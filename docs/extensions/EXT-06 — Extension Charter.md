@@ -1,7 +1,7 @@
 # EXT-06 — Extension Charter
 
-Version: v0.1 DRAFT
-Status: Draft
+Version: v1.0 LOCKED
+Status: Locked
 Governance State: PAUSED
 
 Purpose:
@@ -20,3 +20,9 @@ within Core constraints as defined in 07.xx.
 
 Lifecycle Intent:
 Active (Authoritative Logistics Extension; supersedes EXT-03)
+
+Lock Status:
+LOCKED at v1.0.
+This lock fixes scope, non-scope, lifecycle intent, and Core non-interference.
+No runtime behaviour, enforcement, or activation is enabled by this lock.
+Any change requires formal change control authorisation.

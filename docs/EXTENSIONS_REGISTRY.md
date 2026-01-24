@@ -1,7 +1,7 @@
 # Extensions Registry (Authoritative)
 
-Version: v0.1 DRAFT  
-Status: Draft  
+Version: v1.0 LOCKED  
+Status: Locked  
 Governance State: PAUSED
 
 Authority:
@@ -118,6 +118,12 @@ This Extension does not modify the Immutable Core and operates strictly within C
 
 Lifecycle Notes:
 Governance complete; implementation not authorized; change control required to reopen.
+
+Lock Declaration:
+This Extension Registry is LOCKED at v1.0.
+It defines the authoritative list, identity, and lifecycle intent of Extensions.
+No runtime activation, enforcement, or implementation change is implied.
+Any modification requires formal change control authorisation.
 
 ## EXT-27 — Analytics, Reporting & Metrics
 
