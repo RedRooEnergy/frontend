@@ -96,3 +96,31 @@ Declaration:
 No remediation has been performed.
 Codebase remains UNCHANGED.
 Governance remains PAUSED pending remediation approval.
+
+## Remediation Update — R1 (Repository Boundary)
+
+Action Taken:
+- Initialised git repository at project root
+- Established authoritative repository boundary
+- Created governance-safe .gitignore
+- Created initial baseline commit
+
+Result:
+Repository boundary is now explicit, isolated, and auditable.
+
+Date:
+2026-01-24
+
+## Remediation Update — R2 (Git Context & Isolation)
+
+Action Taken:
+- Verified governed git root via git rev-parse
+- Confirmed git status reports only project-scoped paths
+- Verified absence of external/unscoped paths
+- Checked for nested git repositories
+
+Result:
+Git execution context is now isolated to the governed project root.
+
+Date:
+2026-01-24
