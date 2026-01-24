@@ -1,0 +1,10 @@
+{
+  "extensionId": "EXT-12",
+  "name": "Platform Analytics, Reporting & Oversight",
+  "version": "0.1.0",
+  "coreDependency": true,
+  "implementsUI": true,
+  "implementsRoutes": false,
+  "implementsServices": false,
+  "auditRequired": true
+}

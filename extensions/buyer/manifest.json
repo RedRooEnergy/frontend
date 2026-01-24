@@ -1,0 +1,10 @@
+{
+  "extensionId": "EXT-07",
+  "name": "Buyer Experience & Order Lifecycle",
+  "version": "0.1.0",
+  "coreDependency": true,
+  "implementsUI": true,
+  "implementsRoutes": false,
+  "implementsServices": false,
+  "auditRequired": true
+}

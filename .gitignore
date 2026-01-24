@@ -1,0 +1,28 @@
+# OS
+.DS_Store
+
+# Node / package managers
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Environment / secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Build artefacts
+dist/
+build/
+.out/
+.next/
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+logs/
+*.log

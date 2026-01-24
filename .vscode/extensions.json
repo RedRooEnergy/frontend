@@ -1,0 +1,48 @@
+{
+  "recommendations": [
+    "github.copilot",
+    "github.copilot-chat",
+
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    "github.vscode-pull-request-github",
+    "alefragnani.project-manager",
+
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "editorconfig.editorconfig",
+
+    "dsznajder.es7-react-js-snippets",
+    "bradlc.vscode-tailwindcss",
+    "zignd.html-css-class-completion",
+
+    "mongodb.mongodb-vscode",
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-pg",
+    "mtxr.sqltools-driver-mysql",
+
+    "humao.rest-client",
+    "rangav.vscode-thunder-client",
+
+    "ms-azuretools.vscode-docker",
+
+    "redhat.vscode-yaml",
+    "github.vscode-github-actions",
+
+    "hashicorp.terraform",
+
+    "sonarsource.sonarlint-vscode",
+
+    "yzhang.markdown-all-in-one",
+    "jebbs.plantuml",
+    "42crunch.vscode-openapi",
+
+    "ms-vscode-remote.remote-ssh",
+    "ms-vscode-remote.remote-containers",
+
+    "streetsidesoftware.code-spell-checker"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.vscode-node-azure-pack"
+  ]
+}

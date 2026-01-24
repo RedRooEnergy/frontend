@@ -1,0 +1,10 @@
+{
+  "extensionId": "EXT-13",
+  "name": "Platform Notifications, Alerting & Communications",
+  "version": "0.1.0",
+  "coreDependency": true,
+  "implementsUI": true,
+  "implementsRoutes": false,
+  "implementsServices": false,
+  "auditRequired": true
+}

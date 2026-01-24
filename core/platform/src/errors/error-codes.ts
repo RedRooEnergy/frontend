@@ -1,0 +1,6 @@
+export type ErrorCode =
+  | "AUTH_DENIED"
+  | "INVALID_REQUEST"
+  | "INTERNAL_ERROR"
+  | "IMMUTABILITY_VIOLATION"
+  | "AUDIT_VIOLATION";
