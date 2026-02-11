@@ -1,0 +1,29 @@
+name: Freight & Customs Audit (Blocking)
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  freight-customs-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run freight customs audit
+        working-directory: frontend
+        run: |
+          test -f tests/freight-customs/runFreightCustomsAudit.ts
+          npx --yes tsx tests/freight-customs/runFreightCustomsAudit.ts
