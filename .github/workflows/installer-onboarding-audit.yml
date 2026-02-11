@@ -26,4 +26,4 @@ jobs:
         working-directory: frontend
         run: |
           test -f tests/installer-onboarding/runInstallerOnboardingAudit.ts
-          npx --yes tsx tests/installer-onboarding/runInstallerOnboardingAudit.ts
+          npx tsx tests/installer-onboarding/runInstallerOnboardingAudit.ts
