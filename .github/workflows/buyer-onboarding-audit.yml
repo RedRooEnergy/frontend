@@ -1,0 +1,30 @@
+name: Buyer Onboarding Audit (Blocking)
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  buyer-onboarding-audit:
+    name: Buyer Onboarding Audit (Blocking) / buyer-onboarding-audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run buyer onboarding audit
+        working-directory: frontend
+        run: |
+          test -f tests/buyer-onboarding/runBuyerOnboardingAudit.ts
+          npx tsx tests/buyer-onboarding/runBuyerOnboardingAudit.ts
