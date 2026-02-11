@@ -8,6 +8,7 @@ on:
 
 jobs:
   installer-onboarding-audit:
+    name: Installer Onboarding Audit (Blocking) / installer-onboarding-audit
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

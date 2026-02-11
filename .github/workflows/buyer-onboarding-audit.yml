@@ -8,6 +8,7 @@ on:
 
 jobs:
   buyer-onboarding-audit:
+    name: Buyer Onboarding Audit (Blocking) / buyer-onboarding-audit
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
