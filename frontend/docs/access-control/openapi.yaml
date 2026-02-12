@@ -26,7 +26,7 @@ paths:
                   type: string
                 role:
                   type: string
-                  enum: [RRE_ADMIN, RRE_FINANCE, RRE_CEO, DEVELOPER, RRE_MARKETING]
+                  enum: [RRE_ADMIN, RRE_FINANCE, RRE_CEO, DEVELOPER, RRE_MARKETING, RRE_REGULATOR]
       responses:
         "200":
           description: Login success with role-based redirect path
@@ -44,6 +44,16 @@ paths:
           description: Authentication required
         "403":
           description: Role not allowed for portal
+  /api/portal/evidence:
+    get:
+      summary: Read immutable governance evidence index
+      responses:
+        "200":
+          description: Evidence index payload
+        "401":
+          description: Authentication required
+        "403":
+          description: Role not allowed for portal evidence
   /api/auth/login:
     post:
       summary: Login with seeded user identity
@@ -281,7 +291,7 @@ paths:
           required: true
           schema:
             type: string
-            enum: [buyer, supplier, freight, installer, admin, finance, ceo, marketing]
+            enum: [buyer, supplier, freight, installer, admin, finance, ceo, marketing, regulator]
       responses:
         "200":
           description: Domain read model

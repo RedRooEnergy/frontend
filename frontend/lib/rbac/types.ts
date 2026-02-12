@@ -8,6 +8,7 @@ export const RoleNames = [
   "RRE_FINANCE",
   "RRE_CEO",
   "RRE_MARKETING",
+  "RRE_REGULATOR",
 ] as const;
 
 export type RoleName = (typeof RoleNames)[number];
@@ -65,4 +66,5 @@ export type DashboardDomain =
   | "admin"
   | "finance"
   | "ceo"
-  | "marketing";
+  | "marketing"
+  | "regulator";

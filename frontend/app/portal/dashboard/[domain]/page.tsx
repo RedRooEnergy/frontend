@@ -8,7 +8,17 @@ import { hasPortalAccess } from "../../../../lib/portal/config";
 import { DashboardActionsPanel } from "../../../../components/access-control/DashboardActionsPanel";
 import { canActorReadDomain } from "../../../../lib/portal/domainAccess";
 
-const DOMAINS: DashboardDomain[] = ["buyer", "supplier", "freight", "installer", "admin", "finance", "ceo", "marketing"];
+const DOMAINS: DashboardDomain[] = [
+  "buyer",
+  "supplier",
+  "freight",
+  "installer",
+  "admin",
+  "finance",
+  "ceo",
+  "marketing",
+  "regulator",
+];
 
 function isDomain(value: string): value is DashboardDomain {
   return DOMAINS.includes(value as DashboardDomain);
@@ -52,6 +62,7 @@ export default function PortalDomainPage({ params }: { params: { domain: string 
   );
   const payload = listDashboardData(actor, domain);
   const isAdminOrCeo = actor.roles.includes("RRE_ADMIN") || actor.roles.includes("RRE_CEO");
+  const isRegulator = actor.role === "RRE_REGULATOR";
   const switchableDomains = isAdminOrCeo
     ? DOMAINS.filter((item) => DOMAIN_SUBJECTS[item].some((subject) => listActorActions(actor, subject).includes("READ")))
     : [];
@@ -66,11 +77,18 @@ export default function PortalDomainPage({ params }: { params: { domain: string 
               Role badge: <span className="rounded border border-slate-700 px-2 py-1">{actor.role}</span>
             </p>
           </div>
-          {isAdminOrCeo ? (
-            <Link className="text-sm text-emerald-300 underline" href="/portal/audit">
-              Audit
-            </Link>
-          ) : null}
+          <div className="flex items-center gap-3">
+            {actor.roles.includes("RRE_REGULATOR") ? (
+              <Link className="text-sm text-emerald-300 underline" href="/portal/evidence">
+                Evidence
+              </Link>
+            ) : null}
+            {isAdminOrCeo ? (
+              <Link className="text-sm text-emerald-300 underline" href="/portal/audit">
+                Audit
+              </Link>
+            ) : null}
+          </div>
         </div>
       </div>
 
@@ -93,7 +111,13 @@ export default function PortalDomainPage({ params }: { params: { domain: string 
         </div>
       ) : null}
 
-      <DashboardActionsPanel domain={domain} allowedCapabilityKeys={allowedCapabilityKeys} />
+      {isRegulator ? (
+        <div className="rounded border border-emerald-800/50 bg-emerald-950/20 p-4 text-sm text-emerald-100">
+          Regulator mode is read-only. Mutations are blocked by policy and API enforcement.
+        </div>
+      ) : (
+        <DashboardActionsPanel domain={domain} allowedCapabilityKeys={allowedCapabilityKeys} />
+      )}
 
       <div className="rounded border border-slate-800 bg-slate-900 p-4">
         <h3 className="text-sm font-semibold">Read model</h3>

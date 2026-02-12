@@ -66,15 +66,16 @@ export function processPortalLogin(params: {
     throw new Error("Role is not authorized for portal");
   }
 
+  const activeRole = params.requestedRole || roles[0];
   const token = issueToken({
     userId: user.id,
-    role: roles[0],
+    role: activeRole,
     roles,
     email: user.email,
   });
   appendPortalLoginAudit({
     actorUserId: user.id,
-    actorRole: roles[0],
+    actorRole: activeRole,
     actorEmail: user.email,
     outcome: "ALLOW",
     reason: "Portal login success",
@@ -85,7 +86,7 @@ export function processPortalLogin(params: {
     token,
     actor: {
       userId: user.id,
-      role: roles[0],
+      role: activeRole,
       roles,
       email: user.email,
       name: user.name,
@@ -94,4 +95,3 @@ export function processPortalLogin(params: {
     lastLogin: getLastSuccessfulPortalLogin(user.id),
   };
 }
-

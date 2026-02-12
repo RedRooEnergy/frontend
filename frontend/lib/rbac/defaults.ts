@@ -88,6 +88,17 @@ export const DEFAULT_ROLE_PERMISSIONS: RolePermissionMatrix = {
     { subject: "FINANCE_SETTLEMENTS", actions: ["READ"] },
     { subject: "AUDIT_LOGS", actions: ["READ"] },
   ],
+  RRE_REGULATOR: [
+    { subject: "BUYER_ORDERS", actions: ["READ"] },
+    { subject: "BUYER_DOCUMENTS", actions: ["READ"] },
+    { subject: "SUPPLIER_COMPLIANCE", actions: ["READ"] },
+    { subject: "SUPPLIER_ORDERS", actions: ["READ"] },
+    { subject: "FREIGHT_SHIPMENTS", actions: ["READ"] },
+    { subject: "INSTALLER_CONFIRMATIONS", actions: ["READ"] },
+    { subject: "FINANCE_SETTLEMENTS", actions: ["READ"] },
+    { subject: "COMPLIANCE_DOCUMENTS", actions: ["READ"] },
+    { subject: "AUDIT_LOGS", actions: ["READ"] },
+  ],
 };
 
 export const ROLE_DESCRIPTIONS: Record<RoleName, string> = {
@@ -100,6 +111,7 @@ export const ROLE_DESCRIPTIONS: Record<RoleName, string> = {
   RRE_FINANCE: "Finance operations role",
   RRE_CEO: "Executive oversight role",
   RRE_MARKETING: "Marketing and promotions role",
+  RRE_REGULATOR: "Regulatory read-only oversight role",
 };
 
 export const DOMAIN_SUBJECTS: Record<DashboardDomain, Subject[]> = {
@@ -119,4 +131,15 @@ export const DOMAIN_SUBJECTS: Record<DashboardDomain, Subject[]> = {
     "AUDIT_LOGS",
   ],
   marketing: ["MARKETING_PROMOTIONS", "MARKETING_EMAILS", "BUYER_ORDERS"],
+  regulator: [
+    "BUYER_ORDERS",
+    "BUYER_DOCUMENTS",
+    "SUPPLIER_COMPLIANCE",
+    "SUPPLIER_ORDERS",
+    "FREIGHT_SHIPMENTS",
+    "INSTALLER_CONFIRMATIONS",
+    "FINANCE_SETTLEMENTS",
+    "COMPLIANCE_DOCUMENTS",
+    "AUDIT_LOGS",
+  ],
 };

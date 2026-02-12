@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getActorFromRequest } from "../../../../lib/auth/request";
-import { handleApiError, unauthorized } from "../../../../lib/api/http";
+import { forbidden, handleApiError, unauthorized } from "../../../../lib/api/http";
 import {
   confirmInstallerJob,
   createBuyerOrder,
@@ -14,7 +14,7 @@ import {
 } from "../../../../lib/api/dashboardService";
 import type { DashboardDomain } from "../../../../lib/rbac/types";
 
-const DOMAINS: DashboardDomain[] = ["buyer", "supplier", "freight", "installer", "admin", "finance", "ceo", "marketing"];
+const DOMAINS: DashboardDomain[] = ["buyer", "supplier", "freight", "installer", "admin", "finance", "ceo", "marketing", "regulator"];
 
 function isDomain(value: string): value is DashboardDomain {
   return DOMAINS.includes(value as DashboardDomain);
@@ -38,6 +38,9 @@ export async function GET(request: NextRequest, context: { params: { domain: str
 export async function POST(request: NextRequest, context: { params: { domain: string } }) {
   const actor = getActorFromRequest(request);
   if (!actor) return unauthorized();
+  if (actor.role === "RRE_REGULATOR") {
+    return forbidden("RRE_REGULATOR is read-only and cannot perform mutations");
+  }
   const { domain } = context.params;
   if (!isDomain(domain)) {
     return NextResponse.json({ error: "Unknown dashboard domain" }, { status: 404 });

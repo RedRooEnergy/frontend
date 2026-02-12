@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { RoleName } from "../../lib/rbac/types";
 
-const PORTAL_ROLE_OPTIONS: RoleName[] = ["RRE_ADMIN", "RRE_FINANCE", "RRE_CEO", "DEVELOPER", "RRE_MARKETING"];
+const PORTAL_ROLE_OPTIONS: RoleName[] = ["RRE_ADMIN", "RRE_FINANCE", "RRE_CEO", "DEVELOPER", "RRE_MARKETING", "RRE_REGULATOR"];
 
 const ROLE_EMAIL_DEFAULTS: Record<RoleName, string> = {
   RRE_ADMIN: "admin@redroo.test",
@@ -12,6 +12,7 @@ const ROLE_EMAIL_DEFAULTS: Record<RoleName, string> = {
   RRE_CEO: "ceo@redroo.test",
   DEVELOPER: "developer@redroo.test",
   RRE_MARKETING: "marketing@redroo.test",
+  RRE_REGULATOR: "regulator@redroo.test",
   BUYER: "buyer@redroo.test",
   SUPPLIER: "supplier@redroo.test",
   FREIGHT: "freight@redroo.test",
@@ -52,7 +53,9 @@ export function PortalLoginForm() {
   return (
     <form className="space-y-4 rounded border border-slate-800 bg-slate-900 p-5" onSubmit={onSubmit}>
       <h2 className="text-xl font-semibold">Governance Portal Login</h2>
-      <p className="text-xs text-slate-400">Direct dashboard access for Admin, Finance, CEO, Developer, and Marketing roles.</p>
+      <p className="text-xs text-slate-400">
+        Direct dashboard access for Admin, Finance, CEO, Developer, Marketing, and Regulator roles.
+      </p>
       <div className="space-y-1">
         <label htmlFor="portal-role" className="text-sm text-slate-300">
           Role
@@ -109,4 +112,3 @@ export function PortalLoginForm() {
     </form>
   );
 }
-

@@ -14,6 +14,7 @@ const DEMO_USERS: Record<RoleName, string> = {
   RRE_FINANCE: "finance@redroo.test",
   RRE_CEO: "ceo@redroo.test",
   RRE_MARKETING: "marketing@redroo.test",
+  RRE_REGULATOR: "regulator@redroo.test",
 };
 
 export function LoginForm() {

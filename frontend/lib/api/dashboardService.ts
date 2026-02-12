@@ -122,6 +122,53 @@ export function listDashboardData(actor: Actor, domain: DashboardDomain) {
           emails: snapshot.marketingEmails.filter((row) => row.ownerId === actor.userId || actor.roles.includes("RRE_ADMIN")),
         },
       };
+    case "regulator":
+      return {
+        domain,
+        data: {
+          ...(canRead("BUYER_ORDERS") ? { orders: snapshot.buyerOrders.map(toOrderResponse) } : {}),
+          ...(canRead("BUYER_DOCUMENTS")
+            ? {
+                buyerDocuments: snapshot.buyerDocuments.map((row) => ({
+                  id: row.id,
+                  buyerId: row.buyerId,
+                  title: row.title,
+                  url: row.url,
+                })),
+              }
+            : {}),
+          ...(canRead("SUPPLIER_COMPLIANCE")
+            ? {
+                supplierCompliance: snapshot.supplierCompliance.map((row) => ({
+                  id: row.id,
+                  supplierId: row.supplierId,
+                  certificateType: row.certificateType,
+                  status: row.status,
+                })),
+              }
+            : {}),
+          ...(canRead("FREIGHT_SHIPMENTS") ? { freightShipments: snapshot.freightShipments } : {}),
+          ...(canRead("INSTALLER_CONFIRMATIONS") ? { installerConfirmations: snapshot.installerConfirmations } : {}),
+          ...(canRead("FINANCE_SETTLEMENTS") ? { settlements: snapshot.settlements } : {}),
+          ...(canRead("COMPLIANCE_DOCUMENTS")
+            ? {
+                complianceDocuments: [
+                  { id: "CMP-DOC-01", title: "Buyer Platform Terms", url: "/compliance#buyer-terms" },
+                  { id: "CMP-DOC-02", title: "Escrow Policy", url: "/compliance#escrow-policy" },
+                ],
+              }
+            : {}),
+          ...(canRead("AUDIT_LOGS")
+            ? {
+                governanceAnchors: {
+                  readOnly: true,
+                  immutable: true,
+                  evidenceRoute: "/portal/evidence",
+                },
+              }
+            : {}),
+        },
+      };
     default:
       return { domain, data: {} };
   }

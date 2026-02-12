@@ -13,7 +13,7 @@ export default function PortalLoginPage() {
     <section className="mx-auto max-w-2xl space-y-4">
       <h1 className="text-2xl font-semibold">Portal Dashboard Login</h1>
       <p className="text-sm text-slate-300">
-        Access Admin, Finance, CEO, Developer, and Marketing dashboards directly without using the public homepage.
+        Access Admin, Finance, CEO, Developer, Marketing, and Regulator dashboards directly without using the public homepage.
       </p>
       {hasAccess && actor ? (
         <div className="rounded border border-emerald-700/40 bg-emerald-900/10 p-4 text-sm">
@@ -30,4 +30,3 @@ export default function PortalLoginPage() {
     </section>
   );
 }
-

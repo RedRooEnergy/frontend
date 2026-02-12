@@ -9,6 +9,7 @@ export const DASHBOARD_LABELS: Record<DashboardDomain, string> = {
   finance: "RRE Finance",
   ceo: "RRE CEO",
   marketing: "RRE Marketing & Promotion",
+  regulator: "RRE Regulator",
 };
 
 export type DashboardActionDefinition = {
@@ -95,4 +96,3 @@ export const DASHBOARD_ACTIONS: DashboardActionDefinition[] = [
     payload: { subject: "Operational update" },
   },
 ];
-

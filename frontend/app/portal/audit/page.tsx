@@ -1,5 +1,5 @@
 import { getServerActor } from "../../../lib/auth/serverActor";
-import { getAuditLog, getPortalLoginAuditLog } from "../../../lib/rbac/audit";
+import { getAuditLog, getPortalAccessAuditLog, getPortalLoginAuditLog } from "../../../lib/rbac/audit";
 import { governanceListAudit } from "../../../lib/api/rbacGovernanceService";
 import { hasPortalAccess } from "../../../lib/portal/config";
 
@@ -24,15 +24,22 @@ export default function PortalAuditPage() {
   const authz = getAuditLog().slice(-20).reverse();
   const governance = governanceListAudit(actor).slice(-20).reverse();
   const login = getPortalLoginAuditLog().slice(-20).reverse();
+  const portalAccess = getPortalAccessAuditLog().slice(-20).reverse();
 
   return (
     <section className="space-y-6">
       <h2 className="text-xl font-semibold">Portal Audit Viewer</h2>
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded border border-slate-800 bg-slate-900 p-3">
           <h3 className="text-sm font-semibold mb-2">Portal login events</h3>
           <pre className="max-h-80 overflow-auto rounded bg-slate-950 p-2 text-xs text-slate-300">
             {JSON.stringify(login, null, 2)}
+          </pre>
+        </div>
+        <div className="rounded border border-slate-800 bg-slate-900 p-3">
+          <h3 className="text-sm font-semibold mb-2">Portal access events</h3>
+          <pre className="max-h-80 overflow-auto rounded bg-slate-950 p-2 text-xs text-slate-300">
+            {JSON.stringify(portalAccess, null, 2)}
           </pre>
         </div>
         <div className="rounded border border-slate-800 bg-slate-900 p-3">
@@ -51,4 +58,3 @@ export default function PortalAuditPage() {
     </section>
   );
 }
-

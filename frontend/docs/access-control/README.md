@@ -23,6 +23,7 @@ This implementation provides a role-based access control reference stack for das
 | `RRE_FINANCE` | settlements + pricing rules | operational/compliance (read-only) |
 | `RRE_MARKETING` | promotions + email operations | other domains (read-only) |
 | `RRE_CEO` | no mutations | read-all |
+| `RRE_REGULATOR` | no mutations | regulator oversight + immutable evidence |
 
 ## Key Files
 
@@ -33,6 +34,7 @@ This implementation provides a role-based access control reference stack for das
 - Auth token: `frontend/lib/auth/token.ts`
 - API services: `frontend/lib/api/dashboardService.ts`
 - Governance control service: `frontend/lib/api/rbacGovernanceService.ts`
+- Regulator mode spec: `frontend/docs/access-control/REGULATOR_MODE.md`
 - API routes: `frontend/app/api/**`
 - Guarded UI: `frontend/app/access-control/**`
 
@@ -53,6 +55,7 @@ Open:
 - `/portal/login` (privileged direct dashboard entry)
 - `/portal/dashboard`
 - `/portal/dashboard/[domain]`
+- `/portal/evidence`
 
 ## Seeded Users
 
@@ -67,6 +70,7 @@ Seed users are in `frontend/lib/data/mockDb.ts`:
 - finance@redroo.test
 - ceo@redroo.test
 - marketing@redroo.test
+- regulator@redroo.test
 
 Developer account protection:
 
@@ -93,6 +97,7 @@ Governance mutation endpoints:
 - `GET /api/rbac/audit`
 - `POST /api/portal/login`
 - `GET /api/portal/session`
+- `GET /api/portal/evidence`
 
 Portal behavior:
 
@@ -104,8 +109,10 @@ Portal behavior:
   - `RRE_FINANCE` -> `/portal/dashboard/finance`
   - `RRE_CEO` -> `/portal/dashboard/ceo`
   - `RRE_MARKETING` -> `/portal/dashboard/marketing`
+  - `RRE_REGULATOR` -> `/portal/dashboard/regulator`
 - `/portal/*` is server-guarded (401/403 via middleware)
 - portal login events are hash-chained and include actor role + timestamp + ip
+- portal evidence access events are hash-chained
 - token signing requires `RBAC_JWT_SECRET` (no fallback secret is allowed)
 
 ## RBAC Persistence Configuration

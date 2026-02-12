@@ -17,6 +17,11 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           <p className="text-xs text-slate-400">Direct privileged dashboard access (isolated from public homepage).</p>
         </div>
         <div className="flex items-center gap-3">
+          {showActor ? (
+            <Link className="text-xs text-emerald-300 underline" href="/portal/evidence">
+              Evidence
+            </Link>
+          ) : null}
           {showActor ? <span className="rounded border border-slate-700 px-2 py-1 text-xs">{actor.role}</span> : null}
           {showActor ? <PortalLogoutButton /> : null}
         </div>
@@ -25,4 +30,3 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     </div>
   );
 }
-

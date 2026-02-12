@@ -108,6 +108,7 @@ const seed: DbState = {
     { id: "usr-finance-1", email: "finance@redroo.test", name: "Finance One", role: "RRE_FINANCE" },
     { id: "usr-ceo-1", email: "ceo@redroo.test", name: "CEO One", role: "RRE_CEO" },
     { id: "usr-marketing-1", email: "marketing@redroo.test", name: "Marketing One", role: "RRE_MARKETING" },
+    { id: "usr-regulator-1", email: "regulator@redroo.test", name: "Regulator One", role: "RRE_REGULATOR" },
   ],
   buyerOrders: [
     {

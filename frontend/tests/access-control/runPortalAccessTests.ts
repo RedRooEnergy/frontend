@@ -7,6 +7,8 @@ import { getPortalLoginAuditLog } from "../../lib/rbac/audit";
 import { issueToken, verifyToken } from "../../lib/auth/token";
 import { canActorReadDomain } from "../../lib/portal/domainAccess";
 import { getUserRoleCodes } from "../../lib/rbac/runtimeStore";
+import { createBuyerOrder } from "../../lib/api/dashboardService";
+import { AccessDeniedError } from "../../lib/rbac/errors";
 
 process.env.RBAC_JWT_SECRET = process.env.RBAC_JWT_SECRET || "test-rbac-secret";
 
@@ -42,8 +44,10 @@ function testBuyerDeniedPortalAccess() {
 function testRoleRedirects() {
   const ceo = actorFor("ceo@redroo.test");
   const admin = actorFor("admin@redroo.test");
+  const regulator = actorFor("regulator@redroo.test");
   assert.equal(resolvePortalDashboardPath(ceo.roles), "/portal/dashboard/ceo");
   assert.equal(resolvePortalDashboardPath(admin.roles), "/portal/dashboard/admin");
+  assert.equal(resolvePortalDashboardPath(regulator.roles), "/portal/dashboard/regulator");
 }
 
 function testTokenExpiry() {
@@ -82,6 +86,17 @@ function testDomainDenial() {
   assert.equal(expectedStatus, 403);
 }
 
+function testRegulatorReadOnlyMutations() {
+  const regulator = actorFor("regulator@redroo.test");
+  let denied = false;
+  try {
+    createBuyerOrder(regulator as any, { supplierId: "usr-supplier-1", amount: 100 });
+  } catch (error) {
+    denied = error instanceof AccessDeniedError;
+  }
+  assert.equal(denied, true);
+}
+
 function main() {
   testUnauthorizedPortalRequest();
   testBuyerDeniedPortalAccess();
@@ -89,6 +104,7 @@ function main() {
   testTokenExpiry();
   testPortalLoginAudit();
   testDomainDenial();
+  testRegulatorReadOnlyMutations();
   console.log("PASS: portal access tests");
 }
 
