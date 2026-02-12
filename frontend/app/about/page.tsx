@@ -3,8 +3,11 @@ export default function AboutPage() {
     <section className="space-y-4">
       <h2 className="text-2xl font-semibold">About & Governance</h2>
       <p className="text-slate-300 max-w-3xl">
-        RedRoo is built on a locked governance foundation: Core enforcement, immutable audit trails, and extension boundaries that
-        prevent bypass. Every capability is explicitly governed and verified.
+        RedRoo is built on a locked governance foundation: core enforcement, immutable audit trails, and extension boundaries that
+        prevent bypass.
+      </p>
+      <p className="text-slate-300 max-w-3xl">
+        Every capability is explicitly governed, measurable, and verified through deterministic controls.
       </p>
       <ul className="list-disc list-inside text-slate-300 space-y-1">
         <li>Core rules are enforced server-side; UI is a truthful reflection.</li>
