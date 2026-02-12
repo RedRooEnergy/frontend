@@ -275,49 +275,41 @@ function seedPermissions(sqlite: SqliteDatabase) {
 }
 
 function seedDefaultAssignments(sqlite: SqliteDatabase) {
-  const rolePermissionCount = readInteger(sqlite.prepare("SELECT COUNT(1) AS count FROM role_permissions").get().count, 0);
-  if (rolePermissionCount === 0) {
-    const insertGrant = sqlite.prepare(`
-      INSERT INTO role_permissions (role_id, permission_id, granted_by_user_id, granted_at)
-      VALUES (@roleId, @permissionId, @grantedByUserId, @grantedAt)
-    `);
-    const grantedAt = nowIso();
-    const transaction = sqlite.transaction(() => {
-      for (const roleName of RoleNames) {
-        for (const permission of DEFAULT_ROLE_PERMISSIONS[roleName]) {
-          for (const action of permission.actions) {
-            insertGrant.run({
-              roleId: roleId(roleName),
-              permissionId: permissionId(permission.subject, action),
-              grantedByUserId: SYSTEM_ACTOR,
-              grantedAt,
-            });
-          }
+  const insertGrant = sqlite.prepare(`
+    INSERT OR IGNORE INTO role_permissions (role_id, permission_id, granted_by_user_id, granted_at)
+    VALUES (@roleId, @permissionId, @grantedByUserId, @grantedAt)
+  `);
+  const insertAssignment = sqlite.prepare(`
+    INSERT OR IGNORE INTO user_roles (user_id, role_id, assigned_by_user_id, assigned_at)
+    VALUES (@userId, @roleId, @assignedByUserId, @assignedAt)
+  `);
+
+  const transaction = sqlite.transaction(() => {
+    const timestamp = nowIso();
+    for (const roleName of RoleNames) {
+      for (const permission of DEFAULT_ROLE_PERMISSIONS[roleName]) {
+        for (const action of permission.actions) {
+          insertGrant.run({
+            roleId: roleId(roleName),
+            permissionId: permissionId(permission.subject, action),
+            grantedByUserId: SYSTEM_ACTOR,
+            grantedAt: timestamp,
+          });
         }
       }
-    });
-    transaction();
-  }
+    }
 
-  const userRoleCount = readInteger(sqlite.prepare("SELECT COUNT(1) AS count FROM user_roles").get().count, 0);
-  if (userRoleCount === 0) {
-    const insertAssignment = sqlite.prepare(`
-      INSERT INTO user_roles (user_id, role_id, assigned_by_user_id, assigned_at)
-      VALUES (@userId, @roleId, @assignedByUserId, @assignedAt)
-    `);
-    const assignedAt = nowIso();
-    const transaction = sqlite.transaction(() => {
-      for (const user of db.users) {
-        insertAssignment.run({
-          userId: user.id,
-          roleId: roleId(user.role),
-          assignedByUserId: SYSTEM_ACTOR,
-          assignedAt,
-        });
-      }
-    });
-    transaction();
-  }
+    for (const user of db.users) {
+      insertAssignment.run({
+        userId: user.id,
+        roleId: roleId(user.role),
+        assignedByUserId: SYSTEM_ACTOR,
+        assignedAt: timestamp,
+      });
+    }
+  });
+
+  transaction();
 }
 
 function seedPolicyAndLocks(sqlite: SqliteDatabase) {
