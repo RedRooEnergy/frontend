@@ -6,8 +6,18 @@ export default function ContactPage() {
         Reach the governance and support teams for questions about enforced workflows, compliance evidence, or onboarding.
       </p>
       <div className="space-y-2 text-slate-300">
-        <p>Email: support@redroo.energy</p>
-        <p>Governance Desk: governance@redroo.energy</p>
+        <p>
+          Email:{" "}
+          <a className="underline hover:no-underline" href="mailto:support@redroo.energy">
+            support@redroo.energy
+          </a>
+        </p>
+        <p>
+          Governance Desk:{" "}
+          <a className="underline hover:no-underline" href="mailto:governance@redroo.energy">
+            governance@redroo.energy
+          </a>
+        </p>
       </div>
       <p className="text-slate-400 text-sm">Support cannot override governance or enforcement decisions.</p>
     </section>
