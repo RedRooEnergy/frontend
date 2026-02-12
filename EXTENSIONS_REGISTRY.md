@@ -91,6 +91,26 @@ Status: IMPLEMENTATION AUTHORIZED
 Governance: COMPLETE
 Change Control: REQUIRED for all modifications
 
+## EXT-PUBLIC-PARTICIPANT-SITES-01 — Public Participant Sites + Placement Engine
+
+Status: IMPLEMENTATION AUTHORIZED
+Governance: ACTIVE
+Change Control: REQUIRED for all modifications
+Scope:
+- Unified public microsites for `SUPPLIER | CERTIFIER | INSTALLER | INSURANCE`
+- Immutable snapshot publish with deterministic SHA-256 hash
+- Controlled public contact bridge (no raw direct contact disclosure)
+- Optional weekly paid placement contracts with immutable lock manifests
+- Regulator hash verification endpoint
+
+Documentation:
+- docs/extensions/EXT-PUBLIC-PARTICIPANT-SITES-01/EXT-PUBLIC-PARTICIPANT-SITES-01_GOVERNANCE.md
+- docs/extensions/EXT-PUBLIC-PARTICIPANT-SITES-01/RBAC_MATRIX.md
+- docs/extensions/EXT-PUBLIC-PARTICIPANT-SITES-01/PUBLISH_FLOW_DIAGRAM.md
+- docs/extensions/EXT-PUBLIC-PARTICIPANT-SITES-01/HASH_VERIFICATION.md
+- docs/extensions/EXT-PUBLIC-PARTICIPANT-SITES-01/SUSPENSION_ENFORCEMENT_TEST_REPORT.md
+- docs/extensions/EXT-PUBLIC-PARTICIPANT-SITES-01/REGULATOR_WALKTHROUGH.md
+
 ## EXT-26 — [EXTENSION NAME – TO BE CONFIRMED]
 
 Status: GOVERNANCE COMPLETE  
