@@ -5,7 +5,7 @@ import { LogoutButton } from "../../../../components/access-control/LogoutButton
 import { ClientRouteGuard } from "../../../../components/access-control/ClientRouteGuard";
 import { getServerActor } from "../../../../lib/auth/serverActor";
 import { listDashboardData } from "../../../../lib/api/dashboardService";
-import { DOMAIN_SUBJECTS, listRoleActions } from "../../../../lib/rbac/matrix";
+import { DOMAIN_SUBJECTS, listActorActions } from "../../../../lib/rbac/matrix";
 import type { DashboardDomain } from "../../../../lib/rbac/types";
 import { DASHBOARD_LABELS } from "../../../../lib/rbac/ui";
 
@@ -26,7 +26,7 @@ export default function AccessControlDomainPage({ params }: { params: { domain: 
 
   const domain = params.domain;
   const subjects = DOMAIN_SUBJECTS[domain];
-  const canRead = subjects.some((subject) => listRoleActions(actor.role, subject).includes("READ"));
+  const canRead = subjects.some((subject) => listActorActions(actor, subject).includes("READ"));
 
   if (!canRead) {
     return (
@@ -44,7 +44,7 @@ export default function AccessControlDomainPage({ params }: { params: { domain: 
   }
 
   const allowedCapabilityKeys = subjects.flatMap((subject) =>
-    listRoleActions(actor.role, subject).map((action) => `${subject}:${action}`)
+    listActorActions(actor, subject).map((action) => `${subject}:${action}`)
   );
 
   const payload = listDashboardData(actor, domain);

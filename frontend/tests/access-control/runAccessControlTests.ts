@@ -7,12 +7,14 @@ import {
   updateFreightShipment,
 } from "../../lib/api/dashboardService";
 import { findUserByEmail } from "../../lib/data/mockDb";
-import { AccessDeniedError } from "../../lib/rbac/policy";
+import { getUserRoleCodes } from "../../lib/rbac/runtimeStore";
+import { AccessDeniedError } from "../../lib/rbac/errors";
 
 function actorFor(email: string) {
   const user = findUserByEmail(email);
   if (!user) throw new Error(`Missing seeded user: ${email}`);
-  return { userId: user.id, role: user.role, email: user.email } as const;
+  const roles = getUserRoleCodes(user.id);
+  return { userId: user.id, role: roles[0], roles, email: user.email } as const;
 }
 
 function mustThrow403(run: () => unknown) {
@@ -94,4 +96,3 @@ function main() {
 }
 
 main();
-

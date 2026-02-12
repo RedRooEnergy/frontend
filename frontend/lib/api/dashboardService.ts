@@ -15,7 +15,6 @@ function toOrderResponse(order: BuyerOrderRecord) {
 }
 
 export function listDashboardData(actor: Actor, domain: DashboardDomain) {
-  const db = getDb();
   const snapshot = getSafeSnapshot();
   const domainSubjects = DOMAIN_SUBJECTS[domain];
   const readableSubjects = domainSubjects.filter((subject) => {
@@ -57,7 +56,9 @@ export function listDashboardData(actor: Actor, domain: DashboardDomain) {
       return {
         domain,
         data: {
-          shipments: snapshot.freightShipments.filter((row) => row.ownerId === actor.userId || actor.role === "RRE_ADMIN"),
+          shipments: snapshot.freightShipments.filter(
+            (row) => row.ownerId === actor.userId || actor.roles.includes("RRE_ADMIN")
+          ),
           linkedOrders: snapshot.buyerOrders.map(toOrderResponse),
         },
       };
@@ -66,7 +67,7 @@ export function listDashboardData(actor: Actor, domain: DashboardDomain) {
         domain,
         data: {
           confirmations: snapshot.installerConfirmations.filter(
-            (row) => row.ownerId === actor.userId || actor.role === "RRE_ADMIN"
+            (row) => row.ownerId === actor.userId || actor.roles.includes("RRE_ADMIN")
           ),
         },
       };
@@ -107,8 +108,10 @@ export function listDashboardData(actor: Actor, domain: DashboardDomain) {
       return {
         domain,
         data: {
-          promotions: snapshot.promotions.filter((row) => row.ownerId === actor.userId || actor.role === "RRE_ADMIN"),
-          emails: snapshot.marketingEmails.filter((row) => row.ownerId === actor.userId || actor.role === "RRE_ADMIN"),
+          promotions: snapshot.promotions.filter(
+            (row) => row.ownerId === actor.userId || actor.roles.includes("RRE_ADMIN")
+          ),
+          emails: snapshot.marketingEmails.filter((row) => row.ownerId === actor.userId || actor.roles.includes("RRE_ADMIN")),
         },
       };
     default:
@@ -216,4 +219,3 @@ export function listAuditLog(actor: Actor) {
   authorizeOrThrow(actor, "AUDIT_LOGS", "READ");
   return getAuditLog();
 }
-

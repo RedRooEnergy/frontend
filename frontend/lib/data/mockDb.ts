@@ -103,6 +103,7 @@ const seed: DbState = {
     { id: "usr-supplier-1", email: "supplier@redroo.test", name: "Supplier One", role: "SUPPLIER" },
     { id: "usr-freight-1", email: "freight@redroo.test", name: "Freight One", role: "FREIGHT" },
     { id: "usr-installer-1", email: "installer@redroo.test", name: "Installer One", role: "INSTALLER" },
+    { id: "usr-dev-1", email: "developer@redroo.test", name: "Developer Account", role: "RRE_ADMIN" },
     { id: "usr-admin-1", email: "admin@redroo.test", name: "Admin One", role: "RRE_ADMIN" },
     { id: "usr-finance-1", email: "finance@redroo.test", name: "Finance One", role: "RRE_FINANCE" },
     { id: "usr-ceo-1", email: "ceo@redroo.test", name: "CEO One", role: "RRE_CEO" },
@@ -172,4 +173,3 @@ export function getSafeSnapshot() {
     marketingEmails: db.marketingEmails.map((row) => ({ ...row })),
   };
 }
-

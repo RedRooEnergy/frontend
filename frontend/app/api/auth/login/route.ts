@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { findUserByEmail } from "../../../../lib/data/mockDb";
 import { issueToken } from "../../../../lib/auth/token";
 import { authCookieName } from "../../../../lib/auth/request";
+import { getUserRoleCodes } from "../../../../lib/rbac/runtimeStore";
 import type { RoleName } from "../../../../lib/rbac/types";
 
 export async function POST(request: Request) {
@@ -15,15 +16,20 @@ export async function POST(request: Request) {
   if (!user) {
     return NextResponse.json({ error: "user not found" }, { status: 404 });
   }
-  if (body.role && user.role !== body.role) {
+  const roleCodes = getUserRoleCodes(user.id);
+  if (!roleCodes.length) {
+    return NextResponse.json({ error: "user has no active role assignments" }, { status: 403 });
+  }
+  if (body.role && !roleCodes.includes(body.role)) {
     return NextResponse.json({ error: "role mismatch for user" }, { status: 400 });
   }
 
-  const token = issueToken({ userId: user.id, role: user.role, email: user.email });
+  const token = issueToken({ userId: user.id, role: roleCodes[0], roles: roleCodes, email: user.email });
   const response = NextResponse.json({
     actor: {
       userId: user.id,
-      role: user.role,
+      role: roleCodes[0],
+      roles: roleCodes,
       email: user.email,
       name: user.name,
     },
@@ -38,4 +44,3 @@ export async function POST(request: Request) {
   });
   return response;
 }
-

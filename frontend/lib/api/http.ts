@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { AccessDeniedError } from "../rbac/policy";
+import { AccessDeniedError } from "../rbac/errors";
 
 export function unauthorized(message = "Authentication required") {
   return NextResponse.json({ error: message }, { status: 401 });
@@ -18,4 +18,3 @@ export function handleApiError(error: unknown) {
   }
   return NextResponse.json({ error: "Unexpected server error" }, { status: 500 });
 }
-

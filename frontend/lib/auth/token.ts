@@ -1,10 +1,13 @@
 import crypto from "node:crypto";
 import type { Actor } from "../rbac/types";
+import { getPolicyVersion } from "../rbac/runtimeStore";
 
 type TokenPayload = {
   sub: string;
   role: Actor["role"];
+  roles: Actor["roles"];
   email: string;
+  policyVersion: number;
   iat: number;
   exp: number;
 };
@@ -33,7 +36,9 @@ export function issueToken(actor: Actor, ttlSeconds = DEFAULT_TTL_SECONDS) {
   const payload: TokenPayload = {
     sub: actor.userId,
     role: actor.role,
+    roles: actor.roles,
     email: actor.email,
+    policyVersion: getPolicyVersion(),
     iat: nowSeconds,
     exp: nowSeconds + ttlSeconds,
   };
@@ -56,11 +61,12 @@ export function verifyToken(token: string): Actor | null {
   const payload = JSON.parse(base64urlDecode(payloadEncoded)) as TokenPayload;
   const nowSeconds = Math.floor(Date.now() / 1000);
   if (payload.exp < nowSeconds) return null;
+  if (payload.policyVersion !== getPolicyVersion()) return null;
 
   return {
     userId: payload.sub,
     role: payload.role,
+    roles: payload.roles,
     email: payload.email,
   };
 }
-

@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { verifyToken } from "./token";
 import { findUserById } from "../data/mockDb";
+import { getUserRoleCodes } from "../rbac/runtimeStore";
 import type { Actor } from "../rbac/types";
 
 const AUTH_COOKIE = "rre_auth_token";
@@ -21,9 +22,12 @@ export function getActorFromRequest(request: NextRequest): Actor | null {
   if (!actor) return null;
   const user = findUserById(actor.userId);
   if (!user) return null;
+  const roleCodes = getUserRoleCodes(user.id);
+  if (!roleCodes.length) return null;
   return {
     userId: user.id,
-    role: user.role,
+    role: roleCodes[0],
+    roles: roleCodes,
     email: user.email,
   };
 }
@@ -31,4 +35,3 @@ export function getActorFromRequest(request: NextRequest): Actor | null {
 export function authCookieName() {
   return AUTH_COOKIE;
 }
-

@@ -41,6 +41,7 @@ export type Permission = {
 export type Actor = {
   userId: string;
   role: RoleName;
+  roles: RoleName[];
   email: string;
 };
 

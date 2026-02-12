@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getActorFromRequest } from "../../../../lib/auth/request";
-import { ROLE_PERMISSIONS } from "../../../../lib/rbac/matrix";
 import { unauthorized } from "../../../../lib/api/http";
+import { listRolePermissions } from "../../../../lib/rbac/runtimeStore";
+import type { RoleName } from "../../../../lib/rbac/types";
 
 export async function GET(request: NextRequest) {
   const actor = getActorFromRequest(request);
@@ -10,19 +11,21 @@ export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const targetRole = url.searchParams.get("role");
 
-  if (targetRole && targetRole !== actor.role && !["RRE_ADMIN", "RRE_CEO"].includes(actor.role)) {
+  if (targetRole && !actor.roles.includes("RRE_ADMIN") && !actor.roles.includes("RRE_CEO")) {
     return NextResponse.json({ error: "Only Admin/CEO can read other role matrices" }, { status: 403 });
   }
 
+  const targetRoleId = (targetRole || actor.role) as RoleName;
+
   if (targetRole) {
     return NextResponse.json({
-      role: targetRole,
-      permissions: (ROLE_PERMISSIONS as Record<string, unknown>)[targetRole] || [],
+      role: targetRoleId,
+      permissions: listRolePermissions(targetRoleId),
     });
   }
 
   return NextResponse.json({
-    role: actor.role,
-    permissions: ROLE_PERMISSIONS[actor.role],
+    role: targetRoleId,
+    permissions: listRolePermissions(targetRoleId),
   });
 }

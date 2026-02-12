@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getServerActor } from "../../../lib/auth/serverActor";
 import { DASHBOARD_LABELS } from "../../../lib/rbac/ui";
 import { DOMAIN_SUBJECTS } from "../../../lib/rbac/matrix";
-import { listRoleActions } from "../../../lib/rbac/matrix";
+import { listActorActions } from "../../../lib/rbac/matrix";
 import { LogoutButton } from "../../../components/access-control/LogoutButton";
 import { ClientRouteGuard } from "../../../components/access-control/ClientRouteGuard";
 
@@ -14,7 +14,7 @@ export default function AccessControlDashboardIndexPage() {
   }
 
   const availableDomains = (Object.keys(DASHBOARD_LABELS) as Array<keyof typeof DASHBOARD_LABELS>).filter((domain) =>
-    DOMAIN_SUBJECTS[domain].some((subject) => listRoleActions(actor.role, subject).includes("READ"))
+    DOMAIN_SUBJECTS[domain].some((subject) => listActorActions(actor, subject).includes("READ"))
   );
 
   return (
@@ -29,6 +29,15 @@ export default function AccessControlDashboardIndexPage() {
         </div>
         <LogoutButton />
       </div>
+
+      {actor.roles.some((role) => role === "RRE_ADMIN" || role === "RRE_CEO") ? (
+        <div className="rounded border border-emerald-700/40 bg-emerald-900/10 p-3 text-sm">
+          <p className="text-emerald-200">Governance role detected.</p>
+          <Link href="/access-control/governance" className="text-emerald-300 underline">
+            Open Permission Management Dashboard
+          </Link>
+        </div>
+      ) : null}
 
       <div className="grid gap-3 md:grid-cols-2">
         {availableDomains.map((domain) => (

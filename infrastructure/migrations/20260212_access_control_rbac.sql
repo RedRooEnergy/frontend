@@ -19,6 +19,33 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS permissions (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  description TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  action TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (subject, action)
+);
+
+CREATE TABLE IF NOT EXISTS role_permissions (
+  role_id BIGINT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+  permission_id BIGINT NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
+  granted_by_user_id BIGINT NOT NULL REFERENCES users(id),
+  granted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (role_id, permission_id)
+);
+
+CREATE TABLE IF NOT EXISTS user_roles (
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  role_id BIGINT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+  assigned_by_user_id BIGINT NOT NULL REFERENCES users(id),
+  assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, role_id)
+);
+
+-- Backward-compatible alias table names for legacy references
 CREATE TABLE IF NOT EXISTS role_assignments (
   id BIGSERIAL PRIMARY KEY,
   user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -26,15 +53,6 @@ CREATE TABLE IF NOT EXISTS role_assignments (
   assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   assigned_by BIGINT NULL REFERENCES users(id),
   UNIQUE (user_id, role_id)
-);
-
-CREATE TABLE IF NOT EXISTS permissions (
-  id BIGSERIAL PRIMARY KEY,
-  role_id BIGINT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
-  subject TEXT NOT NULL,
-  action TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE (role_id, subject, action)
 );
 
 CREATE TABLE IF NOT EXISTS dashboards (
@@ -58,6 +76,10 @@ CREATE TABLE IF NOT EXISTS resources (
 
 CREATE INDEX IF NOT EXISTS idx_permissions_subject_action ON permissions(subject, action);
 CREATE INDEX IF NOT EXISTS idx_role_assignments_user ON role_assignments(user_id);
+CREATE INDEX IF NOT EXISTS idx_role_permissions_role ON role_permissions(role_id);
+CREATE INDEX IF NOT EXISTS idx_role_permissions_permission ON role_permissions(permission_id);
+CREATE INDEX IF NOT EXISTS idx_user_roles_user ON user_roles(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_roles_role ON user_roles(role_id);
 CREATE INDEX IF NOT EXISTS idx_resources_dashboard_subject ON resources(dashboard_id, subject);
 CREATE INDEX IF NOT EXISTS idx_resources_owner ON resources(owner_user_id);
 
@@ -86,4 +108,3 @@ CREATE INDEX IF NOT EXISTS idx_audit_log_subject_action ON audit_log(subject, ac
 -- This creates an append-only hash chain for tamper evidence.
 
 COMMIT;
-
