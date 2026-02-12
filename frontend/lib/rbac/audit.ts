@@ -19,6 +19,7 @@ export type AuditEntry = {
 
 const auditLog: AuditEntry[] = [];
 const portalLoginAuditLog: PortalLoginAuditEntry[] = [];
+const portalAccessAuditLog: PortalAccessAuditEntry[] = [];
 
 export type PortalLoginAuditEntry = {
   id: string;
@@ -29,6 +30,19 @@ export type PortalLoginAuditEntry = {
   outcome: "ALLOW" | "DENY";
   reason: string;
   ipAddress: string;
+  previousHash: string;
+  hash: string;
+};
+
+export type PortalAccessAuditEntry = {
+  id: string;
+  timestampUtc: string;
+  actorUserId: string;
+  actorRole: string;
+  actorEmail: string;
+  path: string;
+  outcome: "ALLOW" | "DENY";
+  reason: string;
   previousHash: string;
   hash: string;
 };
@@ -135,6 +149,50 @@ export function appendPortalLoginAudit(params: {
 
 export function getPortalLoginAuditLog() {
   return portalLoginAuditLog.map((entry) => ({ ...entry }));
+}
+
+export function appendPortalAccessAudit(params: {
+  actorUserId: string;
+  actorRole: string;
+  actorEmail: string;
+  path: string;
+  outcome: "ALLOW" | "DENY";
+  reason: string;
+}) {
+  const previousHash = portalAccessAuditLog.length ? portalAccessAuditLog[portalAccessAuditLog.length - 1].hash : "GENESIS";
+  const timestampUtc = nowIso();
+  const id = `PACCESS-${String(portalAccessAuditLog.length + 1).padStart(5, "0")}`;
+  const hash = digest(
+    JSON.stringify({
+      id,
+      timestampUtc,
+      actorUserId: params.actorUserId,
+      actorRole: params.actorRole,
+      actorEmail: params.actorEmail,
+      path: params.path,
+      outcome: params.outcome,
+      reason: params.reason,
+      previousHash,
+    })
+  );
+  const entry: PortalAccessAuditEntry = Object.freeze({
+    id,
+    timestampUtc,
+    actorUserId: params.actorUserId,
+    actorRole: params.actorRole,
+    actorEmail: params.actorEmail,
+    path: params.path,
+    outcome: params.outcome,
+    reason: params.reason,
+    previousHash,
+    hash,
+  });
+  portalAccessAuditLog.push(entry);
+  return entry;
+}
+
+export function getPortalAccessAuditLog() {
+  return portalAccessAuditLog.map((entry) => ({ ...entry }));
 }
 
 export function getLastSuccessfulPortalLogin(userId: string) {
