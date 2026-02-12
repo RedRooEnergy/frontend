@@ -1,0 +1,122 @@
+openapi: 3.0.3
+info:
+  title: RedRoo Access Control API
+  version: 1.0.0
+  description: |
+    RBAC-protected dashboard API.
+    Authentication uses a signed bearer token (JWT-like HMAC token) returned by /api/auth/login.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/auth/login:
+    post:
+      summary: Login with seeded user identity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                role:
+                  type: string
+      responses:
+        "200":
+          description: Authenticated actor + token
+        "400":
+          description: Invalid request
+        "404":
+          description: User not found
+  /api/auth/me:
+    get:
+      summary: Resolve current authenticated actor
+      responses:
+        "200":
+          description: Current actor
+        "401":
+          description: Unauthorized
+  /api/rbac/matrix:
+    get:
+      summary: Get role permissions matrix (current actor role by default)
+      parameters:
+        - in: query
+          name: role
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Permission matrix
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /api/dashboard/{domain}:
+    get:
+      summary: Read dashboard projection by domain
+      parameters:
+        - in: path
+          name: domain
+          required: true
+          schema:
+            type: string
+            enum: [buyer, supplier, freight, installer, admin, finance, ceo, marketing]
+      responses:
+        "200":
+          description: Domain read model
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+    post:
+      summary: Execute domain mutation operation
+      parameters:
+        - in: path
+          name: domain
+          required: true
+          schema:
+            type: string
+            enum: [buyer, supplier, freight, installer, finance, marketing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [operation]
+              properties:
+                operation:
+                  type: string
+                payload:
+                  type: object
+      responses:
+        "200":
+          description: Mutation succeeded
+        "201":
+          description: Resource created
+        "400":
+          description: Validation failure
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /api/audit/logs:
+    get:
+      summary: Read immutable authorization audit log
+      responses:
+        "200":
+          description: Audit entries
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT-like
+
