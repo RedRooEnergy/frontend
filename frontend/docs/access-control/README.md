@@ -5,7 +5,7 @@ This implementation provides a role-based access control reference stack for das
 ## Stack
 
 - Next.js (App Router) + TypeScript
-- In-memory seed dataset for deterministic local validation
+- SQLite-backed RBAC state store (`better-sqlite3`) for durable governance state
 - Signed bearer token (HMAC, JWT-like payload)
 - RBAC middleware/policy enforcement in server layer
 - Immutable audit hash chain for authorization decisions
@@ -29,7 +29,7 @@ This implementation provides a role-based access control reference stack for das
 - RBAC matrix: `frontend/lib/rbac/matrix.ts`
 - RBAC policy + deny guard: `frontend/lib/rbac/policy.ts`
 - Immutable audit chain: `frontend/lib/rbac/audit.ts`
-- Governance mutation hash chain: `frontend/lib/rbac/runtimeStore.ts`
+- Governance mutation hash chain + durable role/permission state: `frontend/lib/rbac/runtimeStore.ts`
 - Auth token: `frontend/lib/auth/token.ts`
 - API services: `frontend/lib/api/dashboardService.ts`
 - Governance control service: `frontend/lib/api/rbacGovernanceService.ts`
@@ -41,6 +41,7 @@ This implementation provides a role-based access control reference stack for das
 ```bash
 cd frontend
 npm ci
+export RBAC_JWT_SECRET=your-local-dev-secret
 npm run dev
 ```
 
@@ -107,6 +108,27 @@ Portal behavior:
 - portal login events are hash-chained and include actor role + timestamp + ip
 - token signing requires `RBAC_JWT_SECRET` (no fallback secret is allowed)
 
+## RBAC Persistence Configuration
+
+Runtime RBAC state is persisted in SQLite. Default file path:
+
+- `frontend/.data/rbac-governance.sqlite`
+
+Supported environment variables:
+
+- `RBAC_DB_PATH` (optional): override SQLite file path
+- `RBAC_RESET_ON_BOOT=1` (optional): destructive reset/reseed at process start (test-only)
+- `RBAC_JWT_SECRET` (required): token signing/verification secret
+
+Persistence scope:
+
+- role definitions
+- permissions
+- role-permission grants
+- user-role assignments
+- governance mutation audit chain
+- policy version (token invalidation source)
+
 ## SQL Migration
 
 Schema migration:
@@ -127,9 +149,10 @@ Includes:
 
 ```bash
 cd frontend
-npx tsx tests/access-control/runAccessControlTests.ts
-npx tsx tests/access-control/runGovernanceControlTests.ts
-npx tsx tests/access-control/runPortalAccessTests.ts
+npm run test:access-control
+npm run test:governance-control
+npm run test:portal-access
+npm run test:rbac-persistence
 ```
 
 The test runner validates:
