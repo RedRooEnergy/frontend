@@ -11,8 +11,8 @@ export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const targetRole = url.searchParams.get("role");
 
-  if (targetRole && !actor.roles.includes("RRE_ADMIN") && !actor.roles.includes("RRE_CEO")) {
-    return NextResponse.json({ error: "Only Admin/CEO can read other role matrices" }, { status: 403 });
+  if (targetRole && !actor.roles.includes("RRE_ADMIN") && !actor.roles.includes("RRE_CEO") && !actor.roles.includes("DEVELOPER")) {
+    return NextResponse.json({ error: "Only Admin/CEO/Developer can read other role matrices" }, { status: 403 });
   }
 
   const targetRoleId = (targetRole || actor.role) as RoleName;

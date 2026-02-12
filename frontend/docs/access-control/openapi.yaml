@@ -8,6 +8,42 @@ info:
 servers:
   - url: http://localhost:3000
 paths:
+  /api/portal/login:
+    post:
+      summary: Portal login (privileged dashboards only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                role:
+                  type: string
+                  enum: [RRE_ADMIN, RRE_FINANCE, RRE_CEO, DEVELOPER, RRE_MARKETING]
+      responses:
+        "200":
+          description: Login success with role-based redirect path
+        "401":
+          description: Invalid credentials or expired token context
+        "403":
+          description: Role not allowed for portal
+  /api/portal/session:
+    get:
+      summary: Resolve current portal session actor and landing domain
+      responses:
+        "200":
+          description: Active portal actor
+        "401":
+          description: Authentication required
+        "403":
+          description: Role not allowed for portal
   /api/auth/login:
     post:
       summary: Login with seeded user identity

@@ -11,11 +11,11 @@ export default function GovernancePage() {
     redirect("/access-control/login");
   }
 
-  if (!actor.roles.some((role) => role === "RRE_ADMIN" || role === "RRE_CEO")) {
+  if (!actor.roles.some((role) => role === "RRE_ADMIN" || role === "RRE_CEO" || role === "DEVELOPER")) {
     return (
       <section className="space-y-4">
         <h2 className="text-2xl font-semibold">Forbidden</h2>
-        <p className="text-red-300 text-sm">Only CEO and RRE Admin may access the permission management dashboard.</p>
+        <p className="text-red-300 text-sm">Only CEO, RRE Admin, and Developer may access the permission management dashboard.</p>
         <Link href="/access-control/dashboard" className="text-emerald-300 underline">
           Back to access-control dashboard
         </Link>

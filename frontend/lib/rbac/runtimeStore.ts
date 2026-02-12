@@ -311,6 +311,10 @@ export function revokeRolePermission(params: {
   const index = state.rolePermissions.findIndex((row) => row.roleId === params.roleId && row.permissionId === params.permissionId);
   if (index < 0) return { changed: false };
 
+  if (params.actorUserRoles.includes("DEVELOPER") && params.roleId === "RRE_CEO") {
+    throw new AccessDeniedError("Developer cannot revoke CEO role permissions");
+  }
+
   if (params.actorUserRoles.includes("RRE_CEO") && params.roleId === "RRE_CEO" && permission.action === "READ") {
     throw new AccessDeniedError("CEO read access cannot be removed");
   }
@@ -401,6 +405,14 @@ export function removeUserRole(params: {
 
   const index = state.userRoles.findIndex((row) => row.userId === params.userId && row.roleId === params.roleId);
   if (index < 0) return { changed: false };
+
+  if (params.actorUserRoles.includes("DEVELOPER") && params.actorUserId === params.userId) {
+    throw new AccessDeniedError("Developer cannot remove own access");
+  }
+
+  if (params.actorUserRoles.includes("DEVELOPER") && params.roleId === "RRE_CEO") {
+    throw new AccessDeniedError("Developer cannot remove CEO role assignments");
+  }
 
   if (params.roleId === "RRE_ADMIN") {
     const adminCount = new Set(state.userRoles.filter((row) => row.roleId === "RRE_ADMIN").map((row) => row.userId)).size;

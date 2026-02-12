@@ -17,7 +17,7 @@ import {
 } from "../rbac/runtimeStore";
 import type { Actor, RoleName } from "../rbac/types";
 
-const GOVERNANCE_ROLES = new Set<RoleName>(["RRE_CEO", "RRE_ADMIN"]);
+const GOVERNANCE_ROLES = new Set<RoleName>(["RRE_CEO", "RRE_ADMIN", "DEVELOPER"]);
 
 export function ensureGovernanceAccess(actor: Actor, mutate = false) {
   const hasRole = actor.roles.some((role) => GOVERNANCE_ROLES.has(role));

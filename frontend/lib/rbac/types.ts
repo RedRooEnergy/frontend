@@ -3,6 +3,7 @@ export const RoleNames = [
   "SUPPLIER",
   "FREIGHT",
   "INSTALLER",
+  "DEVELOPER",
   "RRE_ADMIN",
   "RRE_FINANCE",
   "RRE_CEO",

@@ -9,6 +9,7 @@ const DEMO_USERS: Record<RoleName, string> = {
   SUPPLIER: "supplier@redroo.test",
   FREIGHT: "freight@redroo.test",
   INSTALLER: "installer@redroo.test",
+  DEVELOPER: "developer@redroo.test",
   RRE_ADMIN: "admin@redroo.test",
   RRE_FINANCE: "finance@redroo.test",
   RRE_CEO: "ceo@redroo.test",
@@ -94,4 +95,3 @@ export function LoginForm() {
     </form>
   );
 }
-

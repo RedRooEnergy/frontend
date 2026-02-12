@@ -21,6 +21,21 @@ export const DEFAULT_ROLE_PERMISSIONS: RolePermissionMatrix = {
     { subject: "INSTALLER_CONFIRMATIONS", actions: ["READ", "CONFIRM"] },
     { subject: "SUPPLIER_ORDERS", actions: ["READ"] },
   ],
+  DEVELOPER: [
+    { subject: "BUYER_ORDERS", actions: ["READ", "UPDATE", "APPROVE"] },
+    { subject: "BUYER_DOCUMENTS", actions: ["READ", "UPDATE"] },
+    { subject: "SUPPLIER_PRODUCTS", actions: ["READ", "UPDATE", "APPROVE"] },
+    { subject: "SUPPLIER_COMPLIANCE", actions: ["READ", "UPDATE", "APPROVE"] },
+    { subject: "SUPPLIER_ORDERS", actions: ["READ", "UPDATE"] },
+    { subject: "FREIGHT_SHIPMENTS", actions: ["READ", "UPDATE", "APPROVE"] },
+    { subject: "INSTALLER_CONFIRMATIONS", actions: ["READ", "UPDATE", "APPROVE"] },
+    { subject: "ADMIN_OPERATIONS", actions: ["CREATE", "READ", "UPDATE", "APPROVE"] },
+    { subject: "AUDIT_LOGS", actions: ["READ"] },
+    { subject: "FINANCE_SETTLEMENTS", actions: ["READ"] },
+    { subject: "FINANCE_PRICING_RULES", actions: ["READ"] },
+    { subject: "MARKETING_PROMOTIONS", actions: ["READ"] },
+    { subject: "MARKETING_EMAILS", actions: ["READ"] },
+  ],
   RRE_ADMIN: [
     { subject: "BUYER_ORDERS", actions: ["READ", "UPDATE", "APPROVE"] },
     { subject: "BUYER_DOCUMENTS", actions: ["READ", "UPDATE"] },
@@ -80,6 +95,7 @@ export const ROLE_DESCRIPTIONS: Record<RoleName, string> = {
   SUPPLIER: "Supplier domain role",
   FREIGHT: "Freight operations role",
   INSTALLER: "Installer operations role",
+  DEVELOPER: "Developer governance role (admin-equivalent with safety constraints)",
   RRE_ADMIN: "Platform administration role",
   RRE_FINANCE: "Finance operations role",
   RRE_CEO: "Executive oversight role",
@@ -104,4 +120,3 @@ export const DOMAIN_SUBJECTS: Record<DashboardDomain, Subject[]> = {
   ],
   marketing: ["MARKETING_PROMOTIONS", "MARKETING_EMAILS", "BUYER_ORDERS"],
 };
-

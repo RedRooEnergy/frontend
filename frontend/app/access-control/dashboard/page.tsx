@@ -30,7 +30,7 @@ export default function AccessControlDashboardIndexPage() {
         <LogoutButton />
       </div>
 
-      {actor.roles.some((role) => role === "RRE_ADMIN" || role === "RRE_CEO") ? (
+      {actor.roles.some((role) => role === "RRE_ADMIN" || role === "RRE_CEO" || role === "DEVELOPER") ? (
         <div className="rounded border border-emerald-700/40 bg-emerald-900/10 p-3 text-sm">
           <p className="text-emerald-200">Governance role detected.</p>
           <Link href="/access-control/governance" className="text-emerald-300 underline">

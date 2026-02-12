@@ -18,6 +18,20 @@ export type AuditEntry = {
 };
 
 const auditLog: AuditEntry[] = [];
+const portalLoginAuditLog: PortalLoginAuditEntry[] = [];
+
+export type PortalLoginAuditEntry = {
+  id: string;
+  timestampUtc: string;
+  actorUserId: string;
+  actorRole: string;
+  actorEmail: string;
+  outcome: "ALLOW" | "DENY";
+  reason: string;
+  ipAddress: string;
+  previousHash: string;
+  hash: string;
+};
 
 function nowIso() {
   return new Date().toISOString();
@@ -79,3 +93,56 @@ export function getAuditLog() {
   return auditLog.map((entry) => ({ ...entry }));
 }
 
+export function appendPortalLoginAudit(params: {
+  actorUserId: string;
+  actorRole: string;
+  actorEmail: string;
+  outcome: "ALLOW" | "DENY";
+  reason: string;
+  ipAddress: string;
+}) {
+  const previousHash = portalLoginAuditLog.length ? portalLoginAuditLog[portalLoginAuditLog.length - 1].hash : "GENESIS";
+  const timestampUtc = nowIso();
+  const id = `AUTH-${String(portalLoginAuditLog.length + 1).padStart(5, "0")}`;
+  const hash = digest(
+    JSON.stringify({
+      id,
+      timestampUtc,
+      actorUserId: params.actorUserId,
+      actorRole: params.actorRole,
+      actorEmail: params.actorEmail,
+      outcome: params.outcome,
+      reason: params.reason,
+      ipAddress: params.ipAddress,
+      previousHash,
+    })
+  );
+  const entry: PortalLoginAuditEntry = Object.freeze({
+    id,
+    timestampUtc,
+    actorUserId: params.actorUserId,
+    actorRole: params.actorRole,
+    actorEmail: params.actorEmail,
+    outcome: params.outcome,
+    reason: params.reason,
+    ipAddress: params.ipAddress,
+    previousHash,
+    hash,
+  });
+  portalLoginAuditLog.push(entry);
+  return entry;
+}
+
+export function getPortalLoginAuditLog() {
+  return portalLoginAuditLog.map((entry) => ({ ...entry }));
+}
+
+export function getLastSuccessfulPortalLogin(userId: string) {
+  for (let index = portalLoginAuditLog.length - 1; index >= 0; index -= 1) {
+    const row = portalLoginAuditLog[index];
+    if (row.actorUserId === userId && row.outcome === "ALLOW") {
+      return { ...row };
+    }
+  }
+  return null;
+}

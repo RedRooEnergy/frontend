@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "test:access-control": "tsx tests/access-control/runAccessControlTests.ts",
-    "test:governance-control": "tsx tests/access-control/runGovernanceControlTests.ts"
+    "test:governance-control": "tsx tests/access-control/runGovernanceControlTests.ts",
+    "test:portal-access": "tsx tests/access-control/runPortalAccessTests.ts"
   },
   "dependencies": {
     "next": "^14.2.0",
