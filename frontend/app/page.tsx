@@ -1,6 +1,6 @@
 
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const SIDEBAR_TOPICS = [
   "Core Legal & Consumer Documents",
@@ -18,6 +18,22 @@ const SIDEBAR_TOPICS = [
 
 export default function HomePage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [placementCards, setPlacementCards] = useState<Array<{ href: string; entityType: string; tier: string; label: string }>>([]);
+
+  useEffect(() => {
+    const now = new Date();
+    const oneJan = new Date(now.getUTCFullYear(), 0, 1);
+    const dayOfYear = Math.floor((now.getTime() - oneJan.getTime()) / 86400000) + 1;
+    const week = String(Math.ceil(dayOfYear / 7)).padStart(2, "0");
+    const weekId = `${now.getUTCFullYear()}-${week}`;
+
+    fetch(`/api/public-sites/catalogue/placements/${weekId}`)
+      .then((response) => (response.ok ? response.json() : { cards: [] }))
+      .then((payload) => {
+        setPlacementCards(Array.isArray(payload.cards) ? payload.cards : []);
+      })
+      .catch(() => setPlacementCards([]));
+  }, []);
   return (
     <div style={{ background: "#f6f7fb", minHeight: "100vh" }}>
       {/* Header */}
@@ -97,6 +113,36 @@ export default function HomePage() {
               <h3 style={{ fontSize: 22, fontWeight: 700, color: "#1f7a8c" }}>Service Partners</h3>
               <p style={{ color: "#1f2933", textAlign: "center" }}>Script about Service Partners</p>
               <a href="#" style={{ marginTop: 12, color: "#1f7a8c", fontWeight: 600 }}>Find Out More &gt;</a>
+              {placementCards.length ? (
+                <div style={{ marginTop: 20, width: "100%" }}>
+                  <h4 style={{ fontSize: 16, fontWeight: 700, color: "#1f7a8c", marginBottom: 10 }}>
+                    Service Partners (Paid Placements)
+                  </h4>
+                  <div style={{ display: "grid", gap: 8 }}>
+                    {placementCards.map((card, idx) => (
+                      <a
+                        key={`${card.href}-${idx}`}
+                        href={card.href}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          border: "1px solid #d8e0e5",
+                          borderRadius: 10,
+                          padding: "0.5rem 0.75rem",
+                          color: "#1f2933",
+                          textDecoration: "none",
+                        }}
+                      >
+                        <span>{card.entityType}</span>
+                        <span style={{ fontSize: 12, color: "#1f7a8c", fontWeight: 700 }}>
+                          {card.tier} • Paid Placement
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </section>
         </main>
