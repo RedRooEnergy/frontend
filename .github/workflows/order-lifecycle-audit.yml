@@ -1,0 +1,30 @@
+name: Order Lifecycle Audit (Blocking)
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  order-lifecycle-audit:
+    name: Order Lifecycle Audit (Blocking) / order-lifecycle-audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run order lifecycle audit
+        working-directory: frontend
+        run: |
+          test -f tests/order-lifecycle/runOrderLifecycleAudit.ts
+          npx tsx tests/order-lifecycle/runOrderLifecycleAudit.ts
