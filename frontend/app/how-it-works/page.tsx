@@ -12,6 +12,9 @@ export default function HowItWorksPage() {
       <p className="text-slate-300">
         Every step is enforced server-side; the UI surfaces status, denials, and confirmations exactly as they occur.
       </p>
+      <p className="text-slate-400 text-sm">
+        Operational timelines are presented as read-only evidence views tied to immutable event records.
+      </p>
     </section>
   );
 }
