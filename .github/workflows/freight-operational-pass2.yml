@@ -1,0 +1,72 @@
+name: Freight Operational PASS-2 (Informational)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * 1"
+  pull_request:
+
+jobs:
+  freight-operational-pass2:
+    name: Freight Operational PASS-2 (Informational) / freight-operational-pass2-static
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run freight PASS-2 static checks
+        working-directory: frontend
+        run: |
+          PASS2_MODE=static npx tsx tests/freight-operational/runFreightOperationalPass2.ts
+
+      - name: Upload static artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: freight-operational-pass2-static-artefacts
+          path: artefacts/freight-operational-pass2/**
+          if-no-files-found: ignore
+
+  freight-operational-pass2-integration:
+    name: Freight Operational PASS-2 (Informational) / freight-operational-pass2-integration
+    runs-on: ubuntu-latest
+    needs: freight-operational-pass2
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && secrets.PASS2_BASE_URL != '' && secrets.PASS2_TEST_ORDER_ID != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run freight PASS-2 integration checks
+        working-directory: frontend
+        env:
+          PASS2_MODE: integration
+          PASS2_BASE_URL: ${{ secrets.PASS2_BASE_URL }}
+          PASS2_TEST_ORDER_ID: ${{ secrets.PASS2_TEST_ORDER_ID }}
+        run: |
+          npx tsx tests/freight-operational/runFreightOperationalPass2.ts
+
+      - name: Upload integration artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: freight-operational-pass2-integration-artefacts
+          path: artefacts/freight-operational-pass2/**
+          if-no-files-found: ignore
