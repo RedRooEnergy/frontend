@@ -1,0 +1,339 @@
+openapi: 3.0.3
+info:
+  title: RedRoo Access Control API
+  version: 1.0.0
+  description: |
+    RBAC-protected dashboard API.
+    Authentication uses a signed bearer token (JWT-like HMAC token) returned by /api/auth/login.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/portal/login:
+    post:
+      summary: Portal login (privileged dashboards only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                role:
+                  type: string
+                  enum: [RRE_ADMIN, RRE_FINANCE, RRE_CEO, DEVELOPER, RRE_MARKETING]
+      responses:
+        "200":
+          description: Login success with role-based redirect path
+        "401":
+          description: Invalid credentials or expired token context
+        "403":
+          description: Role not allowed for portal
+  /api/portal/session:
+    get:
+      summary: Resolve current portal session actor and landing domain
+      responses:
+        "200":
+          description: Active portal actor
+        "401":
+          description: Authentication required
+        "403":
+          description: Role not allowed for portal
+  /api/auth/login:
+    post:
+      summary: Login with seeded user identity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                role:
+                  type: string
+      responses:
+        "200":
+          description: Authenticated actor + token
+        "400":
+          description: Invalid request
+        "404":
+          description: User not found
+  /api/auth/me:
+    get:
+      summary: Resolve current authenticated actor
+      responses:
+        "200":
+          description: Current actor
+        "401":
+          description: Unauthorized
+  /api/rbac/matrix:
+    get:
+      summary: Get role permissions matrix (current actor role by default)
+      parameters:
+        - in: query
+          name: role
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Permission matrix
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /api/rbac/roles:
+    get:
+      summary: List RBAC roles
+      responses:
+        "200":
+          description: Roles list
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /api/rbac/permissions:
+    get:
+      summary: List RBAC permissions
+      responses:
+        "200":
+          description: Permissions list
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /api/rbac/role/{roleId}/permissions:
+    get:
+      summary: List permissions assigned to a role
+      parameters:
+        - in: path
+          name: roleId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Role permission set
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /api/rbac/role/{roleId}/permission:
+    post:
+      summary: Grant permission to role
+      parameters:
+        - in: path
+          name: roleId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [permissionId]
+              properties:
+                permissionId:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: Permission grant result
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+    delete:
+      summary: Revoke permission from role
+      parameters:
+        - in: path
+          name: roleId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [permissionId]
+              properties:
+                permissionId:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: Permission revoke result
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /api/rbac/users:
+    get:
+      summary: List users and current role assignments
+      responses:
+        "200":
+          description: User role assignment summary
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /api/rbac/user/{userId}/roles:
+    get:
+      summary: List assigned roles for user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User roles
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /api/rbac/user/{userId}/role:
+    post:
+      summary: Assign role to user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roleId]
+              properties:
+                roleId:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: User role assignment result
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+    delete:
+      summary: Remove role from user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roleId]
+              properties:
+                roleId:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: User role removal result
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /api/rbac/audit:
+    get:
+      summary: Read immutable governance change audit chain
+      responses:
+        "200":
+          description: Governance audit records
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /api/dashboard/{domain}:
+    get:
+      summary: Read dashboard projection by domain
+      parameters:
+        - in: path
+          name: domain
+          required: true
+          schema:
+            type: string
+            enum: [buyer, supplier, freight, installer, admin, finance, ceo, marketing]
+      responses:
+        "200":
+          description: Domain read model
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+    post:
+      summary: Execute domain mutation operation
+      parameters:
+        - in: path
+          name: domain
+          required: true
+          schema:
+            type: string
+            enum: [buyer, supplier, freight, installer, finance, marketing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [operation]
+              properties:
+                operation:
+                  type: string
+                payload:
+                  type: object
+      responses:
+        "200":
+          description: Mutation succeeded
+        "201":
+          description: Resource created
+        "400":
+          description: Validation failure
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /api/audit/logs:
+    get:
+      summary: Read immutable authorization audit log
+      responses:
+        "200":
+          description: Audit entries
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT-like
