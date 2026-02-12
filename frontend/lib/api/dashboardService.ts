@@ -2,6 +2,7 @@ import { getAuditLog } from "../rbac/audit";
 import { authorizeOrThrow } from "../rbac/policy";
 import { getDb, getSafeSnapshot, type BuyerOrderRecord } from "../data/mockDb";
 import { DOMAIN_SUBJECTS } from "../rbac/matrix";
+import { AccessDeniedError } from "../rbac/errors";
 import type { Actor, DashboardDomain } from "../rbac/types";
 
 function toOrderResponse(order: BuyerOrderRecord) {
@@ -25,9 +26,11 @@ export function listDashboardData(actor: Actor, domain: DashboardDomain) {
       return false;
     }
   });
+  const readableSet = new Set(readableSubjects);
+  const canRead = (subject: (typeof domainSubjects)[number]) => readableSet.has(subject);
 
   if (!readableSubjects.length) {
-    throw new Error(`No readable subjects for domain ${domain}`);
+    throw new AccessDeniedError(`Role ${actor.role} does not have READ access to dashboard domain ${domain}`);
   }
 
   switch (domain) {
@@ -72,15 +75,20 @@ export function listDashboardData(actor: Actor, domain: DashboardDomain) {
         },
       };
     case "admin":
+      // Admin domain is compositional: only include data for subjects actor can actually read.
       return {
         domain,
         data: {
-          operations: [
-            { id: "OPS-001", message: "Compliance queue review", state: "OPEN" },
-            { id: "OPS-002", message: "Freight escalation triage", state: "OPEN" },
-          ],
-          orders: snapshot.buyerOrders.map(toOrderResponse),
-          auditTrailCount: getAuditLog().length,
+          ...(canRead("ADMIN_OPERATIONS")
+            ? {
+                operations: [
+                  { id: "OPS-001", message: "Compliance queue review", state: "OPEN" },
+                  { id: "OPS-002", message: "Freight escalation triage", state: "OPEN" },
+                ],
+              }
+            : {}),
+          ...(canRead("BUYER_ORDERS") ? { orders: snapshot.buyerOrders.map(toOrderResponse) } : {}),
+          ...(canRead("AUDIT_LOGS") ? { auditTrailCount: getAuditLog().length } : {}),
         },
       };
     case "finance":

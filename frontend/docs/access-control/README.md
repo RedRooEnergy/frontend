@@ -105,6 +105,7 @@ Portal behavior:
   - `RRE_MARKETING` -> `/portal/dashboard/marketing`
 - `/portal/*` is server-guarded (401/403 via middleware)
 - portal login events are hash-chained and include actor role + timestamp + ip
+- token signing requires `RBAC_JWT_SECRET` (no fallback secret is allowed)
 
 ## SQL Migration
 

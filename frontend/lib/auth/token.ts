@@ -24,7 +24,11 @@ function base64urlDecode(input: string) {
 }
 
 function secret() {
-  return process.env.RBAC_JWT_SECRET || "dev-only-rbac-secret-change-in-production";
+  const value = process.env.RBAC_JWT_SECRET;
+  if (!value) {
+    throw new Error("RBAC_JWT_SECRET is required for token signing and verification");
+  }
+  return value;
 }
 
 function sign(rawPayload: string) {

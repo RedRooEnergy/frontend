@@ -8,6 +8,8 @@ import { issueToken, verifyToken } from "../../lib/auth/token";
 import { canActorReadDomain } from "../../lib/portal/domainAccess";
 import { getUserRoleCodes } from "../../lib/rbac/runtimeStore";
 
+process.env.RBAC_JWT_SECRET = process.env.RBAC_JWT_SECRET || "test-rbac-secret";
+
 function actorFor(email: string) {
   const user = findUserByEmail(email);
   if (!user) throw new Error(`Missing user ${email}`);
@@ -91,4 +93,3 @@ function main() {
 }
 
 main();
-

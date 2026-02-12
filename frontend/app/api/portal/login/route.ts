@@ -31,8 +31,10 @@ export async function POST(request: Request) {
     return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Portal login failed";
+    if (/RBAC_JWT_SECRET/i.test(message)) {
+      return NextResponse.json({ error: message }, { status: 500 });
+    }
     const status = /authorized|role/i.test(message) ? 403 : 401;
     return NextResponse.json({ error: message }, { status });
   }
 }
-

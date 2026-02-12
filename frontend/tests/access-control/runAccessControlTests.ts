@@ -85,6 +85,18 @@ function testDashboardShapes() {
   const marketingDashboard = listDashboardData(marketing, "marketing");
   assert.ok(Array.isArray((marketingDashboard.data as any).promotions));
   assert.ok(Array.isArray((marketingDashboard.data as any).emails));
+
+  const unassignedActor = {
+    userId: "usr-unassigned",
+    role: "BUYER" as const,
+    roles: ["BUYER"] as const,
+    email: "missing@redroo.test",
+  };
+  mustThrow403(() => listDashboardData(unassignedActor as any, "admin"));
+
+  const financeAdminProjection = listDashboardData(finance, "admin");
+  assert.equal("operations" in (financeAdminProjection.data as Record<string, unknown>), false);
+  assert.ok(Array.isArray((financeAdminProjection.data as any).orders), "Finance should still receive order projection");
 }
 
 function main() {

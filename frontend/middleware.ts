@@ -30,7 +30,11 @@ function toBase64Url(buffer: Uint8Array) {
 
 async function sign(data: string) {
   const encoder = new TextEncoder();
-  const keyMaterial = encoder.encode(process.env.RBAC_JWT_SECRET || "dev-only-rbac-secret-change-in-production");
+  const secret = process.env.RBAC_JWT_SECRET;
+  if (!secret) {
+    return null;
+  }
+  const keyMaterial = encoder.encode(secret);
   const key = await crypto.subtle.importKey("raw", keyMaterial, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(data));
   return toBase64Url(new Uint8Array(signature));
@@ -44,6 +48,7 @@ async function verifyTokenFromCookie(token: string) {
   if (version !== "v1") return null;
   const data = `${versionEncoded}.${payloadEncoded}`;
   const expectedSignature = await sign(data);
+  if (!expectedSignature) return null;
   if (expectedSignature !== signature) return null;
   const payload = JSON.parse(decodeBase64Url(payloadEncoded)) as TokenPayload;
   const nowSeconds = Math.floor(Date.now() / 1000);
@@ -98,4 +103,3 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ["/portal/:path*"],
 };
-
