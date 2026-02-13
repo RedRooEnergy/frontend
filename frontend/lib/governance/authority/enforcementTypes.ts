@@ -1,4 +1,5 @@
 import type { AuthorityActorRole } from "./types";
+import type { AuthorityEnforcementGuardSignalStatus } from "./enforcementGuard";
 
 export const AUTHORITY_ENFORCEMENT_VERSION = "gov04-enforcement.v1" as const;
 
@@ -48,4 +49,35 @@ export type AuthorityEnforcementPreconditionState = {
     | "POLICY_VERSION_NOT_ALLOWLISTED"
     | "POLICY_VERSION_NOT_PROVIDED"
     | null;
+};
+
+export type AuthorityEnforcementGuardReportRecord = {
+  _id?: string;
+  guardReportId: string;
+  idempotencyKey: string;
+  reportVersion: string;
+  source: "api_internal" | "cli_local" | "cli_http";
+  windowStartUtc: string;
+  windowEndUtc: string;
+  reportHashSha256: string;
+  overallStatus: AuthorityEnforcementGuardSignalStatus;
+  rollbackRecommended: boolean;
+  killSwitchAction: "NONE" | "SET_GOV04_AUTH_ENFORCEMENT_KILL_SWITCH_TRUE";
+  signals: Array<{
+    signalCode:
+      | "CONFLICT_RATE"
+      | "CASE_OPEN_RATE"
+      | "DETERMINISTIC_MISMATCH"
+      | "POLICY_VERSION_UNRESOLVED_RATE"
+      | "SHADOW_VS_ENFORCEMENT_DIVERGENCE_RATE";
+    value: number;
+    warnThreshold: number;
+    pageThreshold: number;
+    status: AuthorityEnforcementGuardSignalStatus;
+  }>;
+  deterministicHashSha256: string;
+  canonicalGuardJson: string;
+  evaluatedAtUtc: string;
+  metadata?: Record<string, unknown>;
+  createdAtUtc: string;
 };

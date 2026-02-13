@@ -6,6 +6,7 @@ import {
   type AuthorityEnforcementGuardThresholds,
 } from "../../lib/governance/authority/enforcementGuard";
 import type { AuthorityShadowMetricsReport } from "../../lib/governance/authority/shadowTypes";
+import { appendAuthorityEnforcementGuardReport } from "../../lib/governance/authority/enforcementGuardStore";
 
 type CliOptions = {
   mode: "local" | "http";
@@ -18,6 +19,7 @@ type CliOptions = {
   tenantId?: string;
   policyId?: string;
   out?: string;
+  persist: boolean;
   thresholds: Partial<AuthorityEnforcementGuardThresholds>;
 };
 
@@ -33,6 +35,10 @@ function parseNumber(value: string | undefined) {
   if (!value) return undefined;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function hasFlag(args: string[], key: string) {
+  return args.includes(key);
 }
 
 function parseCliOptions(argv: string[]): CliOptions {
@@ -56,6 +62,7 @@ function parseCliOptions(argv: string[]): CliOptions {
     tenantId: parseArgValue(argv, "--tenantId"),
     policyId: parseArgValue(argv, "--policyId"),
     out: parseArgValue(argv, "--out"),
+    persist: hasFlag(argv, "--persist"),
     thresholds: {
       conflictRateWarn: parseNumber(parseArgValue(argv, "--conflictRateWarn")),
       conflictRatePage: parseNumber(parseArgValue(argv, "--conflictRatePage")),
@@ -138,10 +145,37 @@ async function main() {
   const options = parseCliOptions(process.argv.slice(2));
   const report = options.mode === "http" ? await runHttp(options) : await runLocal(options);
   const evaluation = evaluateAuthorityEnforcementGuard(report, options.thresholds);
+  let persistence:
+    | {
+        enabled: boolean;
+        created: boolean;
+        guardReportId: string;
+      }
+    | {
+        enabled: false;
+      } = { enabled: false };
+
+  if (options.persist) {
+    const persisted = await appendAuthorityEnforcementGuardReport({
+      report,
+      guard: evaluation,
+      metadata: {
+        script: "authority-enforcement-guard.ts",
+        mode: options.mode,
+      },
+    });
+    persistence = {
+      enabled: true,
+      created: persisted.created,
+      guardReportId: persisted.record.guardReportId,
+    };
+  }
+
   const output = JSON.stringify(
     {
       report,
       guard: evaluation,
+      persistence,
     },
     null,
     2
