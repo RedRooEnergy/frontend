@@ -15,6 +15,9 @@ type IdempotencyCollection = {
     update: Record<string, unknown>,
     options?: { returnDocument?: "after" | "before" }
   ) => Promise<any | null>;
+  find: (query: Record<string, unknown>) => {
+    sort: (spec: Record<string, 1 | -1>) => { limit: (value: number) => { toArray: () => Promise<any[]> } };
+  };
 };
 
 export type IdempotencyStoreDependencies = {
@@ -252,4 +255,36 @@ export async function getPaymentIdempotencyRecord(
     key: params.key,
   });
   return found ? toPublicRecord(found) : null;
+}
+
+export async function listPaymentIdempotencyRecordsByWindow(
+  params: {
+    fromUtc?: string;
+    toUtc?: string;
+    limit?: number;
+    provider?: PaymentProvider;
+    scope?: PaymentIdempotencyScope;
+  },
+  dependencyOverrides: Partial<IdempotencyStoreDependencies> = {}
+): Promise<PaymentIdempotencyRecord[]> {
+  await ensurePaymentIdempotencyIndexes(dependencyOverrides);
+  const deps = resolveDependencies(dependencyOverrides);
+  const collection = await deps.getCollection();
+
+  const query: Record<string, unknown> = {};
+  if (params.provider) query.provider = params.provider;
+  if (params.scope) query.scope = params.scope;
+
+  const range: Record<string, string> = {};
+  const fromUtc = String(params.fromUtc || "").trim();
+  const toUtc = String(params.toUtc || "").trim();
+  if (fromUtc) range.$gte = fromUtc;
+  if (toUtc) range.$lte = toUtc;
+  if (Object.keys(range).length > 0) {
+    query.updatedAt = range;
+  }
+
+  const limit = Math.min(Math.max(Number(params.limit || 500), 1), 5000);
+  const docs = await collection.find(query).sort({ updatedAt: -1, createdAt: -1 }).limit(limit).toArray();
+  return docs.map(toPublicRecord);
 }

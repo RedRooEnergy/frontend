@@ -4,6 +4,8 @@ export type PaymentsRuntimeFlags = {
   stripeHardenedFlowEnabled: boolean;
   wiseHardenedFlowEnabled: boolean;
   reconciliationEnabled: boolean;
+  metricsEnabled: boolean;
+  metricsRouteEnabled: boolean;
 };
 
 export type PaymentsStripeConfig = {
@@ -43,6 +45,8 @@ export function resolvePaymentsRuntimeConfig(env: NodeJS.ProcessEnv = process.en
     stripeHardenedFlowEnabled: parseBooleanEnv(env.ENABLE_STRIPE_HARDENED_FLOW),
     wiseHardenedFlowEnabled: parseBooleanEnv(env.ENABLE_WISE_HARDENED_FLOW),
     reconciliationEnabled: parseBooleanEnv(env.ENABLE_PAYMENTS_RECONCILIATION),
+    metricsEnabled: parseBooleanEnv(env.ENABLE_PAYMENTS_METRICS),
+    metricsRouteEnabled: parseBooleanEnv(env.ENABLE_PAYMENTS_METRICS_ROUTE),
   };
 
   const stripeTestSecret = readTrimmed(env.STRIPE_SECRET_KEY_TEST);

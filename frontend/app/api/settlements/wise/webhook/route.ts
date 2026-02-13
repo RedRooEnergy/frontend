@@ -8,6 +8,8 @@ import { deriveWiseProviderEventId } from "../../../../../lib/payments/wiseEvent
 import { sha256Hex, stableStringify } from "../../../../../lib/payments/pricingSnapshot";
 import { applyWiseProviderStatusToIntent } from "../../../../../lib/payments/wiseTransferService";
 import { markWiseTransferTerminal } from "../../../../../lib/payments/wiseOrderLifecycle";
+import { logPaymentEvent } from "../../../../../lib/payments/logging";
+import { recordRuntimeMetricEvent } from "../../../../../lib/payments/metrics/runtime";
 import { recordAudit } from "../../../../../lib/audit";
 import { dispatchFreightAuditLifecycleHook } from "../../../../../lib/freightAudit/FreightAuditLifecycleHooks";
 
@@ -16,6 +18,20 @@ function safeEqualHex(left: string, right: string) {
   const rightBuf = Buffer.from(String(right || ""), "utf8");
   if (leftBuf.length !== rightBuf.length) return false;
   return crypto.timingSafeEqual(leftBuf, rightBuf);
+}
+
+function emitMetricsEvent(
+  enabled: boolean,
+  event: string,
+  context: Record<string, unknown>,
+  level: "info" | "warn" | "error" = "info"
+) {
+  if (!enabled) return;
+  recordRuntimeMetricEvent({
+    metric: event,
+    labels: context as Record<string, string | number | boolean | null | undefined>,
+  });
+  logPaymentEvent(level, event, context);
 }
 
 function parseOccurredAtUnix(value: unknown): number | null {
@@ -86,6 +102,7 @@ function verifyWiseWebhookAuth(request: Request, rawBody: string) {
 export async function POST(request: Request) {
   const runtimeConfig = resolvePaymentsRuntimeConfig();
   const hardenedEnabled = runtimeConfig.flags.wiseHardenedFlowEnabled;
+  const metricsEnabled = runtimeConfig.flags.metricsEnabled;
 
   const rawBody = await request.text();
 
@@ -146,6 +163,19 @@ export async function POST(request: Request) {
         },
       });
     }
+
+    emitMetricsEvent(
+      metricsEnabled,
+      "payments_metrics_wise_polling_outcome",
+      {
+        provider: "wise",
+        route: "/api/settlements/wise/webhook",
+        outcome: "LOG_ONLY_NON_HARDENED",
+        state: parsed.status || "unknown",
+        transferId: parsed.transferId,
+      },
+      "info"
+    );
 
     return NextResponse.json({ received: true, mode: "log_only_non_hardened" });
   }
@@ -227,6 +257,27 @@ export async function POST(request: Request) {
       });
     }
   }
+
+  emitMetricsEvent(
+    metricsEnabled,
+    "payments_metrics_wise_polling_outcome",
+    {
+      provider: "wise",
+      route: "/api/settlements/wise/webhook",
+      outcome: applied.duplicate
+        ? "DUPLICATE"
+        : isTerminalTransition && applied.transitioned
+        ? "TERMINAL_EVENT_BACKED"
+        : applied.transitioned
+        ? "TRANSITIONED_NON_TERMINAL"
+        : "NO_TRANSITION",
+      state: applied.transitionState || parsed.status || "unknown",
+      transferId: parsed.transferId,
+      eventId,
+      wiseIntentId: applied.intent?.intentId || null,
+    },
+    "info"
+  );
 
   return NextResponse.json({
     received: true,

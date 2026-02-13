@@ -199,3 +199,33 @@ export async function listPaymentProviderEventsByOrder(
   const docs = await collection.find({ orderId: params.orderId }).sort({ createdAt: -1 }).limit(limit).toArray();
   return docs.map(toPublicRecord);
 }
+
+export async function listPaymentProviderEventsByWindow(
+  params: {
+    fromUtc?: string;
+    toUtc?: string;
+    limit?: number;
+    provider?: PaymentProvider;
+  },
+  dependencyOverrides: Partial<ProviderEventStoreDependencies> = {}
+): Promise<PaymentProviderEventRecord[]> {
+  await ensurePaymentProviderEventIndexes(dependencyOverrides);
+  const deps = resolveDependencies(dependencyOverrides);
+  const collection = await deps.getCollection();
+
+  const query: Record<string, unknown> = {};
+  if (params.provider) query.provider = params.provider;
+
+  const range: Record<string, string> = {};
+  const fromUtc = String(params.fromUtc || "").trim();
+  const toUtc = String(params.toUtc || "").trim();
+  if (fromUtc) range.$gte = fromUtc;
+  if (toUtc) range.$lte = toUtc;
+  if (Object.keys(range).length > 0) {
+    query.receivedAt = range;
+  }
+
+  const limit = Math.min(Math.max(Number(params.limit || 500), 1), 5000);
+  const docs = await collection.find(query).sort({ receivedAt: -1, createdAt: -1 }).limit(limit).toArray();
+  return docs.map(toPublicRecord);
+}

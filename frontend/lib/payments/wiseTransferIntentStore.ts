@@ -298,3 +298,33 @@ export async function clearWiseTransferIntentAutoRetryBlock(
   if (!updated) throw new Error("WISE_TRANSFER_INTENT_NOT_FOUND");
   return toPublicRecord(updated);
 }
+
+export async function listWiseTransferIntentsByWindow(
+  params: {
+    fromUtc?: string;
+    toUtc?: string;
+    limit?: number;
+    state?: WiseTransferIntentState;
+  },
+  dependencyOverrides: Partial<WiseTransferIntentStoreDependencies> = {}
+): Promise<WiseTransferIntentRecord[]> {
+  await ensureWiseTransferIntentIndexes(dependencyOverrides);
+  const deps = resolveDependencies(dependencyOverrides);
+  const collection = await deps.getCollection();
+
+  const query: Record<string, unknown> = {};
+  if (params.state) query.state = params.state;
+
+  const range: Record<string, string> = {};
+  const fromUtc = String(params.fromUtc || "").trim();
+  const toUtc = String(params.toUtc || "").trim();
+  if (fromUtc) range.$gte = fromUtc;
+  if (toUtc) range.$lte = toUtc;
+  if (Object.keys(range).length > 0) {
+    query.updatedAt = range;
+  }
+
+  const limit = Math.min(Math.max(Number(params.limit || 500), 1), 5000);
+  const docs = await collection.find(query).sort({ updatedAt: -1, createdAt: -1 }).limit(limit).toArray();
+  return docs.map(toPublicRecord);
+}

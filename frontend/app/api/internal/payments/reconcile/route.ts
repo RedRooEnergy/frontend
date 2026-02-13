@@ -3,6 +3,8 @@ import "../../../../../lib/payments/bootstrap";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { resolvePaymentsRuntimeConfig } from "../../../../../lib/payments/config";
+import { logPaymentEvent } from "../../../../../lib/payments/logging";
+import { recordRuntimeMetricEvent } from "../../../../../lib/payments/metrics/runtime";
 import { runPaymentsReconciliation, type ReconciliationSource } from "../../../../../lib/payments/reconciliation";
 
 function safeEqualHex(left: string, right: string) {
@@ -45,11 +47,26 @@ function parseSource(input: unknown): ReconciliationSource {
   return "api_internal";
 }
 
+function emitMetricsEvent(
+  enabled: boolean,
+  event: string,
+  context: Record<string, unknown>,
+  level: "info" | "warn" | "error" = "info"
+) {
+  if (!enabled) return;
+  recordRuntimeMetricEvent({
+    metric: event,
+    labels: context as Record<string, string | number | boolean | null | undefined>,
+  });
+  logPaymentEvent(level, event, context);
+}
+
 export async function POST(request: Request) {
   const runtimeConfig = resolvePaymentsRuntimeConfig();
   if (!runtimeConfig.flags.reconciliationEnabled) {
     return NextResponse.json({ error: "Payments reconciliation disabled" }, { status: 404 });
   }
+  const metricsEnabled = runtimeConfig.flags.metricsEnabled;
 
   const rawBody = await request.text();
 
@@ -101,6 +118,23 @@ export async function POST(request: Request) {
       limit: payload?.limit,
     },
   });
+
+  emitMetricsEvent(
+    metricsEnabled,
+    "payments_metrics_reconciliation_summary",
+    {
+      provider: "reconciliation",
+      source: report.source,
+      discrepanciesTotal: report.summary.discrepanciesTotal,
+      criticalCount: report.summary.bySeverity.CRITICAL,
+      warningCount: report.summary.bySeverity.WARNING,
+      infoCount: report.summary.bySeverity.INFO,
+      settlementContradictions: report.summary.byCode.SETTLEMENT_MARKED_NO_PROVIDER_COMPLETION,
+      identityMismatch: report.summary.byCode.IDENTITY_MISMATCH,
+      deterministicHashSha256: report.deterministicHashSha256,
+    },
+    report.summary.bySeverity.CRITICAL > 0 ? "warn" : "info"
+  );
 
   return NextResponse.json(report);
 }

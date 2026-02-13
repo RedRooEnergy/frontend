@@ -122,6 +122,8 @@ async function testResolveConfigDefaultsFlagsOff() {
       ENABLE_STRIPE_HARDENED_FLOW: undefined,
       ENABLE_WISE_HARDENED_FLOW: undefined,
       ENABLE_PAYMENTS_RECONCILIATION: undefined,
+      ENABLE_PAYMENTS_METRICS: undefined,
+      ENABLE_PAYMENTS_METRICS_ROUTE: undefined,
       STRIPE_SECRET_KEY_TEST: undefined,
       STRIPE_WEBHOOK_SECRET_TEST: undefined,
       WISE_SANDBOX_API_KEY: undefined,
@@ -136,6 +138,8 @@ async function testResolveConfigDefaultsFlagsOff() {
       assert(config.flags.stripeHardenedFlowEnabled === false, "Stripe hardened flag should default off");
       assert(config.flags.wiseHardenedFlowEnabled === false, "Wise hardened flag should default off");
       assert(config.flags.reconciliationEnabled === false, "Reconciliation flag should default off");
+      assert(config.flags.metricsEnabled === false, "Metrics flag should default off");
+      assert(config.flags.metricsRouteEnabled === false, "Metrics route flag should default off");
     }
   );
 }

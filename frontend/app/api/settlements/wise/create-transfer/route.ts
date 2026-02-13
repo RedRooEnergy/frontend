@@ -9,6 +9,9 @@ import { requireAdmin } from "../../../../../lib/auth/adminGuard";
 import { dispatchFreightAuditLifecycleHook } from "../../../../../lib/freightAudit/FreightAuditLifecycleHooks";
 import { executePayoutWithSoftEnforcement } from "../../../../../lib/freightAudit/FreightSoftEnforcementService";
 import { resolvePaymentsRuntimeConfig } from "../../../../../lib/payments/config";
+import { getPaymentIdempotencyRecord } from "../../../../../lib/payments/idempotencyStore";
+import { logPaymentEvent } from "../../../../../lib/payments/logging";
+import { recordRuntimeMetricEvent } from "../../../../../lib/payments/metrics/runtime";
 import {
   applyWiseProviderStatusToIntent,
   createOrLoadWiseTransferIntent,
@@ -67,6 +70,72 @@ function parsePositiveInt(value: string | undefined, fallback: number) {
   const parsed = Number(value || "");
   if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
   return Math.floor(parsed);
+}
+
+function computeDurationMs(startedAtMs: number) {
+  const elapsed = Date.now() - startedAtMs;
+  return elapsed >= 0 ? elapsed : 0;
+}
+
+function emitMetricsEvent(
+  enabled: boolean,
+  event: string,
+  context: Record<string, unknown>,
+  level: "info" | "warn" | "error" = "info"
+) {
+  if (!enabled) return;
+  recordRuntimeMetricEvent({
+    metric: event,
+    labels: context as Record<string, string | number | boolean | null | undefined>,
+  });
+  logPaymentEvent(level, event, context);
+}
+
+function resolveWiseConflictClass(mode: string) {
+  if (mode === "existing_failed") return "FAILED_CONFLICT";
+  if (mode === "existing_in_progress" || mode === "existing_active") return "IN_PROGRESS";
+  return "SUCCEEDED_REPLAY";
+}
+
+async function emitWiseIdempotencyLatencyMetric(input: {
+  enabled: boolean;
+  orderId: string;
+  idempotencyKey?: string | null;
+  outcome?: string | null;
+}) {
+  if (!input.enabled) return;
+  const key = String(input.idempotencyKey || "").trim();
+  if (!key) return;
+
+  try {
+    const record = await getPaymentIdempotencyRecord({
+      provider: "wise",
+      scope: "WISE_TRANSFER_CREATE",
+      key,
+    });
+    if (!record) return;
+
+    const start = Date.parse(String(record.createdAt || ""));
+    const end = Date.parse(String(record.updatedAt || ""));
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return;
+
+    emitMetricsEvent(
+      input.enabled,
+      "payments_metrics_provider_latency",
+      {
+        provider: "wise",
+        endpointClass: "wise.transfer_create",
+        scope: "WISE_TRANSFER_CREATE",
+        outcome: String(input.outcome || record.status || "observed"),
+        orderId: input.orderId,
+        idempotencyKey: key,
+        durationMs: end - start,
+      },
+      "info"
+    );
+  } catch {
+    // Best-effort instrumentation only.
+  }
 }
 
 function dispatchEscrowEligibleAudit(input: {
@@ -143,7 +212,9 @@ async function runLegacyWiseSettlement(input: {
   adminActorId: string;
   tenantId: string | null;
   primarySupplierId: string | null;
+  metricsEnabled: boolean;
 }) {
+  const startedAtMs = Date.now();
   const apiKey = process.env.WISE_SANDBOX_API_KEY;
   const profileId = process.env.WISE_SANDBOX_PROFILE_ID;
   const useDeterministicSandbox = process.env.NODE_ENV !== "production" && (!apiKey || !profileId);
@@ -167,6 +238,19 @@ async function runLegacyWiseSettlement(input: {
     });
 
     const latestTimelineEvent = input.orders[input.idx].timeline?.[input.orders[input.idx].timeline.length - 1];
+    emitMetricsEvent(
+      input.metricsEnabled,
+      "payments_metrics_provider_latency",
+      {
+        provider: "wise",
+        endpointClass: "wise.transfer_create",
+        scope: "WISE_TRANSFER_CREATE",
+        outcome: "SUCCEEDED",
+        orderId: input.orderId,
+        durationMs: computeDurationMs(startedAtMs),
+      },
+      "info"
+    );
     return {
       ok: true,
       transferId,
@@ -196,6 +280,19 @@ async function runLegacyWiseSettlement(input: {
   if (!transferRes.ok) {
     const err = await transferRes.text();
     console.error("Wise transfer error", err);
+    emitMetricsEvent(
+      input.metricsEnabled,
+      "payments_metrics_provider_latency",
+      {
+        provider: "wise",
+        endpointClass: "wise.transfer_create",
+        scope: "WISE_TRANSFER_CREATE",
+        outcome: "FAILED",
+        orderId: input.orderId,
+        durationMs: computeDurationMs(startedAtMs),
+      },
+      "info"
+    );
     throw new Error("WISE_TRANSFER_FAILED");
   }
 
@@ -214,6 +311,19 @@ async function runLegacyWiseSettlement(input: {
   });
 
   const latestTimelineEvent = input.orders[input.idx].timeline?.[input.orders[input.idx].timeline.length - 1];
+  emitMetricsEvent(
+    input.metricsEnabled,
+    "payments_metrics_provider_latency",
+    {
+      provider: "wise",
+      endpointClass: "wise.transfer_create",
+      scope: "WISE_TRANSFER_CREATE",
+      outcome: "SUCCEEDED",
+      orderId: input.orderId,
+      durationMs: computeDurationMs(startedAtMs),
+    },
+    "info"
+  );
   return {
     ok: true,
     transferId: transfer.id,
@@ -240,6 +350,7 @@ async function runHardenedWiseSettlement(input: {
   tenantId: string | null;
   primarySupplierId: string | null;
   adminSettlementOverride: boolean;
+  metricsEnabled: boolean;
 }) {
   const runtimeConfig = resolvePaymentsRuntimeConfig();
   const wiseConfig = runtimeConfig.wise;
@@ -264,11 +375,38 @@ async function runHardenedWiseSettlement(input: {
     allowRetryBlockedOverride: input.adminSettlementOverride,
   });
 
+  if (intentResolution.mode !== "created") {
+    emitMetricsEvent(
+      input.metricsEnabled,
+      "payments_metrics_idempotency_conflict",
+      {
+        provider: "wise",
+        scope: "WISE_TRANSFER_CREATE",
+        conflictClass: resolveWiseConflictClass(intentResolution.mode),
+        orderId: input.orderId,
+        idempotencyKey: intentResolution.idempotencyKey,
+      },
+      intentResolution.mode === "existing_failed" ? "warn" : "info"
+    );
+  }
+
   if (intentResolution.mode === "existing_failed") {
+    await emitWiseIdempotencyLatencyMetric({
+      enabled: input.metricsEnabled,
+      orderId: input.orderId,
+      idempotencyKey: intentResolution.idempotencyKey,
+      outcome: "FAILED",
+    });
     throw new Error("WISE_TRANSFER_INTENT_PREVIOUS_FAILURE");
   }
 
   if (intentResolution.mode === "existing_in_progress") {
+    await emitWiseIdempotencyLatencyMetric({
+      enabled: input.metricsEnabled,
+      orderId: input.orderId,
+      idempotencyKey: intentResolution.idempotencyKey,
+      outcome: "IN_PROGRESS",
+    });
     return {
       ok: true,
       orderId: input.orderId,
@@ -303,6 +441,13 @@ async function runHardenedWiseSettlement(input: {
         transferId: intent.transferId,
       });
     }
+
+    await emitWiseIdempotencyLatencyMetric({
+      enabled: input.metricsEnabled,
+      orderId: input.orderId,
+      idempotencyKey: intent.idempotencyKey,
+      outcome: "SUCCEEDED",
+    });
 
     return {
       ok: true,
@@ -375,6 +520,13 @@ async function runHardenedWiseSettlement(input: {
           },
         });
 
+        await emitWiseIdempotencyLatencyMetric({
+          enabled: input.metricsEnabled,
+          orderId: input.orderId,
+          idempotencyKey: intent.idempotencyKey,
+          outcome: "FAILED",
+        });
+
         throw new Error(`WISE_TRANSFER_FAILED:${mapped.code}`);
       }
 
@@ -387,6 +539,12 @@ async function runHardenedWiseSettlement(input: {
           errorMessage: "Wise accepted response missing transfer id",
           providerStatus: "request_failed_missing_transfer_id",
           payload: transfer as any,
+        });
+        await emitWiseIdempotencyLatencyMetric({
+          enabled: input.metricsEnabled,
+          orderId: input.orderId,
+          idempotencyKey: intent.idempotencyKey,
+          outcome: "FAILED",
         });
         throw new Error("WISE_TRANSFER_FAILED:WISE_TRANSFER_ID_MISSING");
       }
@@ -461,6 +619,13 @@ async function runHardenedWiseSettlement(input: {
         mode: "wise-hardened-deterministic",
       });
 
+      await emitWiseIdempotencyLatencyMetric({
+        enabled: input.metricsEnabled,
+        orderId: input.orderId,
+        idempotencyKey: intent.idempotencyKey,
+        outcome: "SUCCEEDED",
+      });
+
       return {
         ok: true,
         orderId: input.orderId,
@@ -473,6 +638,13 @@ async function runHardenedWiseSettlement(input: {
         autoRetryBlocked: false,
       };
     }
+
+    await emitWiseIdempotencyLatencyMetric({
+      enabled: input.metricsEnabled,
+      orderId: input.orderId,
+      idempotencyKey: terminalIntent.idempotencyKey,
+      outcome: terminalIntent.state,
+    });
 
     return {
       ok: true,
@@ -488,6 +660,12 @@ async function runHardenedWiseSettlement(input: {
   }
 
   if (isWiseWebhookConfigured()) {
+    await emitWiseIdempotencyLatencyMetric({
+      enabled: input.metricsEnabled,
+      orderId: input.orderId,
+      idempotencyKey: intent.idempotencyKey,
+      outcome: intent.state,
+    });
     return {
       ok: true,
       orderId: input.orderId,
@@ -533,6 +711,13 @@ async function runHardenedWiseSettlement(input: {
       mode: "wise-hardened-polling",
     });
 
+    await emitWiseIdempotencyLatencyMetric({
+      enabled: input.metricsEnabled,
+      orderId: input.orderId,
+      idempotencyKey: terminalIntent.idempotencyKey,
+      outcome: "SUCCEEDED",
+    });
+
     return {
       ok: true,
       orderId: input.orderId,
@@ -557,6 +742,13 @@ async function runHardenedWiseSettlement(input: {
       terminalStateToReason(terminalIntent.state, terminalIntent.lastErrorCode)
     );
   }
+
+  await emitWiseIdempotencyLatencyMetric({
+    enabled: input.metricsEnabled,
+    orderId: input.orderId,
+    idempotencyKey: terminalIntent.idempotencyKey,
+    outcome: terminalIntent.state,
+  });
 
   return {
     ok: true,
@@ -615,6 +807,7 @@ export async function POST(request: Request) {
 
   const runtimeConfig = resolvePaymentsRuntimeConfig();
   const wiseHardenedEnabled = runtimeConfig.flags.wiseHardenedFlowEnabled;
+  const metricsEnabled = runtimeConfig.flags.metricsEnabled;
 
   try {
     const guarded = await executePayoutWithSoftEnforcement({
@@ -647,6 +840,7 @@ export async function POST(request: Request) {
             adminActorId: admin.actorId,
             tenantId,
             primarySupplierId,
+            metricsEnabled,
           });
         }
 
@@ -657,6 +851,7 @@ export async function POST(request: Request) {
           tenantId,
           primarySupplierId,
           adminSettlementOverride: adminFlags.settlementOverride === true,
+          metricsEnabled,
         });
       },
     });

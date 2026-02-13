@@ -3,6 +3,8 @@ import "../../../../../../lib/payments/bootstrap";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { resolvePaymentsRuntimeConfig } from "../../../../../../lib/payments/config";
+import { logPaymentEvent } from "../../../../../../lib/payments/logging";
+import { recordRuntimeMetricEvent } from "../../../../../../lib/payments/metrics/runtime";
 import {
   getWiseTransferIntentByIntentId,
   getWiseTransferIntentByTransferId,
@@ -18,6 +20,20 @@ function safeEqualHex(left: string, right: string) {
   const rightBuf = Buffer.from(String(right || ""), "utf8");
   if (leftBuf.length !== rightBuf.length) return false;
   return crypto.timingSafeEqual(leftBuf, rightBuf);
+}
+
+function emitMetricsEvent(
+  enabled: boolean,
+  event: string,
+  context: Record<string, unknown>,
+  level: "info" | "warn" | "error" = "info"
+) {
+  if (!enabled) return;
+  recordRuntimeMetricEvent({
+    metric: event,
+    labels: context as Record<string, string | number | boolean | null | undefined>,
+  });
+  logPaymentEvent(level, event, context);
 }
 
 function verifyPollingJobSignature(rawBody: string, headers: Headers) {
@@ -113,6 +129,7 @@ export async function POST(request: Request) {
   if (!runtimeConfig.flags.wiseHardenedFlowEnabled) {
     return NextResponse.json({ error: "Wise hardened flow disabled" }, { status: 404 });
   }
+  const metricsEnabled = runtimeConfig.flags.metricsEnabled;
 
   const rawBody = await request.text();
   try {
@@ -145,6 +162,22 @@ export async function POST(request: Request) {
     intervalMs: Number(payload.intervalMs || 0) || undefined,
   });
   const result = poll.intent;
+
+  emitMetricsEvent(
+    metricsEnabled,
+    "payments_metrics_wise_polling_outcome",
+    {
+      provider: "wise",
+      route: "/api/internal/payments/wise/poll-transfer",
+      outcome: poll.terminalEventId ? "TERMINAL_EVENT_BACKED" : "NO_TERMINAL_EVENT",
+      state: result.state,
+      orderId: result.orderId,
+      wiseTransferId: result.transferId || null,
+      wiseIntentId: result.intentId,
+      terminalEventId: poll.terminalEventId || null,
+    },
+    "info"
+  );
 
   if (poll.terminalEventId) {
     applyTerminalMutation(result);

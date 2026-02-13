@@ -5,6 +5,7 @@ import { markRefunded } from "../../../../../lib/escrow";
 import { appendPaymentProviderEvent, updatePaymentProviderEventStatus } from "../../../../../lib/payments/providerEventStore";
 import { resolvePaymentsRuntimeConfig } from "../../../../../lib/payments/config";
 import { logPaymentEvent } from "../../../../../lib/payments/logging";
+import { recordRuntimeMetricEvent } from "../../../../../lib/payments/metrics/runtime";
 import {
   buildCanonicalPricingSnapshot,
   computeCanonicalPricingSnapshotHash,
@@ -34,6 +35,20 @@ function resolveStripeWebhookSecret() {
     return process.env.STRIPE_WEBHOOK_SECRET_LIVE || "";
   }
   return process.env.STRIPE_WEBHOOK_SECRET_TEST || process.env.STRIPE_WEBHOOK_SECRET_LIVE || "";
+}
+
+function emitMetricsEvent(
+  enabled: boolean,
+  event: string,
+  context: Record<string, unknown>,
+  level: "info" | "warn" | "error" = "info"
+) {
+  if (!enabled) return;
+  recordRuntimeMetricEvent({
+    metric: event,
+    labels: context as Record<string, string | number | boolean | null | undefined>,
+  });
+  logPaymentEvent(level, event, context);
 }
 
 function toMinorFromMajor(value: number) {
@@ -169,6 +184,7 @@ function applyRefundFinalization(event: StripeEvent) {
 export async function POST(request: Request) {
   const runtimeConfig = resolvePaymentsRuntimeConfig();
   const hardenedEnabled = runtimeConfig.flags.stripeHardenedFlowEnabled;
+  const metricsEnabled = runtimeConfig.flags.metricsEnabled;
   const webhookSecret = resolveStripeWebhookSecret();
   if (!webhookSecret) {
     return NextResponse.json({ error: "Stripe webhook secret not configured" }, { status: 500 });
@@ -186,6 +202,16 @@ export async function POST(request: Request) {
       toleranceSeconds: WEBHOOK_TOLERANCE_SECONDS,
     });
   } catch (error: any) {
+    emitMetricsEvent(
+      metricsEnabled,
+      "payments_metrics_webhook_verification_failed",
+      {
+        provider: "stripe",
+        route: "/api/payments/stripe/webhook",
+        failureCode: String(error?.message || "STRIPE_WEBHOOK_SIGNATURE_INVALID"),
+      },
+      "warn"
+    );
     logPaymentEvent("warn", "payments_stripe_webhook_signature_rejected", {
       provider: "stripe",
       operation: "webhook_verify",
@@ -229,6 +255,18 @@ export async function POST(request: Request) {
   });
 
   if (!appended.created) {
+    emitMetricsEvent(
+      metricsEnabled,
+      "payments_metrics_webhook_duplicate_suppressed",
+      {
+        provider: "stripe",
+        route: "/api/payments/stripe/webhook",
+        eventType,
+        eventId,
+        orderId,
+      },
+      "info"
+    );
     logPaymentEvent("info", "payments_stripe_webhook_duplicate_ignored", {
       provider: "stripe",
       operation: "webhook_event",

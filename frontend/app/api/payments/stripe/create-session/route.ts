@@ -7,6 +7,7 @@ import {
   markPaymentIdempotencyResult,
 } from "../../../../../lib/payments/idempotencyStore";
 import { logPaymentEvent } from "../../../../../lib/payments/logging";
+import { recordRuntimeMetricEvent } from "../../../../../lib/payments/metrics/runtime";
 import { mapStripeProviderError } from "../../../../../lib/payments/providerErrors";
 import {
   buildCanonicalPricingSnapshot,
@@ -77,6 +78,27 @@ function toMinorFromMajor(value: number) {
   return Math.round(Number(value || 0) * 100);
 }
 
+function durationMs(startUtc: string | null | undefined, endUtc: string | null | undefined): number | null {
+  const start = Date.parse(String(startUtc || ""));
+  const end = Date.parse(String(endUtc || ""));
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return null;
+  return end - start;
+}
+
+function emitMetricsEvent(
+  enabled: boolean,
+  event: string,
+  context: Record<string, unknown>,
+  level: "info" | "warn" | "error" = "info"
+) {
+  if (!enabled) return;
+  recordRuntimeMetricEvent({
+    metric: event,
+    labels: context as Record<string, string | number | boolean | null | undefined>,
+  });
+  logPaymentEvent(level, event, context);
+}
+
 function buildCanonicalSnapshotInputFromOrder(order: OrderRecord): CanonicalPricingSnapshotInput {
   return {
     orderId: order.orderId,
@@ -96,6 +118,7 @@ function buildCanonicalSnapshotInputFromOrder(order: OrderRecord): CanonicalPric
 export async function POST(request: Request) {
   const runtimeConfig = resolvePaymentsRuntimeConfig();
   const hardenedEnabled = runtimeConfig.flags.stripeHardenedFlowEnabled;
+  const metricsEnabled = runtimeConfig.flags.metricsEnabled;
   const secret = resolveStripeSecret();
 
   if (!secret) {
@@ -245,6 +268,18 @@ export async function POST(request: Request) {
     const metadata = (existing.metadata || {}) as Record<string, unknown>;
 
     if (existing.status === "SUCCEEDED") {
+      emitMetricsEvent(
+        metricsEnabled,
+        "payments_metrics_idempotency_conflict",
+        {
+          provider: "stripe",
+          scope: "STRIPE_CHECKOUT_SESSION_CREATE",
+          conflictClass: "SUCCEEDED_REPLAY",
+          orderId,
+          idempotencyKey,
+        },
+        "info"
+      );
       return NextResponse.json({
         url: metadata.stripeSessionUrl || null,
         id: metadata.stripeSessionId || null,
@@ -254,6 +289,18 @@ export async function POST(request: Request) {
     }
 
     if (existing.status === "IN_PROGRESS") {
+      emitMetricsEvent(
+        metricsEnabled,
+        "payments_metrics_idempotency_conflict",
+        {
+          provider: "stripe",
+          scope: "STRIPE_CHECKOUT_SESSION_CREATE",
+          conflictClass: "IN_PROGRESS",
+          orderId,
+          idempotencyKey,
+        },
+        "info"
+      );
       return NextResponse.json(
         {
           status: "IN_PROGRESS",
@@ -263,6 +310,19 @@ export async function POST(request: Request) {
         { status: 202 }
       );
     }
+
+    emitMetricsEvent(
+      metricsEnabled,
+      "payments_metrics_idempotency_conflict",
+      {
+        provider: "stripe",
+        scope: "STRIPE_CHECKOUT_SESSION_CREATE",
+        conflictClass: "FAILED_CONFLICT",
+        orderId,
+        idempotencyKey,
+      },
+      "warn"
+    );
 
     return NextResponse.json(
       {
@@ -306,7 +366,7 @@ export async function POST(request: Request) {
     if (!response.ok) {
       const errText = await response.text();
       const mapped = mapStripeProviderError(response.status, errText);
-      await markPaymentIdempotencyResult({
+      const idempotencyResult = await markPaymentIdempotencyResult({
         provider: "stripe",
         scope: "STRIPE_CHECKOUT_SESSION_CREATE",
         key: idempotencyKey,
@@ -318,6 +378,23 @@ export async function POST(request: Request) {
           providerCode: mapped.providerCode,
         },
       });
+      const latency = durationMs(lock.record.createdAt, idempotencyResult.updatedAt);
+      if (latency !== null) {
+        emitMetricsEvent(
+          metricsEnabled,
+          "payments_metrics_provider_latency",
+          {
+            provider: "stripe",
+            endpointClass: "stripe.checkout_session_create",
+            scope: "STRIPE_CHECKOUT_SESSION_CREATE",
+            outcome: "FAILED",
+            orderId,
+            idempotencyKey,
+            durationMs: latency,
+          },
+          "info"
+        );
+      }
 
       logPaymentEvent("error", "payments_stripe_create_session_failed", {
         provider: "stripe",
@@ -334,7 +411,7 @@ export async function POST(request: Request) {
     const session = (await response.json()) as StripeSessionResponse;
     const sessionId = String(session?.id || "").trim();
 
-    await markPaymentIdempotencyResult({
+    const idempotencyResult = await markPaymentIdempotencyResult({
       provider: "stripe",
       scope: "STRIPE_CHECKOUT_SESSION_CREATE",
       key: idempotencyKey,
@@ -346,6 +423,23 @@ export async function POST(request: Request) {
         pricingSnapshotHashServer,
       },
     });
+    const latency = durationMs(lock.record.createdAt, idempotencyResult.updatedAt);
+    if (latency !== null) {
+      emitMetricsEvent(
+        metricsEnabled,
+        "payments_metrics_provider_latency",
+        {
+          provider: "stripe",
+          endpointClass: "stripe.checkout_session_create",
+          scope: "STRIPE_CHECKOUT_SESSION_CREATE",
+          outcome: "SUCCEEDED",
+          orderId,
+          idempotencyKey,
+          durationMs: latency,
+        },
+        "info"
+      );
+    }
 
     upsertOrder(orderId, (current) => {
       const next = {
@@ -365,7 +459,7 @@ export async function POST(request: Request) {
       replayed: false,
     });
   } catch (err: any) {
-    await markPaymentIdempotencyResult({
+    const idempotencyResult = await markPaymentIdempotencyResult({
       provider: "stripe",
       scope: "STRIPE_CHECKOUT_SESSION_CREATE",
       key: idempotencyKey,
@@ -375,6 +469,23 @@ export async function POST(request: Request) {
         errorCode: "PAYMENT_STRIPE_SESSION_EXCEPTION",
       },
     });
+    const latency = durationMs(lock.record.createdAt, idempotencyResult.updatedAt);
+    if (latency !== null) {
+      emitMetricsEvent(
+        metricsEnabled,
+        "payments_metrics_provider_latency",
+        {
+          provider: "stripe",
+          endpointClass: "stripe.checkout_session_create",
+          scope: "STRIPE_CHECKOUT_SESSION_CREATE",
+          outcome: "FAILED",
+          orderId,
+          idempotencyKey,
+          durationMs: latency,
+        },
+        "info"
+      );
+    }
 
     logPaymentEvent("error", "payments_stripe_create_session_exception", {
       provider: "stripe",
