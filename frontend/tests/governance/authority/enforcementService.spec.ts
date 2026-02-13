@@ -56,6 +56,7 @@ function makeInput() {
 async function testBypassStillPersistsShadow() {
   let shadowAppended = 0;
   const deps: Partial<AuthorityEnforcementServiceDependencies> = {
+    getRuntimeKillSwitchState: async () => false,
     resolvePreconditions: () => ({
       enabled: false,
       killSwitch: false,
@@ -95,6 +96,7 @@ async function testEnforcedAllowWritesArtifact() {
     evaluationResult: evaluation,
   });
   const deps: Partial<AuthorityEnforcementServiceDependencies> = {
+    getRuntimeKillSwitchState: async () => false,
     resolvePreconditions: () => ({
       enabled: true,
       killSwitch: false,
@@ -136,6 +138,7 @@ async function testStrictModeBlocksOnPersistFailure() {
     evaluationResult: evaluation,
   });
   const deps: Partial<AuthorityEnforcementServiceDependencies> = {
+    getRuntimeKillSwitchState: async () => false,
     resolvePreconditions: () => ({
       enabled: true,
       killSwitch: false,
@@ -187,6 +190,7 @@ async function testDivergencePersistsMetricArtifactInFailOpenMode() {
   let divergencePersisted = false;
 
   const deps: Partial<AuthorityEnforcementServiceDependencies> = {
+    getRuntimeKillSwitchState: async () => false,
     resolvePreconditions: () => ({
       enabled: true,
       killSwitch: false,
@@ -246,6 +250,7 @@ async function testPreconditionResolverOrder() {
       resource: "catalog.product",
       action: "fee_ledger.emit.product_approved",
       policyVersionHash: "a".repeat(64),
+      runtimeKillSwitchEnabled: false,
     },
     env
   );
@@ -254,12 +259,40 @@ async function testPreconditionResolverOrder() {
   assert(resolved.bypassReason === "KILL_SWITCH_ENABLED", "Expected kill switch to dominate ordering");
 }
 
+async function testRuntimeKillSwitchDominatesPreconditions() {
+  const env = {
+    ENABLE_GOV04_AUTHORITY_ENFORCEMENT: "true",
+    GOV04_AUTH_ENFORCEMENT_KILL_SWITCH: "false",
+    GOV04_AUTH_ENFORCEMENT_STRICT_MODE: "false",
+    GOV04_AUTH_ENFORCE_TENANT_ALLOWLIST: "TENANT-1",
+    GOV04_AUTH_ENFORCE_ROLE_ALLOWLIST: "admin",
+    GOV04_AUTH_ENFORCE_RESOURCE_ACTION_ALLOWLIST: "catalog.product|fee_ledger.emit.product_approved",
+    GOV04_AUTH_ENFORCE_POLICY_VERSION_ALLOWLIST: "a".repeat(64),
+  } as any;
+
+  const resolved = resolveAuthorityEnforcementPreconditions(
+    {
+      tenantId: "TENANT-1",
+      requestActorRole: "admin",
+      resource: "catalog.product",
+      action: "fee_ledger.emit.product_approved",
+      policyVersionHash: "a".repeat(64),
+      runtimeKillSwitchEnabled: true,
+    },
+    env
+  );
+
+  assert(resolved.bypassed === true, "Expected bypass under runtime kill switch");
+  assert(resolved.bypassReason === "KILL_SWITCH_ENABLED", "Expected runtime kill switch to dominate ordering");
+}
+
 async function run() {
   await testBypassStillPersistsShadow();
   await testEnforcedAllowWritesArtifact();
   await testStrictModeBlocksOnPersistFailure();
   await testDivergencePersistsMetricArtifactInFailOpenMode();
   await testPreconditionResolverOrder();
+  await testRuntimeKillSwitchDominatesPreconditions();
 }
 
 run();

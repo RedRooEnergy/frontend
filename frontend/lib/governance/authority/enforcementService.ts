@@ -8,6 +8,7 @@ import {
   appendAuthorityEnforcementDecision,
   type AuthorityEnforcementStoreDependencies,
 } from "./enforcementStore";
+import { getAuthorityEnforcementKillSwitchState } from "./enforcementControlStore";
 import type {
   AuthorityEnforcementDecisionRecord,
   AuthorityEnforcementPreconditionState,
@@ -70,7 +71,9 @@ export type AuthorityEnforcementServiceDependencies = {
     resource: string;
     action: string;
     policyVersionHash?: string | null;
+    runtimeKillSwitchEnabled?: boolean;
   }) => AuthorityEnforcementPreconditionState;
+  getRuntimeKillSwitchState: () => Promise<boolean>;
   logger: Pick<typeof console, "info" | "warn" | "error">;
 };
 
@@ -80,6 +83,7 @@ const defaultDependencies: AuthorityEnforcementServiceDependencies = {
   appendShadowDecision: (input, deps) => appendAuthorityShadowDecision(input, deps),
   appendEnforcementDecision: (input, deps) => appendAuthorityEnforcementDecision(input, deps),
   resolvePreconditions: (input) => resolveAuthorityEnforcementPreconditions(input, process.env),
+  getRuntimeKillSwitchState: () => getAuthorityEnforcementKillSwitchState(),
   logger: console,
 };
 
@@ -103,11 +107,12 @@ export function resolveAuthorityEnforcementPreconditions(
     resource: string;
     action: string;
     policyVersionHash?: string | null;
+    runtimeKillSwitchEnabled?: boolean;
   },
   env: NodeJS.ProcessEnv = process.env
 ): AuthorityEnforcementPreconditionState {
   const enabled = isAuthorityEnforcementEnabled(env);
-  const killSwitch = isAuthorityEnforcementKillSwitchEnabled(env);
+  const killSwitch = isAuthorityEnforcementKillSwitchEnabled(env) || input.runtimeKillSwitchEnabled === true;
   const strictMode = isAuthorityEnforcementStrictMode(env);
 
   if (killSwitch) {
@@ -222,6 +227,20 @@ export async function evaluateAuthorityEnforcementDecision(
 ): Promise<AuthorityEnforcementOutcome> {
   const deps = resolveDependencies(dependencyOverrides);
   const decidedAtUtc = String(input.decidedAtUtc || deps.now().toISOString());
+  let runtimeKillSwitchEnabled = false;
+  try {
+    runtimeKillSwitchEnabled = await deps.getRuntimeKillSwitchState();
+  } catch (error: any) {
+    deps.logger.error("gov04_authority_enforcement_runtime_kill_switch_state_failed", {
+      tenantId: String(input.tenantId || "").trim() || null,
+      policyId: input.policyId,
+      resource: input.resource,
+      action: input.action,
+      requestActorId: input.requestActorId,
+      errorCode: String(error?.code || error?.message || "AUTHORITY_ENFORCEMENT_RUNTIME_KILL_SWITCH_READ_FAILED"),
+      errorMessage: String(error?.message || "runtime kill switch state read failed"),
+    });
+  }
 
   const preconditions = deps.resolvePreconditions({
     tenantId: input.tenantId,
@@ -229,6 +248,7 @@ export async function evaluateAuthorityEnforcementDecision(
     resource: input.resource,
     action: input.action,
     policyVersionHash: input.policyVersionHash || null,
+    runtimeKillSwitchEnabled,
   });
 
   const evaluationInput: AuthorityShadowEvaluationInput = {

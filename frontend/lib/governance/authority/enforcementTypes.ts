@@ -81,3 +81,22 @@ export type AuthorityEnforcementGuardReportRecord = {
   metadata?: Record<string, unknown>;
   createdAtUtc: string;
 };
+
+export type AuthorityEnforcementControlEventType = "KILL_SWITCH_ACTIVATED" | "KILL_SWITCH_DEACTIVATED";
+
+export type AuthorityEnforcementControlEventRecord = {
+  _id?: string;
+  controlEventId: string;
+  idempotencyKey: string;
+  eventType: AuthorityEnforcementControlEventType;
+  killSwitchState: boolean;
+  reasonCode: string;
+  guardReportId?: string | null;
+  reportHashSha256?: string | null;
+  triggeredBy: string;
+  eventAtUtc: string;
+  deterministicHashSha256: string;
+  canonicalControlJson: string;
+  metadata?: Record<string, unknown>;
+  createdAtUtc: string;
+};
