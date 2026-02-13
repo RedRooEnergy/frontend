@@ -8,6 +8,7 @@ import { recordAudit } from "../../../../../lib/audit";
 import { requireAdmin } from "../../../../../lib/auth/adminGuard";
 import { dispatchFreightAuditLifecycleHook } from "../../../../../lib/freightAudit/FreightAuditLifecycleHooks";
 import { executePayoutWithSoftEnforcement } from "../../../../../lib/freightAudit/FreightSoftEnforcementService";
+import { emitAuthorityObserveDecision } from "../../../../../lib/governance/authority/observe";
 import { resolvePaymentsRuntimeConfig } from "../../../../../lib/payments/config";
 import { getPaymentIdempotencyRecord } from "../../../../../lib/payments/idempotencyStore";
 import { logPaymentEvent } from "../../../../../lib/payments/logging";
@@ -201,6 +202,32 @@ function dispatchPayoutReadyAudit(input: {
         "TIMELINE_REPLAY_EXPORT",
         "EVIDENCE_PACK_MANIFEST",
       ],
+    },
+  });
+}
+
+function emitSettlementAuthorityObservation(input: {
+  tenantId: string | null;
+  orderId: string;
+  requestActorId: string;
+  requestActorRole: string;
+  observedDecision: "WOULD_ALLOW" | "WOULD_DENY";
+  reasonCodes: string[];
+  metadata?: Record<string, unknown>;
+}) {
+  emitAuthorityObserveDecision({
+    tenantId: input.tenantId,
+    policyId: "gov04.authority.settlement.transfer.observe.v1",
+    subjectActorId: input.orderId || "unknown_order",
+    requestActorId: input.requestActorId || "unknown_request_actor",
+    requestActorRole: input.requestActorRole,
+    resource: "settlement.wise_transfer",
+    action: "create",
+    observedDecision: input.observedDecision,
+    reasonCodes: input.reasonCodes,
+    metadata: {
+      route: "api.settlements.wise.create-transfer",
+      ...(input.metadata || {}),
     },
   });
 }
@@ -769,12 +796,36 @@ async function runHardenedWiseSettlement(input: {
 export async function POST(request: Request) {
   const admin = requireAdmin(request.headers);
   if (!admin) {
+    emitSettlementAuthorityObservation({
+      tenantId: null,
+      orderId: "unknown_order",
+      requestActorId: "anonymous",
+      requestActorRole: "system",
+      observedDecision: "WOULD_DENY",
+      reasonCodes: ["ADMIN_REQUIRED"],
+      metadata: {
+        status: "unauthorized",
+      },
+    });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const payload = (await request.json()) as { orderId?: string; tenantId?: string };
   const orderId = String(payload.orderId || "").trim();
-  if (!orderId) return NextResponse.json({ error: "orderId required" }, { status: 400 });
+  if (!orderId) {
+    emitSettlementAuthorityObservation({
+      tenantId: null,
+      orderId: "unknown_order",
+      requestActorId: admin.actorId,
+      requestActorRole: admin.actorRole,
+      observedDecision: "WOULD_DENY",
+      reasonCodes: ["ORDER_ID_REQUIRED"],
+      metadata: {
+        status: "invalid_payload",
+      },
+    });
+    return NextResponse.json({ error: "orderId required" }, { status: 400 });
+  }
   const tenantId = String(payload.tenantId || "").trim() || null;
 
   const orders = getOrders();
@@ -784,11 +835,37 @@ export async function POST(request: Request) {
     idx = orders.length - 1;
     writeStore("orders" as any, orders as any);
   }
-  if (idx === -1) return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  if (idx === -1) {
+    emitSettlementAuthorityObservation({
+      tenantId,
+      orderId,
+      requestActorId: admin.actorId,
+      requestActorRole: admin.actorRole,
+      observedDecision: "WOULD_DENY",
+      reasonCodes: ["ORDER_NOT_FOUND"],
+      metadata: {
+        status: "order_not_found",
+      },
+    });
+    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  }
 
   const adminFlags = getAdminFlags();
   const order = orders[idx];
   if (!canSettle(order, adminFlags.settlementOverride === true) || order.escrowStatus !== "HELD") {
+    emitSettlementAuthorityObservation({
+      tenantId,
+      orderId,
+      requestActorId: admin.actorId,
+      requestActorRole: admin.actorRole,
+      observedDecision: "WOULD_DENY",
+      reasonCodes: ["SETTLEMENT_NOT_ELIGIBLE"],
+      metadata: {
+        status: "not_eligible",
+        orderStatus: order.status,
+        escrowStatus: order.escrowStatus || null,
+      },
+    });
     return NextResponse.json({ error: "Not eligible for settlement" }, { status: 400 });
   }
 
@@ -857,6 +934,20 @@ export async function POST(request: Request) {
     });
 
     if (guarded.status === "REVIEW_REQUIRED") {
+      emitSettlementAuthorityObservation({
+        tenantId,
+        orderId,
+        requestActorId: admin.actorId,
+        requestActorRole: admin.actorRole,
+        observedDecision: "WOULD_DENY",
+        reasonCodes: ["SOFT_ENFORCEMENT_REVIEW_REQUIRED"],
+        metadata: {
+          status: "review_required",
+          holdId: guarded.hold.holdId,
+          blockingFailures: guarded.hold.blockingFailures,
+          criticalFailures: guarded.hold.criticalFailures,
+        },
+      });
       return NextResponse.json(
         {
           status: "REVIEW_REQUIRED",
@@ -875,9 +966,36 @@ export async function POST(request: Request) {
       );
     }
 
+    emitSettlementAuthorityObservation({
+      tenantId,
+      orderId,
+      requestActorId: admin.actorId,
+      requestActorRole: admin.actorRole,
+      observedDecision: "WOULD_ALLOW",
+      reasonCodes: ["SETTLEMENT_TRANSFER_EXECUTED"],
+      metadata: {
+        status: "payout_attempt_executed",
+        settlementMode: (guarded.result as any)?.settlementMode || null,
+        transferId: (guarded.result as any)?.transferId || null,
+        pendingProviderConfirmation: Boolean((guarded.result as any)?.pendingProviderConfirmation),
+      },
+    });
     return NextResponse.json(guarded.result);
   } catch (e: any) {
     const code = String(e?.message || "");
+
+    emitSettlementAuthorityObservation({
+      tenantId,
+      orderId,
+      requestActorId: admin.actorId,
+      requestActorRole: admin.actorRole,
+      observedDecision: "WOULD_DENY",
+      reasonCodes: [code || "WISE_TRANSFER_EXCEPTION"],
+      metadata: {
+        status: "exception",
+        wiseHardenedEnabled,
+      },
+    });
 
     if (!wiseHardenedEnabled) {
       if (code === "WISE_SANDBOX_NOT_CONFIGURED") {
