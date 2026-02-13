@@ -1,9 +1,11 @@
 "use client";
 import { Suspense, useEffect, useState, FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { addOrder, clearCart, getCart, getOrders, getSession, writeStore } from "../../lib/store";
+import Link from "next/link";
+import { addOrder, clearCart, getBuyers, getCart, getOrders, getSession, updateBuyer, writeStore } from "../../lib/store";
 import { recordAudit } from "../../lib/audit";
 import CheckoutEligibilityBanner from "../../components/buyer/CheckoutEligibilityBanner";
+import { deriveBuyerEligibility, type BuyerEligibility } from "../../lib/buyerEligibility";
 
 function computeSnapshotHash(input: string) {
   let hash = 5381;
@@ -12,6 +14,10 @@ function computeSnapshotHash(input: string) {
   }
   return (hash >>> 0).toString(16);
 }
+
+const BUYER_TERMS_VERSION = "v1.0";
+const BUYER_TERMS_ROUTE = "/core-legal-consumer/buyer-terms";
+const STRIPE_HARDENED_CLIENT_MODE = process.env.NEXT_PUBLIC_ENABLE_STRIPE_HARDENED_FLOW === "true";
 
 function CheckoutInner() {
   const router = useRouter();
@@ -23,17 +29,73 @@ function CheckoutInner() {
   const [address, setAddress] = useState({ line1: "", city: "", state: "", postcode: "" });
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsLocked, setTermsLocked] = useState(false);
+  const [eligibility, setEligibility] = useState<BuyerEligibility>("NON_BUYER");
+  const [cartItems, setCartItems] = useState(() => getCart());
 
-  const cartItems = getCart();
   const cartTotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const checkoutLocked = eligibility !== "BUYER_ACTIVE";
 
   useEffect(() => {
-    const session = getSession();
-    if (session?.email) setEmail(session.email);
+    const refreshCheckoutContext = () => {
+      const session = getSession();
+      const liveEligibility = deriveBuyerEligibility();
+      const liveCart = getCart();
+
+      setEligibility(liveEligibility);
+      setCartItems(liveCart);
+
+      if (session?.email) {
+        setEmail(session.email);
+      }
+
+      if (!session || session.role !== "buyer") {
+        setTermsAccepted(false);
+        setTermsLocked(false);
+        return;
+      }
+
+      const buyer = getBuyers().find((entry) => entry.buyerId === session.userId || entry.email === session.email);
+      const accepted = Boolean(buyer?.buyerTermsAccepted);
+      setTermsAccepted(accepted);
+      setTermsLocked(accepted);
+    };
+
+    refreshCheckoutContext();
+    const timer = window.setTimeout(refreshCheckoutContext, 150);
+    return () => window.clearTimeout(timer);
   }, []);
+
+  const persistTermsAcknowledgement = () => {
+    const session = getSession();
+    if (!session || session.role !== "buyer") return false;
+    const buyer = getBuyers().find((entry) => entry.buyerId === session.userId || entry.email === session.email);
+    if (!buyer) return false;
+
+    const acceptedAt = new Date().toISOString();
+    updateBuyer(buyer.email, {
+      buyerTermsAccepted: true,
+      buyerTermsAcceptedAt: acceptedAt,
+      buyerTermsVersion: BUYER_TERMS_VERSION,
+    });
+    setTermsAccepted(true);
+    setTermsLocked(true);
+    recordAudit("BUYER_TERMS_ACKNOWLEDGED", {
+      buyerEmail: buyer.email,
+      version: BUYER_TERMS_VERSION,
+      acceptedAt,
+    });
+    return true;
+  };
 
   // mark order paid when returning from Stripe
   useEffect(() => {
+    if (STRIPE_HARDENED_CLIENT_MODE) {
+      return;
+    }
+
     const markPaid = async () => {
       if (!sessionId || !orderIdParam) return;
       try {
@@ -108,13 +170,30 @@ function CheckoutInner() {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (cartItems.length === 0) return;
+    if (checkoutLocked) {
+      setCheckoutError("Checkout remains locked until your buyer profile is complete.");
+      recordAudit("BUYER_CHECKOUT_BLOCKED", { reason: eligibility });
+      return;
+    }
+    if (!termsAccepted) {
+      setCheckoutError("Buyer Terms acknowledgement is required before checkout.");
+      recordAudit("BUYER_TERMS_ACK_REQUIRED", { reason: "MISSING_BUYER_TERMS_ACKNOWLEDGEMENT" });
+      return;
+    }
+    const liveCartItems = getCart();
+    if (liveCartItems.length === 0) {
+      setCheckoutError("Your cart is empty. Add at least one item before placing an order.");
+      recordAudit("BUYER_ORDER_BLOCKED_EMPTY_CART", {});
+      return;
+    }
+    setCheckoutError("");
+    const liveCartTotal = liveCartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
     const orderId = orderIdParam || crypto.randomUUID();
     const pricingSnapshotHash = computeSnapshotHash(
-      JSON.stringify({ items: cartItems, total: cartTotal, currency: "aud" })
+      JSON.stringify({ items: liveCartItems, total: liveCartTotal, currency: "aud" })
     );
     const supplierIds = Array.from(
-      new Set(cartItems.map((item) => item.supplierId).filter(Boolean) as string[])
+      new Set(liveCartItems.map((item) => item.supplierId).filter(Boolean) as string[])
     );
     addOrder({
       orderId,
@@ -122,8 +201,8 @@ function CheckoutInner() {
       buyerEmail: email,
       shippingAddress: address,
       deliveryNotes: notes,
-      items: cartItems,
-      total: cartTotal,
+      items: liveCartItems,
+      total: liveCartTotal,
       status: "PENDING",
       currency: "aud",
       pricingSnapshotHash,
@@ -134,6 +213,7 @@ function CheckoutInner() {
       supplierIds,
     });
     clearCart();
+    setCartItems([]);
     fetch("/api/orders/notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -244,12 +324,54 @@ function CheckoutInner() {
                 onChange={(e) => setNotes(e.target.value)}
               />
             </div>
+            <div className="space-y-2 rounded-md border px-3 py-3">
+              <label htmlFor="buyer-terms-ack" className="flex items-start gap-2 text-sm">
+                <input
+                  id="buyer-terms-ack"
+                  type="checkbox"
+                  checked={termsAccepted}
+                  disabled={termsLocked}
+                  onChange={(e) => {
+                    if (termsLocked) return;
+                    if (!e.target.checked) {
+                      setTermsAccepted(false);
+                      return;
+                    }
+                    const persisted = persistTermsAcknowledgement();
+                    if (!persisted) {
+                      setCheckoutError("Unable to persist Buyer Terms acknowledgement for this account.");
+                      setTermsAccepted(false);
+                      setTermsLocked(false);
+                      return;
+                    }
+                    setCheckoutError("");
+                  }}
+                />
+                <span>
+                  I acknowledge and accept the{" "}
+                  <Link href={BUYER_TERMS_ROUTE} className="font-semibold text-brand-700 underline">
+                    Buyer Terms
+                  </Link>
+                  .
+                </span>
+              </label>
+              <p className="text-xs text-muted">
+                {termsLocked
+                  ? "Buyer Terms acknowledgement has been recorded for this account."
+                  : "Buyer Terms acknowledgement is required before order submission."}
+              </p>
+            </div>
             <div className="flex items-center justify-between">
               <div className="text-lg font-semibold">Total: ${cartTotal.toFixed(2)}</div>
-              <button type="submit" className="px-4 py-2 bg-brand-700 text-brand-100 rounded-md font-semibold">
+              <button
+                type="submit"
+                disabled={checkoutLocked || !termsAccepted}
+                className="px-4 py-2 bg-brand-700 text-brand-100 rounded-md font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 Place Order
               </button>
             </div>
+            {checkoutError && <p className="text-sm text-amber-700">{checkoutError}</p>}
           </form>
         ) : (
           <div className="bg-surface rounded-2xl shadow-card border p-6 space-y-3">
