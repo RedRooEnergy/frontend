@@ -289,6 +289,8 @@ export async function listAuthorityDelegationEventsByWindow(
     toUtc?: string;
     limit?: number;
     tenantId?: string;
+    grantorActorId?: string;
+    granteeActorId?: string;
     resource?: string;
     action?: string;
   },
@@ -300,6 +302,8 @@ export async function listAuthorityDelegationEventsByWindow(
 
   const query: Record<string, unknown> = {};
   if (params.tenantId) query.tenantId = String(params.tenantId).trim();
+  if (params.grantorActorId) query.grantorActorId = String(params.grantorActorId).trim();
+  if (params.granteeActorId) query.granteeActorId = String(params.granteeActorId).trim();
   if (params.resource) query.resource = String(params.resource).trim();
   if (params.action) query.action = String(params.action).trim();
 

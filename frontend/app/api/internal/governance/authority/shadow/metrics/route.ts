@@ -1,14 +1,25 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
-import { isAuthorityObserveEnabled } from "../../../../../../lib/governance/authority/config";
-import { exportAuthorityEvidencePack } from "../../../../../../lib/governance/authority/export";
+import { runAuthorityShadowMetricsSnapshot } from "../../../../../../../lib/governance/authority/shadowMetrics";
 
-type AuthorityExportRunner = typeof exportAuthorityEvidencePack;
+type MetricsRunner = typeof runAuthorityShadowMetricsSnapshot;
 
-let exportRunner: AuthorityExportRunner = exportAuthorityEvidencePack;
+let metricsRunner: MetricsRunner = runAuthorityShadowMetricsSnapshot;
 
-export function __setAuthorityExportRunnerForTests(runner?: AuthorityExportRunner) {
-  exportRunner = runner || exportAuthorityEvidencePack;
+export function __setAuthorityShadowMetricsRunnerForTests(runner?: MetricsRunner) {
+  metricsRunner = runner || runAuthorityShadowMetricsSnapshot;
+}
+
+function parseBoolean(value: string | undefined) {
+  return String(value || "").trim().toLowerCase() === "true";
+}
+
+function isRouteEnabled(env: NodeJS.ProcessEnv = process.env) {
+  return (
+    parseBoolean(env.ENABLE_GOV04_AUTHORITY_SHADOW_METRICS_ROUTE) &&
+    parseBoolean(env.ENABLE_GOV04_AUTHORITY_SHADOW_METRICS) &&
+    parseBoolean(env.ENABLE_GOV04_AUTHORITY_SHADOW)
+  );
 }
 
 function safeEqualHex(left: string, right: string) {
@@ -19,9 +30,9 @@ function safeEqualHex(left: string, right: string) {
 }
 
 function verifySignature(rawBody: string, headers: Headers) {
-  const secret = String(process.env.GOV04_AUTHORITY_EXPORT_JOB_SECRET || "").trim();
+  const secret = String(process.env.GOV04_AUTHORITY_SHADOW_METRICS_JOB_SECRET || "").trim();
   if (!secret) {
-    throw new Error("GOV04_AUTHORITY_EXPORT_JOB_SECRET_NOT_CONFIGURED");
+    throw new Error("GOV04_AUTHORITY_SHADOW_METRICS_JOB_SECRET_NOT_CONFIGURED");
   }
 
   const signature = String(headers.get("x-rre-job-signature") || "").trim();
@@ -29,20 +40,21 @@ function verifySignature(rawBody: string, headers: Headers) {
   const timestamp = Number(timestampRaw);
 
   if (!signature || !Number.isFinite(timestamp) || timestamp <= 0) {
-    throw new Error("GOV04_AUTHORITY_EXPORT_SIGNATURE_HEADER_INVALID");
+    throw new Error("GOV04_AUTHORITY_SHADOW_METRICS_SIGNATURE_HEADER_INVALID");
   }
 
   const nowUnix = Math.floor(Date.now() / 1000);
   if (Math.abs(nowUnix - Math.floor(timestamp)) > 300) {
-    throw new Error("GOV04_AUTHORITY_EXPORT_SIGNATURE_STALE");
+    throw new Error("GOV04_AUTHORITY_SHADOW_METRICS_SIGNATURE_STALE");
   }
 
   const expected = crypto
     .createHmac("sha256", secret)
     .update(`${Math.floor(timestamp)}.${rawBody}`, "utf8")
     .digest("hex");
+
   if (!safeEqualHex(signature, expected)) {
-    throw new Error("GOV04_AUTHORITY_EXPORT_SIGNATURE_INVALID");
+    throw new Error("GOV04_AUTHORITY_SHADOW_METRICS_SIGNATURE_INVALID");
   }
 }
 
@@ -57,8 +69,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Method not allowed" }, { status: 405, headers: { allow: "POST" } });
   }
 
-  if (!isAuthorityObserveEnabled(process.env)) {
-    return NextResponse.json({ error: "Authority observe mode disabled" }, { status: 404 });
+  if (!isRouteEnabled(process.env)) {
+    return NextResponse.json({ error: "Authority shadow metrics route disabled" }, { status: 404 });
   }
 
   const rawBody = await request.text();
@@ -66,11 +78,11 @@ export async function POST(request: Request) {
   try {
     verifySignature(rawBody, request.headers);
   } catch (error: any) {
-    const code = String(error?.message || "GOV04_AUTHORITY_EXPORT_SIGNATURE_FAILED");
-    if (code === "GOV04_AUTHORITY_EXPORT_JOB_SECRET_NOT_CONFIGURED") {
-      return NextResponse.json({ error: "Authority export secret not configured", code }, { status: 500 });
+    const code = String(error?.message || "GOV04_AUTHORITY_SHADOW_METRICS_SIGNATURE_FAILED");
+    if (code === "GOV04_AUTHORITY_SHADOW_METRICS_JOB_SECRET_NOT_CONFIGURED") {
+      return NextResponse.json({ error: "Authority shadow metrics secret not configured", code }, { status: 500 });
     }
-    return NextResponse.json({ error: "Authority export signature verification failed", code }, { status: 401 });
+    return NextResponse.json({ error: "Authority shadow metrics signature verification failed", code }, { status: 401 });
   }
 
   let payload: {
@@ -80,8 +92,6 @@ export async function POST(request: Request) {
     limit?: number;
     tenantId?: string;
     policyId?: string;
-    schemaVersion?: "v1" | "v2";
-    includeShadowArtifacts?: boolean;
   };
 
   try {
@@ -91,23 +101,21 @@ export async function POST(request: Request) {
   }
 
   try {
-    const report = await exportRunner({
+    const report = await metricsRunner({
       source: parseSource(payload?.source),
       fromUtc: payload?.fromUtc,
       toUtc: payload?.toUtc,
       limit: payload?.limit,
       tenantId: payload?.tenantId,
       policyId: payload?.policyId,
-      schemaVersion: payload?.schemaVersion,
-      includeShadowArtifacts: payload?.includeShadowArtifacts,
     });
 
     return NextResponse.json(report);
   } catch (error: any) {
     return NextResponse.json(
       {
-        error: "Authority export failed",
-        code: String(error?.message || "GOV04_AUTHORITY_EXPORT_FAILED"),
+        error: "Authority shadow metrics snapshot failed",
+        code: String(error?.message || "GOV04_AUTHORITY_SHADOW_METRICS_FAILED"),
       },
       { status: 500 }
     );

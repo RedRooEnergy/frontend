@@ -1,14 +1,12 @@
 import crypto from "crypto";
 import fs from "fs/promises";
-import { exportAuthorityEvidencePack } from "../../lib/governance/authority/export";
+import { runAuthorityShadowMetricsSnapshot } from "../../lib/governance/authority/shadowMetrics";
 
 type CliOptions = {
   mode: "local" | "http";
   source: "api_internal" | "cli_local" | "cli_http";
   url?: string;
   secret?: string;
-  schemaVersion?: "v1" | "v2";
-  includeShadowArtifacts?: boolean;
   fromUtc?: string;
   toUtc?: string;
   limit?: number;
@@ -35,11 +33,6 @@ function parseCliOptions(argv: string[]): CliOptions {
       ? "cli_http"
       : "cli_local";
 
-  const schemaRaw = String(parseArgValue(argv, "--schemaVersion") || "").trim().toLowerCase();
-  const schemaVersion: "v1" | "v2" = schemaRaw === "v1" ? "v1" : "v2";
-  const includeShadowRaw = String(parseArgValue(argv, "--includeShadowArtifacts") || "").trim().toLowerCase();
-  const includeShadowArtifacts = includeShadowRaw ? includeShadowRaw === "true" : schemaVersion === "v2";
-
   const rawLimit = parseArgValue(argv, "--limit");
   const parsedLimit = rawLimit ? Number(rawLimit) : undefined;
 
@@ -47,9 +40,7 @@ function parseCliOptions(argv: string[]): CliOptions {
     mode: mode === "http" ? "http" : "local",
     source,
     url: parseArgValue(argv, "--url"),
-    secret: parseArgValue(argv, "--secret") || process.env.GOV04_AUTHORITY_EXPORT_JOB_SECRET,
-    schemaVersion,
-    includeShadowArtifacts,
+    secret: parseArgValue(argv, "--secret") || process.env.GOV04_AUTHORITY_SHADOW_METRICS_JOB_SECRET,
     fromUtc: parseArgValue(argv, "--from"),
     toUtc: parseArgValue(argv, "--to"),
     limit: Number.isFinite(parsedLimit) ? parsedLimit : undefined,
@@ -64,10 +55,8 @@ function signPayload(secret: string, timestamp: number, rawBody: string) {
 }
 
 async function runLocal(options: CliOptions) {
-  return exportAuthorityEvidencePack({
+  return runAuthorityShadowMetricsSnapshot({
     source: options.source,
-    schemaVersion: options.schemaVersion,
-    includeShadowArtifacts: options.includeShadowArtifacts,
     fromUtc: options.fromUtc,
     toUtc: options.toUtc,
     limit: options.limit,
@@ -79,18 +68,16 @@ async function runLocal(options: CliOptions) {
 async function runHttp(options: CliOptions) {
   const url = String(options.url || "").trim();
   if (!url) {
-    throw new Error("authority export cli requires --url for http mode");
+    throw new Error("authority shadow metrics cli requires --url for http mode");
   }
 
   const secret = String(options.secret || "").trim();
   if (!secret) {
-    throw new Error("authority export cli requires --secret or GOV04_AUTHORITY_EXPORT_JOB_SECRET for http mode");
+    throw new Error("authority shadow metrics cli requires --secret or GOV04_AUTHORITY_SHADOW_METRICS_JOB_SECRET");
   }
 
   const payload = {
     source: options.source,
-    schemaVersion: options.schemaVersion,
-    includeShadowArtifacts: options.includeShadowArtifacts,
     fromUtc: options.fromUtc,
     toUtc: options.toUtc,
     limit: options.limit,
@@ -114,13 +101,13 @@ async function runHttp(options: CliOptions) {
 
   const text = await response.text();
   if (!response.ok) {
-    throw new Error(`authority export http failed (${response.status}): ${text}`);
+    throw new Error(`authority shadow metrics http failed (${response.status}): ${text}`);
   }
 
   try {
     return JSON.parse(text);
   } catch {
-    throw new Error("authority export http returned non-json response");
+    throw new Error("authority shadow metrics http returned non-json response");
   }
 }
 

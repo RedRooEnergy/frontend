@@ -116,6 +116,8 @@ async function runExport() {
       toUtc: "2026-02-13T13:00:00.000Z",
       limit: 100,
       tenantId: "TENANT-1",
+      schemaVersion: "v2",
+      includeShadowArtifacts: true,
     },
     {
       now: () => new Date("2026-02-13T14:00:00.000Z"),
@@ -123,6 +125,33 @@ async function runExport() {
       listPolicyLifecycleEvents: async () => sampleLifecycleEvents(),
       listDelegationEvents: async () => sampleDelegations(),
       listApprovalDecisions: async () => sampleDecisions(),
+      listShadowDecisions: async () => [],
+      listShadowOverrideCases: async () => [],
+      listShadowOverrideCaseEvents: async () => [],
+    }
+  );
+}
+
+async function runExportV1Compatibility() {
+  return exportAuthorityEvidencePack(
+    {
+      source: "cli_local",
+      fromUtc: "2026-02-13T12:00:00.000Z",
+      toUtc: "2026-02-13T13:00:00.000Z",
+      limit: 100,
+      tenantId: "TENANT-1",
+      schemaVersion: "v1",
+      includeShadowArtifacts: false,
+    },
+    {
+      now: () => new Date("2026-02-13T14:00:00.000Z"),
+      listPolicyVersions: async () => samplePolicyVersions(),
+      listPolicyLifecycleEvents: async () => sampleLifecycleEvents(),
+      listDelegationEvents: async () => sampleDelegations(),
+      listApprovalDecisions: async () => sampleDecisions(),
+      listShadowDecisions: async () => [],
+      listShadowOverrideCases: async () => [],
+      listShadowOverrideCaseEvents: async () => [],
     }
   );
 }
@@ -141,10 +170,20 @@ async function testDeterministicHashingAndChainIntegrity() {
   }
   const expectedRoot = sha256Hex(`${chain}:${first.deterministicHashSha256}`);
   assert(first.exportRootHash === expectedRoot, "Expected export root hash to match chain integrity model");
+  assert(first.reportVersion === "gov04-authority-export.v2", "Expected v2 export report version");
+  assert((first as any).schemaVersion === "v2", "Expected explicit schemaVersion");
+  assert((first as any).authorityPhase === "shadow", "Expected authority phase marker");
+}
+
+async function testV1CompatibilityPath() {
+  const report = await runExportV1Compatibility();
+  assert(report.reportVersion === "gov04-authority-export.v1", "Expected v1 compatibility report version");
+  assert(!(report as any).shadowDecisions, "Expected no shadow artifacts in v1 output");
 }
 
 async function run() {
   await testDeterministicHashingAndChainIntegrity();
+  await testV1CompatibilityPath();
 }
 
 run();
