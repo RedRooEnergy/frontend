@@ -68,6 +68,10 @@ export async function ensurePaymentProviderEventIndexes(
         { provider: 1, receivedAt: -1 },
         { name: "payment_provider_events_provider_receivedAt" }
       );
+      await collection.createIndex(
+        { provider: 1, transferId: 1, createdAt: -1 },
+        { name: "payment_provider_events_provider_transfer_createdAt" }
+      );
     })();
   }
 

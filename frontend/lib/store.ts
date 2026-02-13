@@ -668,6 +668,9 @@ export interface BuyerRecord {
   password?: string;
   buyerType?: "Individual" | "SME" | "Enterprise" | "Government";
   businessVerified?: boolean;
+  buyerTermsAccepted?: boolean;
+  buyerTermsAcceptedAt?: string;
+  buyerTermsVersion?: string;
   savedProjects?: string[];
   notificationPrefs?: {
     orderUpdates: boolean;
@@ -797,6 +800,7 @@ export interface OrderRecord {
   deliveredAt?: string;
   stripeSessionId?: string;
   stripePaymentIntentId?: string;
+  wiseTransferId?: string;
   currency?: string;
   escrowStatus?: "HELD" | "RELEASED" | "SETTLED";
   pricingSnapshotHash?: string;
