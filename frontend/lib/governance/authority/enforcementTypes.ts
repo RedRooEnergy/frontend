@@ -25,6 +25,7 @@ export type AuthorityEnforcementDecisionRecord = {
   enforcementMode: true;
   enforcementVersion: typeof AUTHORITY_ENFORCEMENT_VERSION;
   enforcementResult: AuthorityEnforcementResult;
+  shadowVsEnforcementDivergence: boolean;
   responseMutationCode?: string | null;
   deterministicHashSha256: string;
   canonicalEnforcementJson: string;

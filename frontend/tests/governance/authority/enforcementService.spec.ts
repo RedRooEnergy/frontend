@@ -165,6 +165,69 @@ async function testStrictModeBlocksOnPersistFailure() {
   );
 }
 
+async function testDivergencePersistsMetricArtifactInFailOpenMode() {
+  const input = makeInput();
+  const firstEval = makeEvaluation({
+    wouldDecision: "WOULD_ALLOW",
+    wouldBlock: false,
+    reasonCodes: ["ALLOW"],
+  });
+  const secondEval = makeEvaluation({
+    wouldDecision: "WOULD_BLOCK",
+    wouldBlock: true,
+    reasonCodes: ["BLOCK"],
+  });
+
+  const shadowDecisionHash = computeAuthorityShadowDecisionHash({
+    evaluationInput: input,
+    evaluationResult: firstEval,
+  });
+
+  let evaluateCount = 0;
+  let divergencePersisted = false;
+
+  const deps: Partial<AuthorityEnforcementServiceDependencies> = {
+    resolvePreconditions: () => ({
+      enabled: true,
+      killSwitch: false,
+      strictMode: false,
+      bypassed: false,
+      bypassReason: null,
+    }),
+    evaluateShadow: async () => {
+      evaluateCount += 1;
+      return evaluateCount === 1 ? firstEval : secondEval;
+    },
+    appendShadowDecision: async () => ({
+      created: true,
+      record: {
+        decisionId: "shadow-1",
+        decisionHashSha256: shadowDecisionHash,
+      } as any,
+    }),
+    appendEnforcementDecision: async (appendInput) => {
+      if (appendInput.shadowVsEnforcementDivergence === true) {
+        divergencePersisted = true;
+      }
+      return {
+        created: true,
+        record: {
+          enforcementDecisionId: "enf-divergence-1",
+          enforcementResult: appendInput.enforcementResult,
+          shadowVsEnforcementDivergence: appendInput.shadowVsEnforcementDivergence === true,
+        } as any,
+      };
+    },
+  };
+
+  const result = await evaluateAuthorityEnforcementDecision(input, deps);
+  assert(result.enforcement.applied === false, "Expected fail-open on non-strict divergence");
+  assert(result.enforcement.result === "ALLOW", "Expected allow result on non-strict divergence");
+  assert(result.enforcement.divergenceDetected === true, "Expected divergence flag");
+  assert(result.enforcement.created === true, "Expected divergence artifact persisted");
+  assert(divergencePersisted, "Expected divergence marker in persisted artifact");
+}
+
 async function testPreconditionResolverOrder() {
   const env = {
     ENABLE_GOV04_AUTHORITY_ENFORCEMENT: "true",
@@ -195,6 +258,7 @@ async function run() {
   await testBypassStillPersistsShadow();
   await testEnforcedAllowWritesArtifact();
   await testStrictModeBlocksOnPersistFailure();
+  await testDivergencePersistsMetricArtifactInFailOpenMode();
   await testPreconditionResolverOrder();
 }
 

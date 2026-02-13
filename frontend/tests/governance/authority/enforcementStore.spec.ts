@@ -159,6 +159,7 @@ async function testAppendIsIdempotent() {
   assert(first.created === true, "Expected first insert");
   assert(second.created === false, "Expected idempotent dedupe");
   assert(second.record.shadowDecisionId === "shadow-1", "Expected shadow decision linkage");
+  assert(second.record.shadowVsEnforcementDivergence === false, "Expected non-divergence default");
 }
 
 async function testMissingShadowRejected() {
@@ -195,12 +196,29 @@ async function testListByWindow() {
 
   assert(listed.length === 1, "Expected one enforcement decision");
   assert(listed[0].enforcementMode === true, "Expected enforcement mode true");
+  assert(listed[0].shadowVsEnforcementDivergence === false, "Expected divergence counter field");
+}
+
+async function testDivergenceFlagPersists() {
+  const { deps } = createDeps();
+  const created = await appendAuthorityEnforcementDecision(
+    {
+      ...buildInput(),
+      enforcementResult: "BLOCK",
+      shadowVsEnforcementDivergence: true,
+      responseMutationCode: "HTTP_403_AUTHZ_BLOCK_STRICT_DUAL_WRITE_MISMATCH",
+    },
+    deps
+  );
+
+  assert(created.record.shadowVsEnforcementDivergence === true, "Expected divergence flag persisted");
 }
 
 async function run() {
   await testAppendIsIdempotent();
   await testMissingShadowRejected();
   await testListByWindow();
+  await testDivergenceFlagPersists();
 }
 
 run();

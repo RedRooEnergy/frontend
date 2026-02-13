@@ -147,6 +147,9 @@ export type AuthorityShadowMetricsReport = {
     decisionsTotal: number;
     wouldBlockTotal: number;
     policyConflictTotal: number;
+    enforcementDecisionsTotal: number;
+    shadowVsEnforcementDivergenceTotal: number;
+    shadowVsEnforcementDivergenceRate: number;
     casesOpenedTotal: number;
     openCaseBacklog: number;
     deterministicMismatchTotal: number;

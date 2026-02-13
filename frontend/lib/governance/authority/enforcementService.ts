@@ -57,6 +57,7 @@ export type AuthorityEnforcementServiceDependencies = {
       shadowDecisionHashSha256: string;
       decisionHashSha256: string;
       enforcementResult: "ALLOW" | "BLOCK";
+      shadowVsEnforcementDivergence?: boolean;
       responseMutationCode?: string | null;
       decidedAtUtc: string;
       metadata?: Record<string, unknown>;
@@ -390,39 +391,99 @@ export async function evaluateAuthorityEnforcementDecision(
       enforcementEvaluationHashSha256: enforcementEvalDecisionHash,
     });
 
-    if (preconditions.strictMode) {
+    const mismatchResult = preconditions.strictMode ? "BLOCK" : "ALLOW";
+    const mismatchResponseMutationCode = preconditions.strictMode
+      ? "HTTP_403_AUTHZ_BLOCK_STRICT_DUAL_WRITE_MISMATCH"
+      : null;
+    try {
+      const appended = await deps.appendEnforcementDecision({
+        tenantId: input.tenantId,
+        policyId: shadowEvaluation.policyId,
+        policyVersionHash: shadowEvaluation.policyVersionHash,
+        subjectActorId: input.subjectActorId,
+        requestActorId: input.requestActorId,
+        requestActorRole: input.requestActorRole,
+        approverActorId: input.approverActorId || null,
+        approverActorRole: input.approverActorRole || null,
+        delegationId: input.delegationId || null,
+        resource: input.resource,
+        action: input.action,
+        shadowDecisionId: shadow.decision.decisionId,
+        shadowDecisionHashSha256: shadowDecisionHash,
+        decisionHashSha256: shadowDecisionHash,
+        enforcementResult: mismatchResult,
+        shadowVsEnforcementDivergence: true,
+        responseMutationCode: mismatchResponseMutationCode,
+        decidedAtUtc,
+        metadata: {
+          shadowEvaluatorVersion: shadowEvaluation.shadowEvaluatorVersion,
+          enforcementEvaluationVersion: enforcementEvaluation.shadowEvaluatorVersion,
+          shadowEvaluationHashSha256: shadowEvalDecisionHash,
+          enforcementEvaluationHashSha256: enforcementEvalDecisionHash,
+        },
+      });
+
       return {
         preconditions,
         shadow,
         enforcement: {
-          applied: true,
-          result: "BLOCK",
+          applied: preconditions.strictMode,
+          result: mismatchResult,
+          created: appended.created,
+          decision: appended.record,
+          responseMutationCode: mismatchResponseMutationCode,
+          strictMode: preconditions.strictMode,
+          divergenceDetected: true,
+          bypassReason: null,
+          failureCode: "AUTHORITY_ENFORCEMENT_DUAL_WRITE_MISMATCH",
+        },
+      };
+    } catch (error: any) {
+      deps.logger.error("gov04_authority_enforcement_divergence_persist_failed", {
+        tenantId: String(input.tenantId || "").trim() || null,
+        policyId: input.policyId,
+        resource: input.resource,
+        action: input.action,
+        requestActorId: input.requestActorId,
+        shadowDecisionId: shadow.decision.decisionId,
+        errorCode: String(error?.code || error?.message || "AUTHORITY_ENFORCEMENT_DIVERGENCE_PERSIST_FAILED"),
+        errorMessage: String(error?.message || "divergence persist failed"),
+      });
+
+      if (preconditions.strictMode) {
+        return {
+          preconditions,
+          shadow,
+          enforcement: {
+            applied: true,
+            result: "BLOCK",
+            created: false,
+            decision: null,
+            responseMutationCode: "HTTP_403_AUTHZ_BLOCK_STRICT_DUAL_WRITE_MISMATCH",
+            strictMode: true,
+            divergenceDetected: true,
+            bypassReason: null,
+            failureCode: "AUTHORITY_ENFORCEMENT_DUAL_WRITE_MISMATCH",
+          },
+        };
+      }
+
+      return {
+        preconditions,
+        shadow,
+        enforcement: {
+          applied: false,
+          result: "ALLOW",
           created: false,
           decision: null,
-          responseMutationCode: "HTTP_403_AUTHZ_BLOCK_STRICT_DUAL_WRITE_MISMATCH",
-          strictMode: true,
+          responseMutationCode: null,
+          strictMode: false,
           divergenceDetected: true,
           bypassReason: null,
           failureCode: "AUTHORITY_ENFORCEMENT_DUAL_WRITE_MISMATCH",
         },
       };
     }
-
-    return {
-      preconditions,
-      shadow,
-      enforcement: {
-        applied: false,
-        result: "ALLOW",
-        created: false,
-        decision: null,
-        responseMutationCode: null,
-        strictMode: false,
-        divergenceDetected: true,
-        bypassReason: null,
-        failureCode: "AUTHORITY_ENFORCEMENT_DUAL_WRITE_MISMATCH",
-      },
-    };
   }
 
   const enforcementResult = enforcementEvaluation.wouldBlock ? "BLOCK" : "ALLOW";
@@ -446,6 +507,7 @@ export async function evaluateAuthorityEnforcementDecision(
       shadowDecisionHashSha256: shadowDecisionHash,
       decisionHashSha256: enforcementEvalDecisionHash,
       enforcementResult,
+      shadowVsEnforcementDivergence: false,
       responseMutationCode,
       decidedAtUtc,
       metadata: {

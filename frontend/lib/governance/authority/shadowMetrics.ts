@@ -10,6 +10,10 @@ import {
   type AuthorityShadowDecision,
   type AuthorityShadowMetricsReport,
 } from "./shadowTypes";
+import {
+  listAuthorityEnforcementDecisionsByWindow,
+  type AuthorityEnforcementStoreDependencies,
+} from "./enforcementStore";
 
 type MetricsSource = "api_internal" | "cli_local" | "cli_http";
 
@@ -36,12 +40,23 @@ export type AuthorityShadowMetricsDependencies = {
     },
     dependencyOverrides?: Partial<AuthorityShadowCaseStoreDependencies>
   ) => Promise<any[]>;
+  listEnforcementDecisions: (
+    params: {
+      fromUtc?: string;
+      toUtc?: string;
+      limit?: number;
+      tenantId?: string;
+      policyId?: string;
+    },
+    dependencyOverrides?: Partial<AuthorityEnforcementStoreDependencies>
+  ) => Promise<any[]>;
 };
 
 const defaultDependencies: AuthorityShadowMetricsDependencies = {
   now: () => new Date(),
   listDecisions: (params, deps) => listAuthorityShadowDecisionsByWindow(params, deps),
   listCases: (params, deps) => listAuthorityShadowOverrideCasesByWindow(params, deps),
+  listEnforcementDecisions: (params, deps) => listAuthorityEnforcementDecisionsByWindow(params, deps),
 };
 
 function resolveDependencies(
@@ -130,6 +145,13 @@ export async function runAuthorityShadowMetricsSnapshot(
     tenantId: filters.tenantId,
     policyId: filters.policyId,
   });
+  const enforcementDecisions = await deps.listEnforcementDecisions({
+    fromUtc: filters.fromUtc,
+    toUtc: filters.toUtc,
+    limit: filters.limit,
+    tenantId: filters.tenantId,
+    policyId: filters.policyId,
+  });
 
   const wouldDecisionCounts = new Map<string, number>();
   const conflictCounts = new Map<string, number>();
@@ -137,6 +159,7 @@ export async function runAuthorityShadowMetricsSnapshot(
   let wouldBlockTotal = 0;
   let policyConflictTotal = 0;
   let deterministicMismatchTotal = 0;
+  let shadowVsEnforcementDivergenceTotal = 0;
 
   for (const decision of decisions) {
     const wouldDecision = String(decision.wouldDecision || "WOULD_BLOCK") as AuthorityShadowDecision;
@@ -160,6 +183,12 @@ export async function runAuthorityShadowMetricsSnapshot(
     }
   }
 
+  for (const enforcementDecision of enforcementDecisions) {
+    if (enforcementDecision?.shadowVsEnforcementDivergence === true) {
+      shadowVsEnforcementDivergenceTotal += 1;
+    }
+  }
+
   const casesOpenedTotal = cases.length;
   const openCaseBacklog = cases.filter((entry) => entry.status === "OPEN").length;
 
@@ -178,6 +207,12 @@ export async function runAuthorityShadowMetricsSnapshot(
     decisionsTotal: decisions.length,
     wouldBlockTotal,
     policyConflictTotal,
+    enforcementDecisionsTotal: enforcementDecisions.length,
+    shadowVsEnforcementDivergenceTotal,
+    shadowVsEnforcementDivergenceRate:
+      enforcementDecisions.length > 0
+        ? Number((shadowVsEnforcementDivergenceTotal / enforcementDecisions.length).toFixed(6))
+        : 0,
     casesOpenedTotal,
     openCaseBacklog,
     deterministicMismatchTotal,

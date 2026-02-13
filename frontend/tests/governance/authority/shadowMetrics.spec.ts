@@ -30,11 +30,16 @@ async function testMetricsDeterminismAndMismatch() {
     { caseId: "case-1", status: "OPEN" },
     { caseId: "case-2", status: "CLOSED" },
   ];
+  const enforcementDecisions = [
+    { enforcementDecisionId: "ed-1", shadowVsEnforcementDivergence: false },
+    { enforcementDecisionId: "ed-2", shadowVsEnforcementDivergence: true },
+  ];
 
   const deps = {
     now: () => new Date("2026-02-13T12:00:00.000Z"),
     listDecisions: async () => decisions as any,
     listCases: async () => cases as any,
+    listEnforcementDecisions: async () => enforcementDecisions as any,
   };
 
   const first = await runAuthorityShadowMetricsSnapshot(
@@ -60,6 +65,9 @@ async function testMetricsDeterminismAndMismatch() {
   assert(first.summary.wouldBlockTotal === 1, "Expected would-block count");
   assert(first.summary.casesOpenedTotal === 2, "Expected case count");
   assert(first.summary.openCaseBacklog === 1, "Expected open-case backlog count");
+  assert(first.summary.enforcementDecisionsTotal === 2, "Expected enforcement decision count");
+  assert(first.summary.shadowVsEnforcementDivergenceTotal === 1, "Expected divergence count");
+  assert(first.summary.shadowVsEnforcementDivergenceRate === 0.5, "Expected divergence rate");
   assert(first.summary.deterministicMismatchTotal >= 1, "Expected mismatch detection");
   assert(first.deterministicHashSha256 === second.deterministicHashSha256, "Expected deterministic hash stability");
 }

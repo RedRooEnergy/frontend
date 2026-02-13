@@ -97,6 +97,10 @@ export async function ensureAuthorityEnforcementDecisionIndexes(
         { name: "gov_authority_enforcement_result_decidedAt" }
       );
       await collection.createIndex(
+        { shadowVsEnforcementDivergence: 1, decidedAtUtc: -1 },
+        { name: "gov_authority_enforcement_divergence_decidedAt" }
+      );
+      await collection.createIndex(
         { policyId: 1, policyVersionHash: 1, decidedAtUtc: -1 },
         { name: "gov_authority_enforcement_policy_decidedAt" }
       );
@@ -122,6 +126,7 @@ function buildCanonicalEnforcementPayload(input: {
   shadowDecisionHashSha256: string;
   decisionHashSha256: string;
   enforcementResult: AuthorityEnforcementResult;
+  shadowVsEnforcementDivergence?: boolean;
   responseMutationCode?: string | null;
   decidedAtUtc: string;
   metadata?: Record<string, unknown>;
@@ -144,6 +149,7 @@ function buildCanonicalEnforcementPayload(input: {
     enforcementMode: true,
     enforcementVersion: AUTHORITY_ENFORCEMENT_VERSION,
     enforcementResult: input.enforcementResult,
+    shadowVsEnforcementDivergence: input.shadowVsEnforcementDivergence === true,
     responseMutationCode: String(input.responseMutationCode || "").trim() || null,
     decidedAtUtc: String(input.decidedAtUtc || "").trim(),
     metadata: input.metadata || null,
@@ -166,6 +172,7 @@ export type AppendAuthorityEnforcementDecisionInput = {
   shadowDecisionHashSha256: string;
   decisionHashSha256: string;
   enforcementResult: AuthorityEnforcementResult;
+  shadowVsEnforcementDivergence?: boolean;
   responseMutationCode?: string | null;
   decidedAtUtc: string;
   metadata?: Record<string, unknown>;
@@ -259,6 +266,7 @@ export async function appendAuthorityEnforcementDecision(
     enforcementMode: true,
     enforcementVersion: AUTHORITY_ENFORCEMENT_VERSION,
     enforcementResult: canonicalPayload.enforcementResult,
+    shadowVsEnforcementDivergence: canonicalPayload.shadowVsEnforcementDivergence,
     responseMutationCode: canonicalPayload.responseMutationCode,
     deterministicHashSha256,
     canonicalEnforcementJson,
