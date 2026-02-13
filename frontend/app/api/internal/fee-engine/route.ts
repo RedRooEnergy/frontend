@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionFromCookieHeader } from "../../../../lib/auth/sessionCookie";
 import { emitFeeLedgerEvent } from "../../../../lib/feeLedgerStore";
 import { emitAuthorityObserveDecision } from "../../../../lib/governance/authority/observe";
+import { evaluateAuthorityEnforcementDecision } from "../../../../lib/governance/authority/enforcementService";
 
 type TriggerBody =
   | {
@@ -61,6 +62,20 @@ function emitFeeEngineAuthorityObservation(input: {
       ...(input.metadata || {}),
     },
   });
+}
+
+type FeeLedgerEmitter = typeof emitFeeLedgerEvent;
+type AuthorityEnforcementEvaluator = typeof evaluateAuthorityEnforcementDecision;
+
+let feeLedgerEmitter: FeeLedgerEmitter = emitFeeLedgerEvent;
+let authorityEnforcementEvaluator: AuthorityEnforcementEvaluator = evaluateAuthorityEnforcementDecision;
+
+export function __setFeeLedgerEmitterForTests(emitter?: FeeLedgerEmitter) {
+  feeLedgerEmitter = emitter || emitFeeLedgerEvent;
+}
+
+export function __setAuthorityEnforcementEvaluatorForTests(evaluator?: AuthorityEnforcementEvaluator) {
+  authorityEnforcementEvaluator = evaluator || evaluateAuthorityEnforcementDecision;
 }
 
 export async function POST(request: Request) {
@@ -128,7 +143,7 @@ export async function POST(request: Request) {
         });
         return NextResponse.json({ error: "Missing workflow payload" }, { status: 400 });
       }
-      const event = await emitFeeLedgerEvent({
+      const event = await feeLedgerEmitter({
         triggerEvent: "WF_CERTIFIED",
         eventType: "SUPPLIER_CERTIFICATION_FEE",
         actorRole: "supplier",
@@ -187,7 +202,65 @@ export async function POST(request: Request) {
         });
         return NextResponse.json({ error: "Missing product payload" }, { status: 400 });
       }
-      const event = await emitFeeLedgerEvent({
+
+      const enforcementPolicyVersionHash =
+        String(process.env.GOV04_AUTH_FEE_ENGINE_PRODUCT_APPROVED_POLICY_VERSION_HASH || "").trim().toLowerCase() ||
+        String(process.env.GOV04_AUTHORITY_OBSERVE_POLICY_VERSION_HASH || "").trim().toLowerCase() ||
+        undefined;
+
+      const enforcement = await authorityEnforcementEvaluator({
+        tenantId: null,
+        policyId: "gov04.authority.catalog.product_approval.enforce.v1",
+        policyVersionHash: enforcementPolicyVersionHash,
+        subjectActorId: body.productId,
+        requestActorId: session.userId,
+        requestActorRole: session.role,
+        approverActorId: session.userId,
+        approverActorRole: session.role,
+        resource: "catalog.product",
+        action: "fee_ledger.emit.product_approved",
+        decidedAtUtc: new Date().toISOString(),
+        metadata: {
+          route: "api.internal.fee-engine",
+          triggerEvent: body.triggerEvent,
+          productId: body.productId,
+          servicePartnerId: body.servicePartnerId,
+        },
+      });
+
+      if (enforcement.enforcement.divergenceDetected) {
+        console.error("gov04_authority_enforcement_dual_write_divergence_detected", {
+          policyId: "gov04.authority.catalog.product_approval.enforce.v1",
+          productId: body.productId,
+          requestActorId: session.userId,
+          shadowDecisionId: enforcement.shadow?.decision.decisionId || null,
+        });
+      }
+
+      if (enforcement.enforcement.failureCode) {
+        console.error("gov04_authority_enforcement_internal_error", {
+          policyId: "gov04.authority.catalog.product_approval.enforce.v1",
+          productId: body.productId,
+          requestActorId: session.userId,
+          failureCode: enforcement.enforcement.failureCode,
+          strictMode: enforcement.enforcement.strictMode,
+        });
+      }
+
+      if (enforcement.enforcement.applied && enforcement.enforcement.result === "BLOCK") {
+        return NextResponse.json(
+          {
+            error: "Forbidden",
+            code: enforcement.enforcement.failureCode || "AUTHORITY_ENFORCEMENT_BLOCKED",
+            enforcementDecisionId: enforcement.enforcement.decision?.enforcementDecisionId || null,
+            shadowDecisionId: enforcement.shadow?.decision.decisionId || null,
+            responseMutationCode: enforcement.enforcement.responseMutationCode || null,
+          },
+          { status: 403 }
+        );
+      }
+
+      const event = await feeLedgerEmitter({
         triggerEvent: "PRODUCT_APPROVED",
         eventType: "PARTNER_LISTING_APPROVAL_FEE",
         actorRole: "service_partner",
@@ -246,7 +319,7 @@ export async function POST(request: Request) {
         });
         return NextResponse.json({ error: "Missing order payload" }, { status: 400 });
       }
-      const event = await emitFeeLedgerEvent({
+      const event = await feeLedgerEmitter({
         triggerEvent: "ORDER_PAID",
         eventType: "INSTALLER_ORDER_SERVICE_FEE",
         actorRole: "installer",

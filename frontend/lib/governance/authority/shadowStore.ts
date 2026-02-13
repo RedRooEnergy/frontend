@@ -150,29 +150,10 @@ export async function appendAuthorityShadowDecision(
     policyVersionHash,
   });
 
-  const canonicalDecisionPayload = {
-    tenantId,
-    policyId,
-    policyVersionHash,
-    policyLifecycleState: evaluation.policyLifecycleState,
-    subjectActorId,
-    requestActorId,
-    requestActorRole: evaluationInput.requestActorRole,
-    approverActorId: String(evaluationInput.approverActorId || "").trim() || null,
-    approverActorRole: evaluationInput.approverActorRole || null,
-    delegationId: String(evaluationInput.delegationId || "").trim() || null,
-    resource,
-    action,
-    wouldDecision: evaluation.wouldDecision,
-    wouldBlock: evaluation.wouldBlock,
-    reasonCodes: evaluation.reasonCodes,
-    policyConflictCode: evaluation.policyConflictCode,
-    delegationEvaluationResult: evaluation.delegationEvaluationResult,
-    approvalRequirementEvaluation: evaluation.approvalRequirementEvaluation,
-    shadowEvaluatorVersion: evaluation.shadowEvaluatorVersion,
-    decidedAtUtc,
-    metadata: evaluationInput.metadata || null,
-  };
+  const canonicalDecisionPayload = buildAuthorityShadowDecisionCanonicalPayload({
+    evaluationInput,
+    evaluationResult: evaluation,
+  });
 
   const canonicalDecisionJson = canonicalJson(canonicalDecisionPayload);
   const decisionHashSha256 = canonicalPayloadHash(canonicalDecisionPayload);
@@ -237,6 +218,52 @@ export async function appendAuthorityShadowDecision(
   }
 }
 
+export function buildAuthorityShadowDecisionCanonicalPayload(input: {
+  evaluationInput: AuthorityShadowEvaluationInput;
+  evaluationResult: AuthorityShadowEvaluationResult;
+}) {
+  const evaluationInput = input.evaluationInput;
+  const evaluation = input.evaluationResult;
+  const tenantId = String(evaluationInput.tenantId || "").trim() || null;
+  const policyId = String(evaluationInput.policyId || "").trim();
+  const policyVersionHash = String(evaluation.policyVersionHash || "").trim().toLowerCase() || null;
+  const subjectActorId = String(evaluationInput.subjectActorId || "").trim();
+  const requestActorId = String(evaluationInput.requestActorId || "").trim();
+  const resource = String(evaluationInput.resource || "").trim();
+  const action = String(evaluationInput.action || "").trim();
+  const decidedAtUtc = String(evaluationInput.decidedAtUtc || "");
+  return {
+    tenantId,
+    policyId,
+    policyVersionHash,
+    policyLifecycleState: evaluation.policyLifecycleState,
+    subjectActorId,
+    requestActorId,
+    requestActorRole: evaluationInput.requestActorRole,
+    approverActorId: String(evaluationInput.approverActorId || "").trim() || null,
+    approverActorRole: evaluationInput.approverActorRole || null,
+    delegationId: String(evaluationInput.delegationId || "").trim() || null,
+    resource,
+    action,
+    wouldDecision: evaluation.wouldDecision,
+    wouldBlock: evaluation.wouldBlock,
+    reasonCodes: evaluation.reasonCodes,
+    policyConflictCode: evaluation.policyConflictCode,
+    delegationEvaluationResult: evaluation.delegationEvaluationResult,
+    approvalRequirementEvaluation: evaluation.approvalRequirementEvaluation,
+    shadowEvaluatorVersion: evaluation.shadowEvaluatorVersion,
+    decidedAtUtc,
+    metadata: evaluationInput.metadata || null,
+  };
+}
+
+export function computeAuthorityShadowDecisionHash(input: {
+  evaluationInput: AuthorityShadowEvaluationInput;
+  evaluationResult: AuthorityShadowEvaluationResult;
+}) {
+  return canonicalPayloadHash(buildAuthorityShadowDecisionCanonicalPayload(input));
+}
+
 export async function listAuthorityShadowDecisionsByWindow(
   params: {
     fromUtc?: string;
@@ -269,4 +296,19 @@ export async function listAuthorityShadowDecisionsByWindow(
   const limit = Math.min(Math.max(Number(params.limit || 500), 1), 5000);
   const docs = await collection.find(query).sort({ decidedAtUtc: -1, decisionId: 1 }).limit(limit).toArray();
   return docs.map(toPublicRecord);
+}
+
+export async function getAuthorityShadowDecisionById(
+  decisionId: string,
+  dependencyOverrides: Partial<AuthorityShadowStoreDependencies> = {}
+): Promise<AuthorityShadowDecisionRecord | null> {
+  await ensureAuthorityShadowDecisionIndexes(dependencyOverrides);
+  const deps = resolveDependencies(dependencyOverrides);
+  const collection = await deps.getCollection();
+
+  const normalizedDecisionId = String(decisionId || "").trim();
+  if (!normalizedDecisionId) return null;
+
+  const doc = await collection.findOne({ decisionId: normalizedDecisionId });
+  return doc ? toPublicRecord(doc) : null;
 }
