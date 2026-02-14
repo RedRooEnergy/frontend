@@ -146,6 +146,7 @@ Scope:
 Reference:
 - Governance charter: docs/communications/EXT-AUDIT-COMMS-01_GOVERNANCE.md
 - Gate 1 spec: docs/communications/EXT-AUDIT-COMMS-01_GATE1_READONLY_DASHBOARD_SPEC.md
+- Gate 2 spec: docs/communications/EXT-AUDIT-COMMS-01_GATE2_IMPLEMENTATION_CONTRACT_BOUNDARIES.md
 
 ## EXT-26 — [EXTENSION NAME – TO BE CONFIRMED]
 
