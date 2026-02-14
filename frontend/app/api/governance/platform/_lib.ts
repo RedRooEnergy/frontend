@@ -649,16 +649,12 @@ export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
     evaluateChatGovernance01(root),
   ];
 
-  const summary = subsystems.reduce(
-    (acc, subsystem) => {
-      acc.totalSubsystems += 1;
-      if (subsystem.overall === "PASS") acc.passCount += 1;
-      if (subsystem.overall === "FAIL") acc.failCount += 1;
-      if (subsystem.overall === "NO_DATA") acc.noDataCount += 1;
-      return acc;
-    },
-    { totalSubsystems: 0, passCount: 0, failCount: 0, noDataCount: 0 }
-  );
+  const summary = {
+    totalSubsystems: governanceChecks.length,
+    passCount: governanceChecks.filter((check) => check.status === "PASS").length,
+    failCount: governanceChecks.filter((check) => check.status === "FAIL").length,
+    noDataCount: governanceChecks.filter((check) => String(check.status) === "NO_DATA").length,
+  };
 
   const governanceBlockingFail = governanceChecks.some(
     (check) => check.severity === "CRITICAL" && check.status === "FAIL"
