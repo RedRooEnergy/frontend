@@ -43,16 +43,24 @@ export default function ChangeControlForm({ onSubmit }: ChangeControlFormProps) 
         ))}
       </select>
 
-      <label className="mt-4 block text-sm font-medium text-slate-700">Reason (required)</label>
+      <label htmlFor="change-control-reason" className="mt-4 block text-sm font-medium text-slate-700">
+        Reason (required)
+      </label>
       <textarea
+        id="change-control-reason"
+        aria-label="Reason (required)"
         value={reason}
         onChange={(event) => setReason(event.target.value)}
         rows={3}
         className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
       />
 
-      <label className="mt-4 block text-sm font-medium text-slate-700">Rationale (required)</label>
+      <label htmlFor="change-control-rationale" className="mt-4 block text-sm font-medium text-slate-700">
+        Rationale (required)
+      </label>
       <textarea
+        id="change-control-rationale"
+        aria-label="Rationale (required)"
         value={rationale}
         onChange={(event) => setRationale(event.target.value)}
         rows={3}

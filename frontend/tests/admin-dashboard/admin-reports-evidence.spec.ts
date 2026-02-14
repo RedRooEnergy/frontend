@@ -14,7 +14,7 @@ test("admin can load /admin/reports and /admin/evidence", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Reports" })).toBeVisible();
 
   await page.goto("/admin/evidence");
-  await expect(page.getByRole("heading", { name: "Evidence" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Evidence", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Hash verification helper (UI-only)" })).toBeVisible();
 });
 

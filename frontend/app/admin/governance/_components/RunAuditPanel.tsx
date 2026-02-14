@@ -18,8 +18,11 @@ export default function RunAuditPanel({ onRun }: RunAuditPanelProps) {
       <h3 className="text-base font-semibold text-slate-900">Run governance audit</h3>
       <p className="mt-1 text-xs text-slate-600">Phase B2 uses a non-enforcing trigger stub and must not imply runtime enforcement changes.</p>
 
-      <label className="mt-4 block text-sm font-medium text-slate-700">Reason (required)</label>
+      <label htmlFor="run-audit-reason" className="mt-4 block text-sm font-medium text-slate-700">
+        Reason (required)
+      </label>
       <textarea
+        id="run-audit-reason"
         value={reason}
         onChange={(event) => setReason(event.target.value)}
         rows={3}

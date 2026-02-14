@@ -20,7 +20,7 @@ test("change-control create requires reason and rationale", async ({ page }) => 
   await page.getByRole("button", { name: "Submit change control" }).click();
   await expect(page.getByText("Reason is required")).toBeVisible();
 
-  await page.getByLabel("Reason (required)").first().fill("Need policy adjustment");
+  await page.locator("#change-control-reason").fill("Need policy adjustment");
   await page.getByRole("button", { name: "Submit change control" }).click();
   await expect(page.getByText("Rationale is required")).toBeVisible();
 });
@@ -36,5 +36,5 @@ test("run-audit requires reason and shows NOT_IMPLEMENTED receipt", async ({ pag
   await page.getByRole("button", { name: "Trigger audit" }).click();
 
   await expect(page.getByText("Status: NOT_IMPLEMENTED")).toBeVisible();
-  await expect(page.getByText("Audit ID:")).toBeVisible();
+  await expect(page.getByText(/Audit ID:/).first()).toBeVisible();
 });

@@ -120,10 +120,17 @@ export type GovernanceCheck = {
 };
 
 export type GovernanceStatusResponse = {
-  generatedAt: string;
+  generatedAt?: string;
+  generatedAtUtc?: string;
   overall: "PASS" | "FAIL" | "NO_DATA";
-  badgeState: "GREEN" | "DEGRADED" | "NO_DATA";
-  governanceScore: number;
+  badgeState: "GREEN" | "DEGRADED" | "NO_DATA" | "PASS" | "REGRESSION" | "IMPROVING";
+  governanceScore:
+    | number
+    | {
+        basePercent: number;
+        deductions: Array<{ id: string; percent: number }>;
+        finalPercent: number;
+      };
   deductions?: Array<{ ruleId: string; value: number }>;
   trendStatus?: string;
   summary: {

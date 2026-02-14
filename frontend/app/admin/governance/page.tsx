@@ -78,6 +78,11 @@ export default function AdminGovernancePage() {
       return <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">No governance data available.</div>;
     }
 
+    const governanceScore =
+      typeof status.governanceScore === "number"
+        ? status.governanceScore
+        : Number(status.governanceScore?.finalPercent || 0);
+
     return (
       <div className="space-y-4">
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -89,7 +94,7 @@ export default function AdminGovernancePage() {
           </article>
           <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <p className="text-sm text-slate-600">Governance score</p>
-            <p className="mt-1 text-2xl font-semibold text-slate-900">{status.governanceScore}</p>
+            <p className="mt-1 text-2xl font-semibold text-slate-900">{governanceScore}%</p>
           </article>
           <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <p className="text-sm text-slate-600">Fail count</p>

@@ -35,9 +35,9 @@ test("create hold requires reason", async ({ page }) => {
   await loginAs(page, "admin", "admin-hold@rre.test");
   await page.goto("/admin/financial");
 
-  await page.getByRole("button", { name: "Create hold" }).click();
+  await page.getByRole("button", { name: "Create hold" }).first().click();
   await page.getByPlaceholder("Enter identifier").fill("ORD-PLAYWRIGHT-1");
-  await page.getByRole("button", { name: "Create hold" }).click();
+  await page.getByRole("button", { name: "Create hold" }).last().click();
 
   await expect(page.getByText("Reason is required")).toBeVisible();
 });
