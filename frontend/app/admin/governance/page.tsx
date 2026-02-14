@@ -7,6 +7,7 @@ import {
   createGovernanceChangeControl,
   getGovernanceStatus,
   listGovernanceChangeControls,
+  runGovernanceAudit,
 } from "../../../lib/adminDashboard/client";
 import type {
   AdminAuditReceipt,
@@ -17,6 +18,7 @@ import type {
 import ChangeControlForm from "./_components/ChangeControlForm";
 import ChangeControlTable from "./_components/ChangeControlTable";
 import GovernanceStatusMatrix from "./_components/GovernanceStatusMatrix";
+import RunAuditPanel from "./_components/RunAuditPanel";
 import SubSystemBadgeStrip from "./_components/SubSystemBadgeStrip";
 
 function badgeToneFromOverall(overall: GovernanceStatusResponse["overall"]) {
@@ -102,21 +104,34 @@ export default function AdminGovernancePage() {
         <SubSystemBadgeStrip checks={status.governanceChecks} />
         <GovernanceStatusMatrix status={status} />
 
-        <section className="grid gap-4 xl:grid-cols-[1.1fr_1.9fr]">
-          <ChangeControlForm
-            onSubmit={async (payload: CreateChangeControlPayload) => {
-              const result = await createGovernanceChangeControl(payload);
+        <section className="grid gap-4 xl:grid-cols-2">
+          <RunAuditPanel
+            onRun={async (reason) => {
+              const result = await runGovernanceAudit({ reason });
               setReceipt({
                 auditId: result.auditId,
-                entityId: result.entityId,
+                entityId: result.runId || undefined,
               });
-              await load();
+              return result;
             }}
           />
-          <div>
-            <h3 className="mb-2 text-base font-semibold text-slate-900">Change Control Ledger</h3>
-            <ChangeControlTable items={changeControls} />
+          <div className="space-y-4">
+            <ChangeControlForm
+              onSubmit={async (payload: CreateChangeControlPayload) => {
+                const result = await createGovernanceChangeControl(payload);
+                setReceipt({
+                  auditId: result.auditId,
+                  entityId: result.entityId,
+                });
+                await load();
+              }}
+            />
           </div>
+        </section>
+
+        <section>
+          <h3 className="mb-2 text-base font-semibold text-slate-900">Change Control Ledger</h3>
+          <ChangeControlTable items={changeControls} />
         </section>
       </div>
     );

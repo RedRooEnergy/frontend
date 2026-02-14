@@ -92,8 +92,23 @@ export function createGovernanceChangeControl(payload: CreateChangeControlPayloa
 }
 
 export function runGovernanceAudit(payload: RunAuditPayload) {
-  return requestJson<RunAuditResponse>("/api/admin/dashboard/governance/run-audit", {
-    method: "POST",
-    body: payload,
-  });
+  return (async () => {
+    const headers: Record<string, string> = {
+      ...getAdminAuthHeaders(),
+      "content-type": "application/json",
+    };
+
+    const response = await fetch("/api/admin/dashboard/governance/run-audit", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    });
+
+    const json = (await response.json().catch(() => ({}))) as RunAuditResponse & { error?: string };
+    if (!response.ok && response.status !== 501) {
+      throw new Error(typeof json.error === "string" ? json.error : `Request failed (${response.status})`);
+    }
+    return json as RunAuditResponse;
+  })();
 }
