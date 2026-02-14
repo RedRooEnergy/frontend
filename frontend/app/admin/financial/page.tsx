@@ -5,8 +5,10 @@ import AuditReceiptToast from "../_components/AuditReceiptToast";
 import BeforeAfterDiffPanel from "../_components/BeforeAfterDiffPanel";
 import ReasonRequiredModal from "../_components/ReasonRequiredModal";
 import {
+  createFinancialHold,
   getFinancialConfig,
   listFinancialHolds,
+  overrideFinancialHold,
   updateFinancialConfig,
 } from "../../../lib/adminDashboard/client";
 import type {
@@ -15,10 +17,12 @@ import type {
   FinancialConfigUpdatePayload,
   SettlementHold,
 } from "../../../types/adminDashboard";
+import CreateHoldDrawer from "./_components/CreateHoldDrawer";
+import EscrowPolicyForm from "./_components/EscrowPolicyForm";
 import FeeConfigForm from "./_components/FeeConfigForm";
 import FinancialConfigCards from "./_components/FinancialConfigCards";
 import FxPolicyForm from "./_components/FxPolicyForm";
-import EscrowPolicyForm from "./_components/EscrowPolicyForm";
+import HoldOverrideModal from "./_components/HoldOverrideModal";
 import HoldsTable from "./_components/HoldsTable";
 
 type DraftType = "feeConfig" | "fxPolicy" | "escrowPolicy";
@@ -39,6 +43,8 @@ export default function AdminFinancialPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [receipt, setReceipt] = useState<AdminAuditReceipt | null>(null);
+  const [createHoldOpen, setCreateHoldOpen] = useState(false);
+  const [overrideHold, setOverrideHold] = useState<SettlementHold | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -175,9 +181,20 @@ export default function AdminFinancialPage() {
         ) : null}
 
         <section className="space-y-2">
-          <h2 className="text-lg font-semibold text-slate-900">Settlement Holds</h2>
-          <p className="text-sm text-slate-600">Hold actions are enabled in the next stage commit.</p>
-          <HoldsTable holds={holds} />
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">Settlement Holds</h2>
+              <p className="text-sm text-slate-600">Create and override actions are reason-gated and audit-backed.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCreateHoldOpen(true)}
+              className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white"
+            >
+              Create hold
+            </button>
+          </div>
+          <HoldsTable holds={holds} onOverride={(hold) => setOverrideHold(hold)} />
         </section>
       </div>
     );
@@ -207,6 +224,36 @@ export default function AdminFinancialPage() {
         onConfirm={submitDraft}
         confirmLabel={saving ? "Saving..." : "Confirm mutation"}
         confirmDisabled={saving || !reason.trim()}
+      />
+
+      <CreateHoldDrawer
+        open={createHoldOpen}
+        onClose={() => setCreateHoldOpen(false)}
+        onSubmit={async (payload) => {
+          const response = await createFinancialHold(payload);
+          setReceipt({
+            auditId: response.auditId,
+            entityId: response.entityId,
+          });
+          await loadData();
+        }}
+      />
+
+      <HoldOverrideModal
+        hold={overrideHold}
+        onClose={() => setOverrideHold(null)}
+        onSubmit={async ({ holdId, reason: holdReason, justification, durationHours }) => {
+          const response = await overrideFinancialHold(holdId, {
+            reason: holdReason,
+            justification,
+            durationHours,
+          });
+          setReceipt({
+            auditId: response.auditId,
+            entityId: response.entityId,
+          });
+          await loadData();
+        }}
       />
     </div>
   );
