@@ -11,7 +11,7 @@ export type GovernanceCheckResult = {
   status: GovernanceRuleStatus;
   severity: GovernanceRuleSeverity;
   evidence: string[];
-  impactSurface: "Communications/Cryptographic" | "Platform/IntegrityChain";
+  impactSurface: "Communications/Cryptographic" | "Platform/IntegrityChain" | "Platform/CommunicationIntegrity";
   notes: string[];
 };
 
@@ -479,6 +479,132 @@ function evaluateChainIntegrity01(root: string): GovernanceCheckResult {
   };
 }
 
+function evaluateChatGovernance01(root: string): GovernanceCheckResult {
+  const repoRoot =
+    fs.existsSync(path.join(root, "frontend")) && fs.existsSync(path.join(root, "docs"))
+      ? root
+      : fs.existsSync(path.join(root, "..", "frontend")) && fs.existsSync(path.join(root, "..", "docs"))
+        ? path.resolve(root, "..")
+        : root;
+  const frontendRoot = fs.existsSync(path.join(repoRoot, "frontend", "app"))
+    ? path.join(repoRoot, "frontend")
+    : fs.existsSync(path.join(repoRoot, "app"))
+      ? repoRoot
+      : path.join(repoRoot, "frontend");
+
+  const ruleContractPath = path.join(repoRoot, "docs", "governance", "GOV-CHAT-01_PGA_RULE_CONTRACT.md");
+  const statusRoutePath = path.join(frontendRoot, "app", "api", "governance", "chatbot", "status", "route.ts");
+  const badgeRoutePath = path.join(frontendRoot, "app", "api", "governance", "chatbot", "badge", "route.ts");
+  const workflowPath = path.join(repoRoot, ".github", "workflows", "chatbot-audit.yml");
+  const scorecardPath = path.join(repoRoot, "scorecards", "chatbot.scorecard.json");
+
+  const evidence = [
+    "docs/governance/GOV-CHAT-01_PGA_RULE_CONTRACT.md",
+    "frontend/app/api/governance/chatbot/status/route.ts",
+    "frontend/app/api/governance/chatbot/badge/route.ts",
+    ".github/workflows/chatbot-audit.yml",
+    "scorecards/chatbot.scorecard.json",
+  ];
+
+  const notes: string[] = [];
+  const addNote = (code: string, detail?: string) => notes.push(detail ? `${code}:${detail}` : code);
+
+  if (!fs.existsSync(ruleContractPath)) {
+    addNote("CHAT_RULE_CONTRACT_MISSING");
+  }
+
+  const statusRouteSource = readTextIfExists(statusRoutePath);
+  const badgeRouteSource = readTextIfExists(badgeRoutePath);
+  const workflowSource = readTextIfExists(workflowPath);
+
+  if (!statusRouteSource) {
+    addNote("CHAT_STATUS_ROUTE_MISSING");
+  } else {
+    if (!statusRouteSource.includes("scorecards/chatbot.scorecard.json")) {
+      addNote("CHAT_STATUS_ROUTE_INPUT_PATH_INVALID");
+    }
+    if (!statusRouteSource.includes("extensionId")) {
+      addNote("CHAT_STATUS_ROUTE_PAYLOAD_INVALID");
+    }
+    if (!statusRouteSource.includes("overall")) {
+      addNote("CHAT_STATUS_ROUTE_PAYLOAD_INVALID");
+    }
+  }
+
+  if (!badgeRouteSource) {
+    addNote("CHAT_BADGE_ROUTE_MISSING");
+  } else {
+    if (!badgeRouteSource.includes("scorecards/chatbot.scorecard.json")) {
+      addNote("CHAT_BADGE_ROUTE_INPUT_PATH_INVALID");
+    }
+    if (!badgeRouteSource.includes("renderBadge(\"chatbot-audit\", overall, color)")) {
+      addNote("CHAT_BADGE_STATUS_MISMATCH");
+    }
+    if (!badgeRouteSource.includes('overall === "PASS"')) {
+      addNote("CHAT_BADGE_STATUS_MISMATCH");
+    }
+    if (!badgeRouteSource.includes('overall === "NO_DATA"')) {
+      addNote("CHAT_BADGE_STATUS_MISMATCH");
+    }
+  }
+
+  if (!workflowSource) {
+    addNote("CHAT_CI_GATE_MISSING");
+  } else {
+    if (!workflowSource.includes("npm run test:chatbot")) {
+      addNote("CHAT_CI_TEST_RUN_MISSING");
+    }
+    if (!workflowSource.includes("chatbot.scorecard.json")) {
+      addNote("CHAT_CI_SCORECARD_ASSERT_MISSING");
+    }
+    if (!workflowSource.includes("Chatbot scorecard is not PASS")) {
+      addNote("CHAT_CI_BYPASS_DETECTED");
+    }
+  }
+
+  if (!fs.existsSync(scorecardPath)) {
+    addNote("CHAT_SCORECARD_MISSING");
+  } else {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(scorecardPath, "utf8")) as {
+        overall?: string;
+        failCount?: number;
+        checks?: Array<{ id?: string; status?: string }>;
+      };
+
+      const overall = String(parsed.overall || "").toUpperCase();
+      if (overall !== "PASS") {
+        addNote("CHAT_SCORECARD_OVERALL_NOT_PASS", overall || "UNKNOWN");
+      }
+
+      const failCount = Number(parsed.failCount || 0);
+      if (!Number.isFinite(failCount) || failCount > 0) {
+        addNote("CHAT_SCORECARD_FAILCOUNT_NONZERO", String(parsed.failCount ?? "UNKNOWN"));
+      }
+
+      const checks = Array.isArray(parsed.checks) ? parsed.checks : [];
+      const failingChecks = checks.filter((row) => String(row?.status || "").toUpperCase() !== "PASS");
+      if (failingChecks.length > 0) {
+        addNote(
+          "CHAT_SCORECARD_CHECK_NONPASS",
+          failingChecks.map((row) => String(row.id || "UNKNOWN")).join(",")
+        );
+      }
+    } catch {
+      addNote("CHAT_SCORECARD_PARSE_INVALID");
+    }
+  }
+
+  return {
+    id: "GOV-CHAT-01",
+    status: notes.length === 0 ? "PASS" : "FAIL",
+    severity: "CRITICAL",
+    evidence,
+    impactSurface: "Platform/CommunicationIntegrity",
+    notes,
+  };
+}
+
 export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
   const root = resolveRepoRoot();
 
@@ -517,7 +643,11 @@ export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
       fileMatcher: (name) => name.startsWith("scorecard.") && name.endsWith(".json"),
     }),
   ];
-  const governanceChecks: GovernanceCheckResult[] = [evaluateExtWeChat07(root), evaluateChainIntegrity01(root)];
+  const governanceChecks: GovernanceCheckResult[] = [
+    evaluateExtWeChat07(root),
+    evaluateChainIntegrity01(root),
+    evaluateChatGovernance01(root),
+  ];
 
   const summary = subsystems.reduce(
     (acc, subsystem) => {
