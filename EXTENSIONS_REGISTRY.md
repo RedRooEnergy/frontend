@@ -156,6 +156,29 @@ References:
 - Aggregator Rule: `GOV-CHAIN-01` (CRITICAL, binary PASS/FAIL)
 - PGA + CI Activation Baseline: `b9823ce`
 
+## EXT-GOV-AUTH-01 — Platform Design Authority Framework
+
+Status: LOCKED (DESIGN AUTHORITY ONLY; NON-OPERATIONAL)
+Operational State: Governance-only authority model for architectural evolution
+Change Control: REQUIRED for any modification
+Scope:
+- Grand-Master authority hierarchy definition
+- Platform Architect Council and Governance Lead boundary mapping
+- Design-governance technical enforcement mapping (branch protection/CODEOWNERS/CI)
+- Authority breach handling and immutable governance evidence requirements
+
+Boundaries:
+- No runtime RBAC identifier change
+- No backend permission logic expansion
+- No operational transaction authority grant
+
+References:
+- Authority hierarchy: `docs/00_master_project_definition/RRE-00-PLATFORM-AUTHORITY-HIERARCHY-v1.0.md`
+- Extension spec: `docs/extensions/EXT-GOV-AUTH-01/EXT-GOV-AUTH-01_SPEC.md`
+- Close pack: `docs/governance/PLATFORM_DESIGN_AUTHORITY_LOCK_CLOSE_PACK_v1.0.md`
+- Board resolution: `docs/governance/BOARD_RESOLUTION_PLATFORM_DESIGN_AUTHORITY_LOCK_v1.0.md`
+- Manifest: `docs/governance/PLATFORM_DESIGN_AUTHORITY_LOCK_MANIFEST_v1.0.json`
+
 ## EXT-INTERNAL-MSG-01 — Governed Internal Messaging
 
 Status: DESIGN LOCK (no runtime impact)

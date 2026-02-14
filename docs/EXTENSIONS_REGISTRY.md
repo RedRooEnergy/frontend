@@ -179,6 +179,23 @@ Board Ratification: docs/governance/BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_RATI
 Aggregator Rule: GOV-CHAIN-01 (critical, binary PASS/FAIL)
 PGA + CI Activation Baseline: b9823ce
 
+## EXT-GOV-AUTH-01 — Platform Design Authority Framework
+
+Status: Locked (Design Authority Only; Non-Operational)  
+Purpose:
+Grand-Master and Council authority hierarchy governance for architectural evolution, Core boundary stewardship, and extension design-approval discipline.
+
+Core Interaction:
+This Extension does not modify the Immutable Core and operates strictly within Core constraints.
+
+Lifecycle Notes:
+Governance lock only; runtime authorization unchanged; no RBAC identifier changes; no operational authority expansion.
+Authority hierarchy document: `docs/00_master_project_definition/RRE-00-PLATFORM-AUTHORITY-HIERARCHY-v1.0.md`
+Extension spec: `docs/extensions/EXT-GOV-AUTH-01/EXT-GOV-AUTH-01_SPEC.md`
+Close pack: `docs/governance/PLATFORM_DESIGN_AUTHORITY_LOCK_CLOSE_PACK_v1.0.md`
+Board resolution: `docs/governance/BOARD_RESOLUTION_PLATFORM_DESIGN_AUTHORITY_LOCK_v1.0.md`
+Manifest: `docs/governance/PLATFORM_DESIGN_AUTHORITY_LOCK_MANIFEST_v1.0.json`
+
 ## EXT-26 — Marketing Orchestration & Campaign Governance
 
 Status: Complete (Governance complete; implementation not authorized)  

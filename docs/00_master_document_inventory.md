@@ -183,6 +183,7 @@ Status: COMPLETE & FROZEN
 15.03 — Administrative Safeguard Controls
 15.04 — Emergency Access & Lockdown Rules
 15.05 — Admin Accountability Enforcement
+15.06 — Careers & Recruitment Governance
 
 PHASE 16 — MARKETING & PARTNER PROGRAMS
 
@@ -250,3 +251,10 @@ Governance Baseline: FROZEN
 Execution Authority: Granted (ETG-001 closed)
 
 Next Phase: Implementation Phase A — Immutable Core Coding
+
+DMS HASH INDEX ENTRIES
+
+| Series ID | Document | Version | Status | Path | SHA-256 | Manifest Path | Manifest SHA-256 | UTC Timestamp |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 02.XX.03 | ADMIN_DASHBOARD_CLOSE_PACK_v1.0 | v1.0 | LOCKED | docs/admin/ADMIN_DASHBOARD_CLOSE_PACK_v1.0.md | cc920adc55ef38f098975452600becb8de63d37cc681aedecb61206352405fb2 | docs/admin/ADMIN_DASHBOARD_CLOSEPACK_MANIFEST_v1.0.json | 9fbbce2b5d3ce3113a3185ffac0ae5af6e12a3be9c73d3510c2832ce53d3c292 | 2026-02-14T14:43:44.383Z |
+| 00.XX.01 | PLATFORM_DESIGN_AUTHORITY_LOCK_CLOSE_PACK_v1.0 | v1.0 | LOCKED | docs/governance/PLATFORM_DESIGN_AUTHORITY_LOCK_CLOSE_PACK_v1.0.md | 5fa46d5d43ff34b6d0d91f9198a542c932680e6a2d3ef326eea896ae4b7b7937 | docs/governance/PLATFORM_DESIGN_AUTHORITY_LOCK_MANIFEST_v1.0.json | 45edfccb03ae6642c95871e553f96c8d9990f754c42b53fa758c298809026e25 | 2026-02-14T17:25:43.261Z |

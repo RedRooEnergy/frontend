@@ -1,0 +1,28 @@
+{
+  "closePackVersion": "v1.0",
+  "timestampUTC": "2026-02-14T17:25:43.261Z",
+  "documents": [
+    {
+      "name": "RRE-00-PLATFORM-AUTHORITY-HIERARCHY-v1.0.md",
+      "path": "docs/00_master_project_definition/RRE-00-PLATFORM-AUTHORITY-HIERARCHY-v1.0.md",
+      "sha256": "f7ee9c00f3d04a8466ebac56473c08e1b045474452a151af75be2ae2337730ae"
+    },
+    {
+      "name": "EXT-GOV-AUTH-01_SPEC.md",
+      "path": "docs/extensions/EXT-GOV-AUTH-01/EXT-GOV-AUTH-01_SPEC.md",
+      "sha256": "a8b8863c68e8d0acb6cfc2c82e3ede0c86c41adadab383ad269ae8ba6383194b"
+    },
+    {
+      "name": "PLATFORM_DESIGN_AUTHORITY_LOCK_CLOSE_PACK_v1.0.md",
+      "path": "docs/governance/PLATFORM_DESIGN_AUTHORITY_LOCK_CLOSE_PACK_v1.0.md",
+      "sha256": "5fa46d5d43ff34b6d0d91f9198a542c932680e6a2d3ef326eea896ae4b7b7937"
+    },
+    {
+      "name": "BOARD_RESOLUTION_PLATFORM_DESIGN_AUTHORITY_LOCK_v1.0.md",
+      "path": "docs/governance/BOARD_RESOLUTION_PLATFORM_DESIGN_AUTHORITY_LOCK_v1.0.md",
+      "sha256": "5a67bb2c5818b749f3a5707dad6d7e654f07ecf09eb9c414aaf1de65078331c7"
+    }
+  ],
+  "signedBy": "BOARD AUTHORITY",
+  "integrityStatement": "All listed documents are immutable governance artefacts."
+}
