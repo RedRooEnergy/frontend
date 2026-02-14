@@ -196,9 +196,6 @@ export async function upsertFreightSettlementRecord(
   const settlementPayloadCanonicalJson = String(input.settlementPayloadCanonicalJson || "").trim() || null;
 
   const query: Record<string, unknown> = { orderId, settlementVersion };
-  if (freightSettlementHash) {
-    query.freightSettlementHash = freightSettlementHash;
-  }
 
   const existing = await collection.findOne(query);
   if (existing) {

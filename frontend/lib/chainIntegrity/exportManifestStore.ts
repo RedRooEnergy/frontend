@@ -159,9 +159,6 @@ export async function upsertExportManifestRecord(
 
   const now = deps.now().toISOString();
   const query: Record<string, unknown> = { orderId };
-  if (exportManifestHash) {
-    query.exportManifestHash = exportManifestHash;
-  }
 
   const existing = await collection.findOne(query);
   if (existing) {
