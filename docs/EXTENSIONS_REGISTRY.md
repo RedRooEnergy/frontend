@@ -120,6 +120,22 @@ This Extension does not modify the Immutable Core and operates strictly within C
 Lifecycle Notes:
 Design locked only; runtime implementation not authorized; change control required before any build phase.
 
+## EXT-AUDIT-COMMS-01 — Unified Cross-Channel Evidence View
+
+Status: Design Lock (No runtime impact)  
+Bounded by: EXT-COMMS-01 (docs/communications/COMMUNICATIONS_CONTROL_PLANE.md)
+
+Purpose:
+Governance design for a regulator-first, read-only, cross-channel evidence convergence surface spanning Email and WeChat, with Internal Messaging reserved for future inclusion.
+
+Core Interaction:
+This Extension does not modify the Immutable Core and operates strictly within Core constraints.
+
+Lifecycle Notes:
+Design locked only; runtime implementation not authorized; change control required before any build phase.
+Governance charter: docs/communications/EXT-AUDIT-COMMS-01_GOVERNANCE.md
+Gate 1 spec: docs/communications/EXT-AUDIT-COMMS-01_GATE1_READONLY_DASHBOARD_SPEC.md
+
 ## EXT-26 — Marketing Orchestration & Campaign Governance
 
 Status: Complete (Governance complete; implementation not authorized)  

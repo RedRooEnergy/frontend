@@ -130,6 +130,23 @@ Scope:
 Reference:
 - docs/communications/EXT-INTERNAL-MSG-01_GOVERNANCE.md
 
+## EXT-AUDIT-COMMS-01 — Unified Cross-Channel Evidence View
+
+Status: DESIGN LOCK (no runtime impact)
+Runtime Impact: NONE
+Change Control: REQUIRED to authorize build phase
+Bounded by: EXT-COMMS-01 (docs/communications/COMMUNICATIONS_CONTROL_PLANE.md)
+Scope:
+- Read-only cross-channel evidence aggregation
+- Correlation-first regulator evidence surface
+- Deterministic composite hash across included channels
+- Channel parity rules for payload/status progression visibility
+- Prohibited mutation patterns for audit aggregation
+
+Reference:
+- Governance charter: docs/communications/EXT-AUDIT-COMMS-01_GOVERNANCE.md
+- Gate 1 spec: docs/communications/EXT-AUDIT-COMMS-01_GATE1_READONLY_DASHBOARD_SPEC.md
+
 ## EXT-26 — [EXTENSION NAME – TO BE CONFIRMED]
 
 Status: GOVERNANCE COMPLETE  
