@@ -123,6 +123,43 @@ async function main() {
     })
   );
 
+  results.push(
+    await runCheck("REGULATOR-EXPORT-PACK-GUARDS", () => {
+      const routeSource = readFile("app/api/wechat/regulator-export-pack/route.ts");
+      const builderSource = readFile("lib/wechat/regulatorExportPack.ts");
+      const dashboardSource = readFile("app/dashboard/regulator/wechat/page.tsx");
+
+      const exportedMethods = Array.from(routeSource.matchAll(/export\s+async\s+function\s+(GET|POST|PUT|PATCH|DELETE)\s*\(/g)).map(
+        (match) => match[1]
+      );
+      assert(exportedMethods.includes("GET"), "Regulator export pack route must export GET");
+      assert(!exportedMethods.some((method) => method !== "GET"), "Regulator export pack route exports mutation method");
+
+      const forbiddenBodyPatterns = [
+        /renderedPayload\b/,
+        /inboundPayload\b/,
+        /messageBody\b/i,
+      ];
+      for (const pattern of forbiddenBodyPatterns) {
+        assert(!pattern.test(builderSource), `Forbidden raw body pattern found in builder source: ${pattern}`);
+        assert(!pattern.test(routeSource), `Forbidden raw body pattern found in export route: ${pattern}`);
+        assert(!pattern.test(dashboardSource), `Forbidden raw body pattern found in regulator dashboard: ${pattern}`);
+      }
+
+      const forbiddenSecretPatterns = [/appSecret/i, /accessToken/i, /webhookSecret/i, /WECHAT_WEBHOOK_TOKEN/i];
+      for (const pattern of forbiddenSecretPatterns) {
+        assert(!pattern.test(builderSource), `Forbidden secret/token reference found in builder source: ${pattern}`);
+        assert(!pattern.test(routeSource), `Forbidden secret/token reference found in export route: ${pattern}`);
+        assert(!pattern.test(dashboardSource), `Forbidden secret/token reference found in regulator dashboard: ${pattern}`);
+      }
+
+      const requiredPackNames = ["slice.json", "manifest.json", "manifest.sha256.txt", "README.txt"];
+      for (const fileName of requiredPackNames) {
+        assert(builderSource.includes(`\"${fileName}\"`), `Export pack builder missing required filename: ${fileName}`);
+      }
+    })
+  );
+
   const passCount = results.filter((row) => row.pass).length;
   const failCount = results.length - passCount;
 
