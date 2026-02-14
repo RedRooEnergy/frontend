@@ -1,6 +1,6 @@
 # Platform Governance Rule Registry
 
-Version: v1.0
+Version: v1.3.0
 Status: LOCKED
 
 ## GOV-WECHAT-07
@@ -69,3 +69,33 @@ Scoring Policy:
 Activation Boundary:
 - Static-analysis governance rule only.
 - No runtime enforcement authorization is implied.
+
+## GOV-CHAT-01
+
+Extension: EXT-CHAT-01  
+Lifecycle Status: IMPLEMENTED / GOVERNANCE LOCKED  
+Aggregator Rule: GOV-CHAT-01  
+Impact Class: Operational Communication Integrity  
+Authority Expansion: NONE  
+Mutation Rights Introduced: NONE
+
+Pass Criteria (static governance checks):
+- `docs/governance/GOV-CHAT-01_PGA_RULE_CONTRACT.md` exists
+- `frontend/app/api/governance/chatbot/status/route.ts` exists and resolves scorecard input
+- `frontend/app/api/governance/chatbot/badge/route.ts` exists and maps status outcome consistently
+- `.github/workflows/chatbot-audit.yml` exists with chatbot PASS assertion behavior
+- `scorecards/chatbot.scorecard.json` exists and reports overall PASS/failCount zero/check-level PASS
+
+Failure Severity: CRITICAL
+
+Scoring Policy:
+- Binary PASS/FAIL only
+- No partial credit
+- On FAIL: platform `overall = FAIL`
+- On FAIL: platform badge state is `DEGRADED`
+- On FAIL: platform PASS-3 governance declaration is blocked
+
+Activation Boundary:
+- Static-analysis governance rule only.
+- No runtime enforcement authorization is implied.
+- No reverse dependency to chat runtime state is allowed.

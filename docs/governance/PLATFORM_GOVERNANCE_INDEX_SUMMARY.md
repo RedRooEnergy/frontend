@@ -1,6 +1,6 @@
 # Platform Governance Index Summary
 
-Version: v1.0  
+Version: v1.3.0  
 Status: ACTIVE SUMMARY  
 Classification: Governance Scoring Surface
 
@@ -46,6 +46,26 @@ On FAIL:
 - Implementation close pack: `docs/communications/EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_CLOSE_PACK.md`
 - Board ratification reference: `docs/governance/BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_RATIFICATION_v1.0.md`
 
+## EXT-CHAT-01 / GOV-CHAT-01 Inclusion
+
+Rule: `GOV-CHAT-01`  
+Impact Surface: Platform / CommunicationIntegrity  
+Severity: CRITICAL  
+Score Mode: Binary PASS/FAIL (no partial credit)
+
+On FAIL:
+- Platform overall = `FAIL`
+- Platform badge state = `DEGRADED`
+- Platform PASS-3 governance declaration blocked
+
+## Baseline References (Chat Governance Integration)
+
+- Contract lock baseline: `184090f`
+- Static rule baseline: `f4fe581`
+- Badge/overall gating baseline: `791e72b`
+- CI fail-gate baseline: `79f0e8f`
+- EXT-CHAT-01 lock declaration: `docs/governance/BOARD_RESOLUTION_EXT-CHAT-01_LOCK_v1.0.md`
+
 ## Subsystem Completion Declaration — WeChat
 
 WeChat domain (export signatures, regulator public key distribution,
@@ -62,3 +82,8 @@ Completion declaration:
 
 This index summary is a derived governance surface only.
 It does not create operational authority and does not mutate subsystem state.
+
+## Platform Governance Aggregator Baseline
+
+Current governance baseline: `v1.3.0`  
+Close Pack: `docs/governance/PLATFORM_GOVERNANCE_AGGREGATOR_CLOSE_PACK_v1.3.0.md`
