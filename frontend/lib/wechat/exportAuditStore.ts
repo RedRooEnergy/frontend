@@ -215,3 +215,48 @@ export async function listWeChatRegulatorExportAuditEvents(
     page,
   };
 }
+
+export async function countWeChatRegulatorExportAuditEventsInWindow(
+  input: {
+    actorId: string;
+    route: string;
+    windowSeconds: number;
+    nowIso?: string;
+  },
+  dependencyOverrides: Partial<WeChatExportAuditStoreDependencies> = {}
+) {
+  const deps = resolveDependencies(dependencyOverrides);
+  await ensureWeChatExportAuditIndexes(dependencyOverrides);
+
+  const actorId = String(input.actorId || "").trim();
+  if (!actorId) throw new Error("WECHAT_EXPORT_AUDIT_INVALID_ACTOR");
+
+  const route = String(input.route || "").trim();
+  if (!route) throw new Error("WECHAT_EXPORT_AUDIT_INVALID_ROUTE");
+
+  const windowSeconds = Math.min(Math.max(Math.floor(Number(input.windowSeconds || 1)), 1), 86_400);
+  const nowIso = String(input.nowIso || deps.now().toISOString()).trim();
+  const nowMs = Date.parse(nowIso);
+  if (!Number.isFinite(nowMs)) throw new Error("WECHAT_EXPORT_AUDIT_INVALID_NOW");
+  const windowStartIso = new Date(nowMs - windowSeconds * 1_000).toISOString();
+
+  const query = {
+    actorId,
+    actorRole: "regulator",
+    route,
+    requestedAt: {
+      $gte: windowStartIso,
+      $lte: nowIso,
+    },
+  };
+
+  const collection = await deps.getCollection(EXPORT_AUDIT_COLLECTION);
+  const count = await collection.countDocuments(query);
+
+  return {
+    count,
+    windowSeconds,
+    windowStartIso,
+    nowIso,
+  };
+}
