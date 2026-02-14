@@ -1006,7 +1006,7 @@ export async function listWeChatDispatchSliceForRegulator(
     items: rows.map((row) => {
       const publicRow = toPublicRecord<WeChatDispatchRecord>(row);
       const renderedBody = String(publicRow.render?.renderedPayload || "");
-      const bodyHash = sha256Hex(renderedBody);
+      const bodyHash = String(publicRow.render?.renderedPayloadHashSha256 || "").trim() || sha256Hex(renderedBody);
       const bodyLength = Buffer.byteLength(renderedBody, "utf8");
       return {
         dispatchIdMasked: maskId(publicRow.dispatchId),
@@ -1104,7 +1104,7 @@ export async function listWeChatInboundSliceForRegulator(
     items: rows.map((row) => {
       const publicRow = toPublicRecord<WeChatInboundMessageRecord>(row);
       const payloadCanonical = stableStringify(publicRow.inboundPayload || {});
-      const bodyHash = sha256Hex(payloadCanonical);
+      const bodyHash = String(publicRow.inboundPayloadHashSha256 || "").trim() || sha256Hex(payloadCanonical);
       const bodyLength = Buffer.byteLength(payloadCanonical, "utf8");
       return {
         inboundIdMasked: maskId(publicRow.inboundId),

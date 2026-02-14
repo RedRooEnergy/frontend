@@ -117,6 +117,9 @@ async function main() {
         assert(!pattern.test(routeSource), `Forbidden secret/token reference found in regulator route: ${pattern}`);
         assert(!pattern.test(dashboardSource), `Forbidden secret/token reference found in regulator dashboard: ${pattern}`);
       }
+
+      assert(!dashboardSource.includes("overview."), "Regulator dashboard still references legacy overview state");
+      assert(!dashboardSource.includes("deterministicHashSha256"), "Regulator dashboard references unsupported response hash field");
     })
   );
 

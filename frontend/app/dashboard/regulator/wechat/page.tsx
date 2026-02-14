@@ -55,7 +55,7 @@ export default function RegulatorWeChatGovernancePage() {
       const res = await fetch("/api/wechat/regulator-slice?limit=25&page=1");
       const json = await res.json();
       if (!res.ok) {
-        setStatus(json?.error || "Unable to load WeChat overview");
+        setStatus(json?.error || "Unable to load WeChat regulator slice");
         return;
       }
       setSlice(json);
