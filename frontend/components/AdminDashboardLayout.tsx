@@ -17,6 +17,7 @@ const navItems = [
   { label: "Service Partner Audit", href: "/dashboard/admin/service-partners/audit" },
   { label: "Product & Catalogue Governance", href: "/dashboard/admin/catalogue" },
   { label: "Orders & Escalations", href: "/dashboard/admin/orders" },
+  { label: "Operational Conversations", href: "/dashboard/admin/conversations" },
   { label: "Payments & Settlement", href: "/dashboard/admin/finance" },
   { label: "Marketplace Fee Ledger", href: "/dashboard/admin/fee-ledger" },
   { label: "Email Governance", href: "/dashboard/admin/email" },
