@@ -106,6 +106,20 @@ This Extension does not modify the Immutable Core and operates strictly within C
 Lifecycle Notes:
 Governance complete; implementation authorized; change control required.
 
+## EXT-INTERNAL-MSG-01 — Governed Internal Messaging
+
+Status: Design Lock (No runtime impact)  
+Bounded by: EXT-COMMS-01 (docs/communications/COMMUNICATIONS_CONTROL_PLANE.md)
+
+Purpose:
+Governance design for an internal platform collaboration channel that is evidence-bearing and non-state-authoritative, bounded by the Communications Control Plane.
+
+Core Interaction:
+This Extension does not modify the Immutable Core and operates strictly within Core constraints.
+
+Lifecycle Notes:
+Design locked only; runtime implementation not authorized; change control required before any build phase.
+
 ## EXT-26 — Marketing Orchestration & Campaign Governance
 
 Status: Complete (Governance complete; implementation not authorized)  

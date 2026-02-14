@@ -114,6 +114,22 @@ Implementation hash reference:
 - CI: test:wechat passing
 - Immutable boundaries verified
 
+## EXT-INTERNAL-MSG-01 — Governed Internal Messaging
+
+Status: DESIGN LOCK (no runtime impact)
+Runtime Impact: NONE
+Change Control: REQUIRED to authorize build phase
+Bounded by: EXT-COMMS-01 (docs/communications/COMMUNICATIONS_CONTROL_PLANE.md)
+Scope:
+- Governed in-platform collaboration channel
+- Evidence-bearing message controls under communications governance
+- Non-state-authoritative messaging boundaries
+- Regulator read-only export posture
+- Prohibited pattern controls for persistence, hashing, and identity
+
+Reference:
+- docs/communications/EXT-INTERNAL-MSG-01_GOVERNANCE.md
+
 ## EXT-26 — [EXTENSION NAME – TO BE CONFIRMED]
 
 Status: GOVERNANCE COMPLETE  
