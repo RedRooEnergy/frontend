@@ -5,9 +5,13 @@ on:
     paths:
       - "frontend/app/api/governance/platform/**"
       - "frontend/app/api/wechat/regulator-public-key/**"
+      - "frontend/lib/chainIntegrity/**"
       - "frontend/lib/wechat/signaturePublicKey.ts"
       - "frontend/tests/wechat-ui/**"
+      - "frontend/tests/chain-integrity/**"
       - "docs/communications/EXT-WECHAT-07_CLOSE_PACK.md"
+      - "docs/communications/EXT-CHAIN-INTEGRITY-01_*.md"
+      - "docs/governance/BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_*.md"
       - "docs/governance/PLATFORM_GOVERNANCE_RULE_REGISTRY.md"
   push:
     branches:
@@ -15,9 +19,13 @@ on:
     paths:
       - "frontend/app/api/governance/platform/**"
       - "frontend/app/api/wechat/regulator-public-key/**"
+      - "frontend/lib/chainIntegrity/**"
       - "frontend/lib/wechat/signaturePublicKey.ts"
       - "frontend/tests/wechat-ui/**"
+      - "frontend/tests/chain-integrity/**"
       - "docs/communications/EXT-WECHAT-07_CLOSE_PACK.md"
+      - "docs/communications/EXT-CHAIN-INTEGRITY-01_*.md"
+      - "docs/governance/BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_*.md"
       - "docs/governance/PLATFORM_GOVERNANCE_RULE_REGISTRY.md"
 
 jobs:
@@ -34,4 +42,8 @@ jobs:
       - name: Assert GOV-WECHAT-07 PASS
         run: |
           npx tsx --eval "import { getPlatformGovernanceStatus } from './app/api/governance/platform/_lib.ts'; const status = getPlatformGovernanceStatus(); const check = status.governanceChecks?.find((entry) => entry.id === 'GOV-WECHAT-07'); if (!(check && check.id === 'GOV-WECHAT-07' && check.status === 'PASS')) { console.error('GOV-WECHAT-07 must be PASS in platform governance aggregator'); process.exit(1); } console.log('PASS GOV-WECHAT-07');"
+        working-directory: frontend
+      - name: Assert GOV-CHAIN-01 PASS
+        run: |
+          npx tsx --eval "import { getPlatformGovernanceStatus } from './app/api/governance/platform/_lib.ts'; const status = getPlatformGovernanceStatus(); const check = status.governanceChecks?.find((entry) => entry.id === 'GOV-CHAIN-01'); if (!(check && check.id === 'GOV-CHAIN-01' && check.status === 'PASS')) { console.error('GOV-CHAIN-01 must be PASS in platform governance aggregator'); if (check?.notes?.length) { console.error('GOV-CHAIN-01 notes:', check.notes.join(' | ')); } process.exit(1); } console.log('PASS GOV-CHAIN-01');"
         working-directory: frontend
