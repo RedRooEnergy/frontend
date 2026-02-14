@@ -65,8 +65,8 @@ export default function AdminDashboardLayout({ children, title }: { children: Re
   return (
     <div className="min-h-screen bg-surface-muted text-strong">
       <main className="buyer-dashboard-main buyer-dashboard-grid">
-        <aside aria-label="Admin navigation" className="buyer-nav space-y-3">
-          <h2 className="text-lg font-semibold">Admin</h2>
+        <aside aria-label="Grand-Master navigation" className="buyer-nav space-y-3">
+          <h2 className="text-lg font-semibold">Grand-Master</h2>
           <nav className="flex flex-col gap-2">
             {navItems.map((item) => {
               const active = pathname === item.href;
@@ -98,7 +98,7 @@ export default function AdminDashboardLayout({ children, title }: { children: Re
           </div>
           {!enabled && (
             <div className="bg-amber-100 border border-amber-200 text-amber-900 text-sm rounded-2xl p-4">
-              Admin phase is disabled. Set NEXT_PUBLIC_ADMIN_PHASE=on in non-production to enable.
+              Grand-Master phase is disabled. Set NEXT_PUBLIC_ADMIN_PHASE=on in non-production to enable.
             </div>
           )}
           {enabled && children}

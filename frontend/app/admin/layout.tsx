@@ -22,7 +22,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <AdminSidebar />
         <section className="space-y-4">
           <AdminTopBar
-            title="Platform Administrator Dashboard"
+            title="Grand-Master Dashboard"
             subtitle="Governed control surface. All mutations require reason and immutable audit receipts."
           />
           {children}

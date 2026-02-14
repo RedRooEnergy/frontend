@@ -17,7 +17,7 @@ export default function AdminConversationsPage() {
 
   return (
     <AdminDashboardLayout title="Operational Conversations">
-      <ChatDashboardClient role="ADMIN" title="Admin Conversation Monitor" />
+      <ChatDashboardClient role="ADMIN" title="Grand-Master Conversation Monitor" />
     </AdminDashboardLayout>
   );
 }

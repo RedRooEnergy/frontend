@@ -41,7 +41,7 @@ export default function AdminOrdersEscalationsPage() {
   const escalations = orders.filter(orderNeedsEscalation);
 
   return (
-    <AdminDashboardLayout title="Admin Orders & Escalations">
+    <AdminDashboardLayout title="Grand-Master Orders & Escalations">
       <div className="buyer-card">
         <div className="buyer-card-header">
           <div>

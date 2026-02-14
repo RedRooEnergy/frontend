@@ -60,7 +60,7 @@ export default function AdminProductsPage() {
     <div className="space-y-4">
       <header>
         <h2 className="text-xl font-semibold text-slate-900">Products</h2>
-        <p className="text-sm text-slate-600">Moderation controls remain hidden until backend product-admin routes are authorized.</p>
+        <p className="text-sm text-slate-600">Moderation controls remain hidden until backend product moderation routes are authorized.</p>
       </header>
 
       {loading ? <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">Loading product surface...</div> : null}

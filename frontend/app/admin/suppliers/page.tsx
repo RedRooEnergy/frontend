@@ -61,7 +61,7 @@ export default function AdminSuppliersPage() {
     <div className="space-y-4">
       <header>
         <h2 className="text-xl font-semibold text-slate-900">Suppliers</h2>
-        <p className="text-sm text-slate-600">Moderation UI remains read-only until backend supplier-admin endpoints are available.</p>
+        <p className="text-sm text-slate-600">Moderation UI remains read-only until backend supplier moderation endpoints are available.</p>
       </header>
 
       {loading ? <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">Loading supplier surface...</div> : null}
