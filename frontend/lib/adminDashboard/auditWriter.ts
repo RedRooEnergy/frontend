@@ -5,6 +5,13 @@ export const ADMIN_AUDIT_COLLECTION = "admin_audit_logs";
 
 type CollectionLike = {
   insertOne: (doc: Record<string, unknown>) => Promise<{ insertedId?: { toString: () => string } | string }>;
+  find: (query: Record<string, unknown>) => {
+    sort: (spec: Record<string, 1 | -1>) => {
+      limit: (value: number) => {
+        toArray: () => Promise<Array<Record<string, unknown>>>;
+      };
+    };
+  };
 };
 
 type AuditDependencies = {
@@ -68,6 +75,7 @@ export type AdminAuditRecord = {
   evidence?: Array<{ type: string; refId: string; hash?: string; uri?: string }>;
   correlationId?: string | null;
   tenantId?: string | null;
+  integrityHash: string;
 };
 
 export class AdminAuditError extends Error {
@@ -93,6 +101,45 @@ export function hashCanonicalPayload(value: unknown): string {
   return crypto.createHash("sha256").update(stableStringify(value), "utf8").digest("hex");
 }
 
+export function computeAuditRecordIntegrityHash(record: {
+  ts: string;
+  actor: {
+    userId: string;
+    role: string;
+    email?: string | null;
+    ip?: string | null;
+    userAgent?: string | null;
+  };
+  action: string;
+  entity: {
+    type: string;
+    id: string;
+  };
+  reason: string;
+  beforeHash: string;
+  afterHash: string;
+  evidence?: Array<{ type: string; refId: string; hash?: string; uri?: string }>;
+  correlationId?: string | null;
+  tenantId?: string | null;
+}) {
+  return hashCanonicalPayload({
+    ts: record.ts,
+    actor: record.actor,
+    action: record.action,
+    entity: record.entity,
+    reason: record.reason,
+    beforeHash: record.beforeHash,
+    afterHash: record.afterHash,
+    evidence: record.evidence || [],
+    correlationId: record.correlationId || null,
+    tenantId: record.tenantId || null,
+  });
+}
+
+function isSha256Hex(value: unknown) {
+  return typeof value === "string" && /^[0-9a-f]{64}$/.test(value);
+}
+
 function normalizeReason(input: string): string {
   return String(input || "").trim();
 }
@@ -112,7 +159,7 @@ function buildRecord(input: WriteAdminAuditInput, deps: AuditDependencies): Admi
   assertRequired(input.entity?.type || "", "entity.type");
   assertRequired(input.entity?.id || "", "entity.id");
 
-  return {
+  const baseRecord: Omit<AdminAuditRecord, "integrityHash"> = {
     auditId: deps.randomUuid(),
     ts: deps.now().toISOString(),
     actor: {
@@ -134,6 +181,11 @@ function buildRecord(input: WriteAdminAuditInput, deps: AuditDependencies): Admi
     correlationId: input.correlationId ? String(input.correlationId).trim() : null,
     tenantId: input.tenantId ? String(input.tenantId).trim() : null,
   };
+
+  return {
+    ...baseRecord,
+    integrityHash: computeAuditRecordIntegrityHash(baseRecord),
+  };
 }
 
 export async function writeAdminAudit(
@@ -148,4 +200,75 @@ export async function writeAdminAudit(
   const collection = await deps.getCollection(ADMIN_AUDIT_COLLECTION);
   await collection.insertOne(record);
   return record;
+}
+
+export type AdminAuditIntegrityResult = {
+  status: "PASS" | "FAIL";
+  checkedAt: string;
+  totalRecords: number;
+  invalidRecords: number;
+  notes: string[];
+};
+
+export async function verifyAdminAuditLogIntegrity(
+  input: { limit?: number } = {},
+  overrides: Partial<AuditDependencies> = {}
+): Promise<AdminAuditIntegrityResult> {
+  const deps: AuditDependencies = {
+    ...defaultDependencies,
+    ...overrides,
+  };
+  const limit = Math.max(1, Math.min(Math.floor(input.limit || 5000), 50_000));
+  const collection = await deps.getCollection(ADMIN_AUDIT_COLLECTION);
+  const rows = await collection.find({}).sort({ ts: 1 }).limit(limit).toArray();
+  const notes: string[] = [];
+  let invalidRecords = 0;
+
+  rows.forEach((row, idx) => {
+    const auditId = String((row as any).auditId || `row-${idx + 1}`);
+    const beforeHash = (row as any).beforeHash;
+    const afterHash = (row as any).afterHash;
+    const integrityHash = (row as any).integrityHash;
+
+    if (!isSha256Hex(beforeHash) || !isSha256Hex(afterHash)) {
+      invalidRecords += 1;
+      notes.push(`INVALID_HASH_SHAPE:${auditId}`);
+      return;
+    }
+
+    const expectedIntegrityHash = computeAuditRecordIntegrityHash({
+      ts: String((row as any).ts || ""),
+      actor: {
+        userId: String((row as any).actor?.userId || ""),
+        role: String((row as any).actor?.role || ""),
+        email: (row as any).actor?.email ? String((row as any).actor.email) : null,
+        ip: (row as any).actor?.ip ? String((row as any).actor.ip) : null,
+        userAgent: (row as any).actor?.userAgent ? String((row as any).actor.userAgent) : null,
+      },
+      action: String((row as any).action || ""),
+      entity: {
+        type: String((row as any).entity?.type || ""),
+        id: String((row as any).entity?.id || ""),
+      },
+      reason: String((row as any).reason || ""),
+      beforeHash: String(beforeHash),
+      afterHash: String(afterHash),
+      evidence: Array.isArray((row as any).evidence) ? (row as any).evidence : [],
+      correlationId: (row as any).correlationId ? String((row as any).correlationId) : null,
+      tenantId: (row as any).tenantId ? String((row as any).tenantId) : null,
+    });
+
+    if (!isSha256Hex(integrityHash) || integrityHash !== expectedIntegrityHash) {
+      invalidRecords += 1;
+      notes.push(`INTEGRITY_HASH_MISMATCH:${auditId}`);
+    }
+  });
+
+  return {
+    status: invalidRecords === 0 ? "PASS" : "FAIL",
+    checkedAt: deps.now().toISOString(),
+    totalRecords: rows.length,
+    invalidRecords,
+    notes,
+  };
 }

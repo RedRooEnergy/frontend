@@ -26,6 +26,7 @@ type MemoryGlobal = typeof globalThis & {
 };
 
 const globalMemory = globalThis as MemoryGlobal;
+const APPEND_ONLY_COLLECTIONS = new Set(["admin_audit_logs"]);
 
 function getStore(name: string) {
   if (!globalMemory.__rreAdminMemoryCollections) {
@@ -109,6 +110,9 @@ export function getAdminMemoryCollection(name: string): MemoryCollection {
       };
     },
     async updateOne(filter: Record<string, unknown>, update: Record<string, unknown>) {
+      if (APPEND_ONLY_COLLECTIONS.has(name)) {
+        throw new Error(`${name} is append-only and cannot be updated`);
+      }
       const rows = getStore(name);
       const idx = rows.findIndex((entry) => matchQuery(entry, filter));
       if (idx === -1) return { matchedCount: 0, modifiedCount: 0 };
