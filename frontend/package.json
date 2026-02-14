@@ -11,10 +11,12 @@
     "test:access-control": "RBAC_DB_PATH=.tmp/rbac-access-control.sqlite RBAC_RESET_ON_BOOT=1 RBAC_JWT_SECRET=test-rbac-secret tsx tests/access-control/runAccessControlTests.ts",
     "test:governance-control": "RBAC_DB_PATH=.tmp/rbac-governance.sqlite RBAC_RESET_ON_BOOT=1 RBAC_JWT_SECRET=test-rbac-secret tsx tests/access-control/runGovernanceControlTests.ts",
     "test:portal-access": "RBAC_DB_PATH=.tmp/rbac-portal.sqlite RBAC_RESET_ON_BOOT=1 RBAC_JWT_SECRET=test-rbac-secret tsx tests/access-control/runPortalAccessTests.ts",
-    "test:rbac-persistence": "RBAC_DB_PATH=.tmp/rbac-persistence.sqlite RBAC_RESET_ON_BOOT=1 RBAC_JWT_SECRET=test-rbac-secret tsx tests/access-control/runRbacPersistenceTests.ts"
+    "test:rbac-persistence": "RBAC_DB_PATH=.tmp/rbac-persistence.sqlite RBAC_RESET_ON_BOOT=1 RBAC_JWT_SECRET=test-rbac-secret tsx tests/access-control/runRbacPersistenceTests.ts",
+    "test:wechat": "tsx tests/wechat/runWeChatTests.ts"
   },
   "dependencies": {
     "better-sqlite3": "12.6.2",
+    "mongodb": "^6.21.0",
     "next": "^14.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

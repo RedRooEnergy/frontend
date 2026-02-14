@@ -91,6 +91,29 @@ Status: IMPLEMENTATION AUTHORIZED
 Governance: COMPLETE
 Change Control: REQUIRED for all modifications
 
+## EXT-WECHAT-01 — WeChat Governed Communications Channel
+
+Status: LOCKED BASELINE
+Operational State: Feature-gated (disabled by default)
+Change Control: REQUIRED (boundary expansion prohibited)
+Audit: CI enforced (wechat-system-ci.yml)
+Scope:
+- Event-bound WeChat notifications/prompts
+- Deterministic template rendering + payload hashing
+- Binding verification and lifecycle controls
+- Immutable dispatch/inbound evidence records
+- Regulator read-only governance overview (hash-first)
+
+Dependencies:
+- Core identity/session controls
+- Core audit and immutable evidence posture
+- Existing order/compliance/freight/payment correlation surfaces
+
+Implementation hash reference:
+- Tag: ext-wechat-01-baseline-v1.0
+- CI: test:wechat passing
+- Immutable boundaries verified
+
 ## EXT-26 — [EXTENSION NAME – TO BE CONFIRMED]
 
 Status: GOVERNANCE COMPLETE  
