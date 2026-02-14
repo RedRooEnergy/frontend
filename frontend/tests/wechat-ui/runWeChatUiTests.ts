@@ -90,6 +90,36 @@ async function main() {
     })
   );
 
+  results.push(
+    await runCheck("REGULATOR-HASH-FIRST-ENFORCEMENT", () => {
+      const routeSource = readFile("app/api/wechat/regulator-slice/route.ts");
+      const dashboardSource = readFile("app/dashboard/regulator/wechat/page.tsx");
+
+      const exportedMethods = Array.from(routeSource.matchAll(/export\s+async\s+function\s+(GET|POST|PUT|PATCH|DELETE)\s*\(/g)).map(
+        (match) => match[1]
+      );
+      assert(exportedMethods.includes("GET"), "Regulator slice route must export GET");
+      assert(!exportedMethods.some((method) => method !== "GET"), "Regulator slice route exports mutation method");
+
+      const forbiddenBodyPatterns = [
+        /renderedPayload\b/,
+        /inboundPayload\b/,
+        /messageBody\b/i,
+        /\bbody\s*:/i,
+      ];
+      for (const pattern of forbiddenBodyPatterns) {
+        assert(!pattern.test(routeSource), `Forbidden body exposure pattern found in regulator route: ${pattern}`);
+        assert(!pattern.test(dashboardSource), `Forbidden body exposure pattern found in regulator dashboard: ${pattern}`);
+      }
+
+      const forbiddenSecretPatterns = [/appSecret/i, /accessToken/i, /webhookSecret/i, /WECHAT_WEBHOOK_TOKEN/i];
+      for (const pattern of forbiddenSecretPatterns) {
+        assert(!pattern.test(routeSource), `Forbidden secret/token reference found in regulator route: ${pattern}`);
+        assert(!pattern.test(dashboardSource), `Forbidden secret/token reference found in regulator dashboard: ${pattern}`);
+      }
+    })
+  );
+
   const passCount = results.filter((row) => row.pass).length;
   const failCount = results.length - passCount;
 
