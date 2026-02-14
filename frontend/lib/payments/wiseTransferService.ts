@@ -21,6 +21,7 @@ import {
   type WiseTransferIntentState,
 } from "./wiseTransferIntentStore";
 import { mapWiseProviderError } from "./wiseErrors";
+import { persistFreightSettlementLinkageIfProvided } from "../chainIntegrity/persistenceSeams";
 
 export const WISE_TRANSFER_TERMINAL_STATES: WiseTransferIntentState[] = [
   "COMPLETED",
@@ -456,6 +457,16 @@ export async function applyWiseProviderStatusToIntent(input: {
   payload: Record<string, unknown>;
   incomingEventId?: string | null;
   occurredAtUnix?: number | null;
+  chainIntegrity?: {
+    orderId?: string;
+    settlementVersion?: string;
+    paymentSnapshotHash?: string | null;
+    exportManifestHash?: string | null;
+    freightSettlementHash?: string | null;
+    settlementPayloadCanonicalJson?: string | null;
+    status?: "DRAFT" | "FINAL" | "VOID";
+    evidenceRefs?: Array<{ type: string; id: string; hash?: string; path?: string }>;
+  };
 }) {
   const intent = await getWiseTransferIntentByTransferId(input.transferId);
 
@@ -522,6 +533,19 @@ export async function applyWiseProviderStatusToIntent(input: {
     autoRetryBlocked: mapped.terminalState === "TIMED_OUT" ? true : intent.autoRetryBlocked,
     lastErrorCode: mapped.terminalState === "COMPLETED" ? null : `WISE_${mapped.terminalState}`,
   });
+
+  if (mapped.terminalState === "COMPLETED" && input.chainIntegrity) {
+    await persistFreightSettlementLinkageIfProvided({
+      orderId: input.chainIntegrity.orderId || intent.orderId,
+      settlementVersion: input.chainIntegrity.settlementVersion,
+      paymentSnapshotHash: input.chainIntegrity.paymentSnapshotHash,
+      exportManifestHash: input.chainIntegrity.exportManifestHash,
+      freightSettlementHash: input.chainIntegrity.freightSettlementHash,
+      settlementPayloadCanonicalJson: input.chainIntegrity.settlementPayloadCanonicalJson,
+      status: input.chainIntegrity.status || "FINAL",
+      evidenceRefs: input.chainIntegrity.evidenceRefs,
+    });
+  }
 
   return {
     intent: transitioned,

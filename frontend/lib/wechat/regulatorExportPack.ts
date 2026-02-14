@@ -5,6 +5,7 @@ import {
   listWeChatInboundSliceForRegulator,
   listWeChatLedgerSliceForRegulator,
 } from "./store";
+import { persistExportManifestLinkageIfProvided } from "../chainIntegrity/persistenceSeams";
 
 type ExportScope = {
   bindingId: string | null;
@@ -242,6 +243,15 @@ export async function buildWeChatRegulatorExportPack(input: {
   bindingId?: string;
   limit?: number;
   page?: number;
+  chainIntegrity?: {
+    orderId?: string;
+    paymentSnapshotHash?: string | null;
+    exportManifestHash?: string | null;
+    manifestPath?: string | null;
+    generatedAt?: string | null;
+    keyId?: string | null;
+    signaturePresent?: boolean;
+  };
   signature?: {
     enabled?: boolean;
     privateKeyPem?: string;
@@ -341,6 +351,17 @@ export async function buildWeChatRegulatorExportPack(input: {
     zipEntries.push({ name: "manifest.sig.txt", data: manifestSignatureBytes });
   }
   const zipBuffer = buildStoredZip(zipEntries);
+
+  // Phase seam only: persist linkage when caller explicitly provides order-correlated context.
+  await persistExportManifestLinkageIfProvided({
+    orderId: input.chainIntegrity?.orderId,
+    paymentSnapshotHash: input.chainIntegrity?.paymentSnapshotHash,
+    exportManifestHash: input.chainIntegrity?.exportManifestHash || manifestSha256,
+    manifestPath: input.chainIntegrity?.manifestPath || "manifest.json",
+    generatedAt: input.chainIntegrity?.generatedAt || generatedAt,
+    keyId: input.chainIntegrity?.keyId || (manifestSignature ? manifestSignature.keyId : null),
+    signaturePresent: input.chainIntegrity?.signaturePresent ?? Boolean(manifestSignature),
+  });
 
   return {
     zipBuffer,
