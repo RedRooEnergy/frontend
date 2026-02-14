@@ -1,5 +1,6 @@
 import { getDb } from "../db/mongo";
 import { assertSha256LowerHex64 } from "./hashValidation";
+import { assertWriteOnceTransition, normalizeNullableString } from "./writeOnceGuards";
 
 const COLLECTION = "chain_export_manifests";
 
@@ -47,6 +48,7 @@ const defaultDependencies: ExportManifestStoreDependencies = {
 };
 
 let indexesReady: Promise<void> | null = null;
+const EXPORT_MANIFEST_WRITE_ONCE_FIELDS = ["paymentSnapshotHash", "exportManifestHash"] as const;
 
 function resolveDependencies(overrides: Partial<ExportManifestStoreDependencies> = {}): ExportManifestStoreDependencies {
   return {
@@ -161,19 +163,44 @@ export async function upsertExportManifestRecord(
     query.exportManifestHash = exportManifestHash;
   }
 
+  const existing = await collection.findOne(query);
+  if (existing) {
+    for (const field of EXPORT_MANIFEST_WRITE_ONCE_FIELDS) {
+      const nextValue =
+        field === "paymentSnapshotHash"
+          ? paymentSnapshotHash
+          : field === "exportManifestHash"
+          ? exportManifestHash
+          : null;
+      if (normalizeNullableString(nextValue) !== null) {
+        assertWriteOnceTransition({
+          existing: existing[field],
+          next: nextValue,
+          field,
+        });
+      }
+    }
+  }
+
+  const setFields: Record<string, unknown> = {
+    orderId,
+    manifestPath: String(input.manifestPath || "").trim() || null,
+    generatedAt: String(input.generatedAt || "").trim() || null,
+    keyId: String(input.keyId || "").trim() || null,
+    signaturePresent: input.signaturePresent === true,
+    updatedAt: now,
+  };
+  if (normalizeNullableString(exportManifestHash) !== null) {
+    setFields.exportManifestHash = exportManifestHash;
+  }
+  if (normalizeNullableString(paymentSnapshotHash) !== null) {
+    setFields.paymentSnapshotHash = paymentSnapshotHash;
+  }
+
   const updated = await collection.findOneAndUpdate(
     query,
     {
-      $set: {
-        orderId,
-        exportManifestHash,
-        paymentSnapshotHash,
-        manifestPath: String(input.manifestPath || "").trim() || null,
-        generatedAt: String(input.generatedAt || "").trim() || null,
-        keyId: String(input.keyId || "").trim() || null,
-        signaturePresent: input.signaturePresent === true,
-        updatedAt: now,
-      },
+      $set: setFields,
       $setOnInsert: {
         recordId: deps.randomId(),
         createdAt: now,

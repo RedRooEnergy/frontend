@@ -1,5 +1,6 @@
 import { getDb } from "../db/mongo";
 import { assertSha256LowerHex64 } from "./hashValidation";
+import { assertFinalOnlyCanonicalPayload, assertWriteOnceTransition, normalizeNullableString } from "./writeOnceGuards";
 
 const COLLECTION = "chain_freight_settlements";
 
@@ -55,6 +56,11 @@ const defaultDependencies: FreightSettlementStoreDependencies = {
 };
 
 let indexesReady: Promise<void> | null = null;
+const FREIGHT_SETTLEMENT_WRITE_ONCE_FIELDS = [
+  "paymentSnapshotHash",
+  "exportManifestHash",
+  "freightSettlementHash",
+] as const;
 
 function resolveDependencies(overrides: Partial<FreightSettlementStoreDependencies> = {}): FreightSettlementStoreDependencies {
   return {
@@ -131,6 +137,15 @@ export async function createFreightSettlementRecord(
   const orderId = String(input.orderId || "").trim();
   if (!orderId) throw new Error("FREIGHT_SETTLEMENT_ORDER_ID_REQUIRED");
 
+  const status = normalizeStatus(input.status);
+  const settlementPayloadCanonicalJson = String(input.settlementPayloadCanonicalJson || "").trim() || null;
+  assertFinalOnlyCanonicalPayload({
+    existingPayload: null,
+    nextPayload: settlementPayloadCanonicalJson,
+    existingStatus: null,
+    nextStatus: status,
+  });
+
   const now = deps.now().toISOString();
   const record: FreightSettlementRecord = {
     settlementRecordId: deps.randomId(),
@@ -139,8 +154,8 @@ export async function createFreightSettlementRecord(
     exportManifestHash: normalizeOptionalHash(input.exportManifestHash, "exportManifestHash"),
     freightSettlementHash: normalizeOptionalHash(input.freightSettlementHash, "freightSettlementHash"),
     settlementVersion: String(input.settlementVersion || "v1").trim() || "v1",
-    settlementPayloadCanonicalJson: String(input.settlementPayloadCanonicalJson || "").trim() || null,
-    status: normalizeStatus(input.status),
+    settlementPayloadCanonicalJson,
+    status,
     evidenceRefs: Array.isArray(input.evidenceRefs) ? input.evidenceRefs : [],
     createdAt: now,
     updatedAt: now,
@@ -178,27 +193,66 @@ export async function upsertFreightSettlementRecord(
   const exportManifestHash = normalizeOptionalHash(input.exportManifestHash, "exportManifestHash");
   const freightSettlementHash = normalizeOptionalHash(input.freightSettlementHash, "freightSettlementHash");
   const status = normalizeStatus(input.status);
+  const settlementPayloadCanonicalJson = String(input.settlementPayloadCanonicalJson || "").trim() || null;
 
   const query: Record<string, unknown> = { orderId, settlementVersion };
   if (freightSettlementHash) {
     query.freightSettlementHash = freightSettlementHash;
   }
 
+  const existing = await collection.findOne(query);
+  if (existing) {
+    for (const field of FREIGHT_SETTLEMENT_WRITE_ONCE_FIELDS) {
+      const nextValue =
+        field === "paymentSnapshotHash"
+          ? paymentSnapshotHash
+          : field === "exportManifestHash"
+          ? exportManifestHash
+          : field === "freightSettlementHash"
+          ? freightSettlementHash
+          : null;
+      if (normalizeNullableString(nextValue) !== null) {
+        assertWriteOnceTransition({
+          existing: existing[field],
+          next: nextValue,
+          field,
+        });
+      }
+    }
+  }
+
+  assertFinalOnlyCanonicalPayload({
+    existingPayload: existing?.settlementPayloadCanonicalJson,
+    nextPayload: settlementPayloadCanonicalJson,
+    existingStatus: existing?.status,
+    nextStatus: status,
+  });
+
   const now = deps.now().toISOString();
+  const setFields: Record<string, unknown> = {
+    orderId,
+    settlementVersion,
+    status,
+    evidenceRefs: Array.isArray(input.evidenceRefs) ? input.evidenceRefs : [],
+    updatedAt: now,
+  };
+  if (normalizeNullableString(paymentSnapshotHash) !== null) {
+    setFields.paymentSnapshotHash = paymentSnapshotHash;
+  }
+  if (normalizeNullableString(exportManifestHash) !== null) {
+    setFields.exportManifestHash = exportManifestHash;
+  }
+  if (normalizeNullableString(freightSettlementHash) !== null) {
+    setFields.freightSettlementHash = freightSettlementHash;
+  }
+  if (normalizeNullableString(settlementPayloadCanonicalJson) !== null) {
+    setFields.settlementPayloadCanonicalJson = settlementPayloadCanonicalJson;
+  }
+
   const updated = await collection.findOneAndUpdate(
     query,
     {
-      $set: {
-        orderId,
-        settlementVersion,
-        paymentSnapshotHash,
-        exportManifestHash,
-        freightSettlementHash,
-        settlementPayloadCanonicalJson: String(input.settlementPayloadCanonicalJson || "").trim() || null,
-        status,
-        evidenceRefs: Array.isArray(input.evidenceRefs) ? input.evidenceRefs : [],
-        updatedAt: now,
-      },
+      $set: setFields,
       $setOnInsert: {
         settlementRecordId: deps.randomId(),
         createdAt: now,
