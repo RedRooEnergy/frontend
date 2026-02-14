@@ -173,6 +173,48 @@ async function main() {
     })
   );
 
+  results.push(
+    await runCheck("REGULATOR-EXPORT-AUDIT-GUARDS", () => {
+      const exportRouteSource = readFile("app/api/wechat/regulator-export-pack/route.ts");
+      const auditRouteSource = readFile("app/api/wechat/regulator-export-audit/route.ts");
+      const auditStoreSource = readFile("lib/wechat/exportAuditStore.ts");
+
+      const exportRouteMethods = Array.from(
+        exportRouteSource.matchAll(/export\s+async\s+function\s+(GET|POST|PUT|PATCH|DELETE)\s*\(/g)
+      ).map((match) => match[1]);
+      assert(exportRouteMethods.includes("GET"), "Regulator export pack route must export GET");
+      assert(!exportRouteMethods.some((method) => method !== "GET"), "Regulator export pack route exports mutation method");
+
+      const auditRouteMethods = Array.from(
+        auditRouteSource.matchAll(/export\s+async\s+function\s+(GET|POST|PUT|PATCH|DELETE)\s*\(/g)
+      ).map((match) => match[1]);
+      assert(auditRouteMethods.includes("GET"), "Regulator export audit route must export GET");
+      assert(!auditRouteMethods.some((method) => method !== "GET"), "Regulator export audit route exports mutation method");
+
+      assert(
+        exportRouteSource.includes("appendWeChatRegulatorExportAuditEvent"),
+        "Regulator export pack route does not append export audit event"
+      );
+
+      const forbiddenBodyPatterns = [/renderedPayload\b/, /inboundPayload\b/, /messageBody\b/i];
+      for (const pattern of forbiddenBodyPatterns) {
+        assert(!pattern.test(exportRouteSource), `Forbidden raw body pattern found in export route: ${pattern}`);
+        assert(!pattern.test(auditRouteSource), `Forbidden raw body pattern found in audit route: ${pattern}`);
+      }
+
+      const forbiddenSecretPatterns = [/appSecret/i, /accessToken/i, /webhookSecret/i, /WECHAT_WEBHOOK_TOKEN/i];
+      for (const pattern of forbiddenSecretPatterns) {
+        assert(!pattern.test(exportRouteSource), `Forbidden secret/token reference found in export route: ${pattern}`);
+        assert(!pattern.test(auditRouteSource), `Forbidden secret/token reference found in audit route: ${pattern}`);
+      }
+
+      const forbiddenStoreWritePatterns = [/\.updateOne\(/, /\.replaceOne\(/, /\.deleteOne\(/, /\.findOneAndUpdate\(/];
+      for (const pattern of forbiddenStoreWritePatterns) {
+        assert(!pattern.test(auditStoreSource), `Forbidden non-append write operation found in export audit store: ${pattern}`);
+      }
+    })
+  );
+
   const passCount = results.filter((row) => row.pass).length;
   const failCount = results.length - passCount;
 
