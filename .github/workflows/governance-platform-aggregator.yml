@@ -4,11 +4,16 @@ on:
   pull_request:
     paths:
       - "frontend/app/api/governance/platform/**"
+      - "frontend/app/api/governance/chatbot/**"
       - "frontend/app/api/wechat/regulator-public-key/**"
       - "frontend/lib/chainIntegrity/**"
       - "frontend/lib/wechat/signaturePublicKey.ts"
+      - "frontend/tests/chatbot/**"
       - "frontend/tests/wechat-ui/**"
       - "frontend/tests/chain-integrity/**"
+      - "scorecards/chatbot.scorecard.json"
+      - ".github/workflows/chatbot-audit.yml"
+      - "docs/governance/GOV-CHAT-01_PGA_RULE_CONTRACT.md"
       - "docs/communications/EXT-WECHAT-07_CLOSE_PACK.md"
       - "docs/communications/EXT-CHAIN-INTEGRITY-01_*.md"
       - "docs/governance/BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_*.md"
@@ -18,11 +23,16 @@ on:
       - "main"
     paths:
       - "frontend/app/api/governance/platform/**"
+      - "frontend/app/api/governance/chatbot/**"
       - "frontend/app/api/wechat/regulator-public-key/**"
       - "frontend/lib/chainIntegrity/**"
       - "frontend/lib/wechat/signaturePublicKey.ts"
+      - "frontend/tests/chatbot/**"
       - "frontend/tests/wechat-ui/**"
       - "frontend/tests/chain-integrity/**"
+      - "scorecards/chatbot.scorecard.json"
+      - ".github/workflows/chatbot-audit.yml"
+      - "docs/governance/GOV-CHAT-01_PGA_RULE_CONTRACT.md"
       - "docs/communications/EXT-WECHAT-07_CLOSE_PACK.md"
       - "docs/communications/EXT-CHAIN-INTEGRITY-01_*.md"
       - "docs/governance/BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_*.md"
@@ -46,4 +56,8 @@ jobs:
       - name: Assert GOV-CHAIN-01 PASS
         run: |
           npx tsx --eval "import { getPlatformGovernanceStatus } from './app/api/governance/platform/_lib.ts'; const status = getPlatformGovernanceStatus(); const check = status.governanceChecks?.find((entry) => entry.id === 'GOV-CHAIN-01'); if (!(check && check.id === 'GOV-CHAIN-01' && check.status === 'PASS')) { console.error('GOV-CHAIN-01 must be PASS in platform governance aggregator'); if (check?.notes?.length) { console.error('GOV-CHAIN-01 notes:', check.notes.join(' | ')); } process.exit(1); } console.log('PASS GOV-CHAIN-01');"
+        working-directory: frontend
+      - name: Assert GOV-CHAT-01 PASS
+        run: |
+          npx tsx --eval "import { getPlatformGovernanceStatus } from './app/api/governance/platform/_lib.ts'; const status = getPlatformGovernanceStatus(); const check = status.governanceChecks?.find((entry) => entry.id === 'GOV-CHAT-01'); if (!(check && check.id === 'GOV-CHAT-01' && check.status === 'PASS')) { console.error('GOV-CHAT-01 must be PASS in platform governance aggregator'); if (check?.notes?.length) { console.error('GOV-CHAT-01 notes:', check.notes.join(' | ')); } process.exit(1); } console.log('PASS GOV-CHAT-01');"
         working-directory: frontend
