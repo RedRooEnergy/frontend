@@ -1,6 +1,6 @@
 # Extensions Registry (Authoritative)
 
-Version: v1.0 LOCKED  
+Version: v1.1 LOCKED  
 Status: Locked  
 Governance State: PAUSED
 
@@ -106,6 +106,19 @@ This Extension does not modify the Immutable Core and operates strictly within C
 Lifecycle Notes:
 Governance complete; implementation authorized; change control required.
 
+## EXT-COMMS-01 — Unified Communications Control Plane
+
+Status: Design Lock (No runtime impact)  
+
+Purpose:
+Unified governance control plane defining communication authority boundaries, evidence posture, event ownership, escalation paths, and prohibited patterns across Email, WeChat, internal messaging (future), and marketing outbound.
+
+Core Interaction:
+This Extension does not modify the Immutable Core and operates strictly within Core constraints.
+
+Lifecycle Notes:
+Design locked for governance alignment only; runtime implementation not authorized; change control required to open build phases.
+
 ## EXT-26 — Marketing Orchestration & Campaign Governance
 
 Status: Complete (Governance complete; implementation not authorized)  
@@ -120,7 +133,7 @@ Lifecycle Notes:
 Governance complete; implementation not authorized; change control required to reopen.
 
 Lock Declaration:
-This Extension Registry is LOCKED at v1.0.
+This Extension Registry is LOCKED at v1.1.
 It defines the authoritative list, identity, and lifecycle intent of Extensions.
 No runtime activation, enforcement, or implementation change is implied.
 Any modification requires formal change control authorisation.

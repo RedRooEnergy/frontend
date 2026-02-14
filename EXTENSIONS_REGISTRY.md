@@ -114,6 +114,21 @@ Implementation hash reference:
 - CI: test:wechat passing
 - Immutable boundaries verified
 
+## EXT-COMMS-01 — Unified Communications Control Plane
+
+Status: DESIGN LOCK (no runtime impact)
+Governance: DESIGN COMPLETE
+Change Control: REQUIRED for runtime implementation
+Scope:
+- Cross-channel authority boundaries (Email, WeChat, Internal Messaging, Marketing)
+- Event ownership and correlation requirements
+- Evidence class and regulator exposure model
+- Escalation and fallback sequencing controls
+- Prohibited communication patterns
+
+Reference:
+- docs/communications/COMMUNICATIONS_CONTROL_PLANE.md
+
 ## EXT-26 — [EXTENSION NAME – TO BE CONFIRMED]
 
 Status: GOVERNANCE COMPLETE  
