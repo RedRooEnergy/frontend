@@ -1,0 +1,50 @@
+name: Chatbot Audit CI
+
+on:
+  pull_request:
+    paths:
+      - "docs/extensions/EXT-CHAT-01/**"
+      - "frontend/app/api/chat/**"
+      - "frontend/app/api/governance/chatbot/**"
+      - "frontend/app/dashboard/admin/conversations/**"
+      - "frontend/app/dashboard/buyer/messages/**"
+      - "frontend/app/dashboard/supplier/messages/**"
+      - "frontend/components/chat/**"
+      - "frontend/lib/chat/**"
+      - "frontend/tests/chatbot/**"
+      - "frontend/package.json"
+      - "scorecards/chatbot.scorecard.json"
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/extensions/EXT-CHAT-01/**"
+      - "frontend/app/api/chat/**"
+      - "frontend/app/api/governance/chatbot/**"
+      - "frontend/app/dashboard/admin/conversations/**"
+      - "frontend/app/dashboard/buyer/messages/**"
+      - "frontend/app/dashboard/supplier/messages/**"
+      - "frontend/components/chat/**"
+      - "frontend/lib/chat/**"
+      - "frontend/tests/chatbot/**"
+      - "frontend/package.json"
+      - "scorecards/chatbot.scorecard.json"
+
+jobs:
+  chatbot-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+      - name: Run chatbot audit tests
+        run: npm run test:chatbot
+        working-directory: frontend
+      - name: Assert chatbot scorecard is PASS
+        run: |
+          node -e "const fs=require('fs'); const path=require('path'); const p=path.resolve(process.cwd(),'../scorecards/chatbot.scorecard.json'); if(!fs.existsSync(p)){console.error('Missing scorecard/chatbot.scorecard.json'); process.exit(1);} const score=JSON.parse(fs.readFileSync(p,'utf8')); if(String(score.overall||'FAIL').toUpperCase()!=='PASS'){console.error('Chatbot scorecard is not PASS'); process.exit(1);} console.log('PASS chatbot scorecard');"
+        working-directory: frontend

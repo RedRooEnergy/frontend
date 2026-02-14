@@ -11,6 +11,8 @@
     "test:chain-integrity-phase2": "tsx tests/chain-integrity/runChainIntegrityPhase2Tests.ts",
     "test:audit-comms": "tsx tests/audit-comms/runAuditCommsTests.ts",
     "test:wechat-ui": "tsx tests/wechat-ui/runWeChatUiTests.ts",
+    "test:chatbot": "tsx tests/chatbot/runChatbotTests.ts",
+    "verify:chat-models": "tsx scripts/verify-chat-models.ts",
     "lint": "next lint"
   },
   "dependencies": {

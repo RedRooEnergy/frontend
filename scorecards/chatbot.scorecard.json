@@ -1,0 +1,60 @@
+{
+  "extensionId": "EXT-CHAT-01",
+  "generatedAt": "2026-02-14T10:14:46.402Z",
+  "overall": "PASS",
+  "totalChecks": 10,
+  "passCount": 10,
+  "failCount": 0,
+  "checks": [
+    {
+      "id": "POLICY-MATRIX",
+      "status": "PASS",
+      "details": "PASS"
+    },
+    {
+      "id": "RBAC-NON-PARTICIPANT",
+      "status": "PASS",
+      "details": "PASS"
+    },
+    {
+      "id": "LOCKED-POST-BLOCK",
+      "status": "PASS",
+      "details": "PASS"
+    },
+    {
+      "id": "HASH-CANONICALIZATION",
+      "status": "PASS",
+      "details": "PASS"
+    },
+    {
+      "id": "EXPORT-DETERMINISM",
+      "status": "PASS",
+      "details": "PASS"
+    },
+    {
+      "id": "AUDIT-WRITER-HOOKS",
+      "status": "PASS",
+      "details": "PASS"
+    },
+    {
+      "id": "RATE-LIMIT-HOOK",
+      "status": "PASS",
+      "details": "PASS"
+    },
+    {
+      "id": "ROUTE-GUARDS",
+      "status": "PASS",
+      "details": "PASS"
+    },
+    {
+      "id": "UI-SMOKE",
+      "status": "PASS",
+      "details": "PASS"
+    },
+    {
+      "id": "PROHIBITED-PATTERNS",
+      "status": "PASS",
+      "details": "PASS"
+    }
+  ]
+}
