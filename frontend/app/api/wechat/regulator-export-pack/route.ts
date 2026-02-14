@@ -58,6 +58,9 @@ export async function GET(request: Request) {
   const rateLimitEnabled = parseBoolean(process.env.WECHAT_EXPORT_RATE_LIMIT_ENABLED || null, true);
   const rateLimitMaxRequests = parsePositiveInt(process.env.WECHAT_EXPORT_RATE_LIMIT_MAX_REQUESTS || null, 30, 1000);
   const rateLimitWindowSeconds = parsePositiveInt(process.env.WECHAT_EXPORT_RATE_LIMIT_WINDOW_SECONDS || null, 300, 86_400);
+  const exportSignatureEnabled = parseBoolean(process.env.WECHAT_EXPORT_SIGNATURE_ENABLED || null, false);
+  const exportSignatureKeyId = String(process.env.WECHAT_EXPORT_SIGNATURE_KEY_ID || "").trim();
+  const exportSignaturePrivateKeyPem = String(process.env.WECHAT_EXPORT_SIGNATURE_PRIVATE_KEY_PEM || "").trim();
 
   const auditSalt = String(process.env.WECHAT_EXPORT_AUDIT_SALT || "").trim();
   const routePath = "/api/wechat/regulator-export-pack";
@@ -100,11 +103,25 @@ export async function GET(request: Request) {
     remainingAfterCurrent = Math.max(0, rateLimitMaxRequests - (inWindowCount + 1));
   }
 
-  const pack = await buildWeChatRegulatorExportPack({
-    bindingId,
-    limit,
-    page,
-  });
+  if (exportSignatureEnabled && (!exportSignatureKeyId || !exportSignaturePrivateKeyPem)) {
+    return NextResponse.json({ error: "Export signature configuration invalid" }, { status: 500 });
+  }
+
+  let pack;
+  try {
+    pack = await buildWeChatRegulatorExportPack({
+      bindingId,
+      limit,
+      page,
+      signature: {
+        enabled: exportSignatureEnabled,
+        keyId: exportSignatureKeyId,
+        privateKeyPem: exportSignaturePrivateKeyPem,
+      },
+    });
+  } catch {
+    return NextResponse.json({ error: "Export pack generation failed" }, { status: 500 });
+  }
 
   const forwardedFor = firstHeaderValue(request.headers, "x-forwarded-for", "x-real-ip");
   const clientIp = String(forwardedFor.split(",")[0] || "").trim();
@@ -137,12 +154,14 @@ export async function GET(request: Request) {
         slice: pack.slice,
         manifest: pack.manifest,
         manifestSha256: pack.manifestSha256,
+        manifestSignature: pack.manifestSignature || null,
       },
       {
         headers: {
           "x-wechat-export-ratelimit-limit": String(rateLimitMaxRequests),
           "x-wechat-export-ratelimit-remaining": String(remainingAfterCurrent),
           "x-wechat-export-ratelimit-window": String(rateLimitWindowSeconds),
+          "x-wechat-export-signature-enabled": exportSignatureEnabled ? "1" : "0",
         },
       }
     );
@@ -159,6 +178,7 @@ export async function GET(request: Request) {
       "x-wechat-export-ratelimit-limit": String(rateLimitMaxRequests),
       "x-wechat-export-ratelimit-remaining": String(remainingAfterCurrent),
       "x-wechat-export-ratelimit-window": String(rateLimitWindowSeconds),
+      "x-wechat-export-signature-enabled": exportSignatureEnabled ? "1" : "0",
     },
   });
 }
