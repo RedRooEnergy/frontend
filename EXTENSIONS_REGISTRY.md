@@ -114,6 +114,24 @@ Implementation hash reference:
 - CI: test:wechat passing
 - Immutable boundaries verified
 
+## EXT-WECHAT-07 — Public Key Distribution & Auditor Verification
+
+Status: CLOSED — GOVERNANCE LOCKED
+Operational State: Read-only regulator verification surface (GET-only)
+Change Control: REQUIRED (reopen required for any modification)
+Scope:
+- Regulator-guarded public key disclosure for detached signature verification
+- RSA-only/SPKI/fingerprint verification metadata exposure
+- Explicit disabled-path 404 behavior
+- No mutation routes and no authority expansion
+
+References:
+- Close Pack: `docs/communications/EXT-WECHAT-07_CLOSE_PACK.md`
+- Regulator Addendum: `docs/communications/REGULATOR_ADDENDUM_EXT-WECHAT-07_v1.0.md`
+- Aggregator Rule: `GOV-WECHAT-07` (CRITICAL, binary PASS/FAIL)
+- Aggregator + CI Baseline: `9e2ab9a3e6f0cd808f535f6d5ec29fc6ebc3a982`
+- Board Ratification: `docs/governance/BOARD_RESOLUTION_EXT-WECHAT-07_RATIFICATION_v1.0.md`
+
 ## EXT-INTERNAL-MSG-01 — Governed Internal Messaging
 
 Status: DESIGN LOCK (no runtime impact)

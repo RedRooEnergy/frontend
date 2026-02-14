@@ -140,6 +140,23 @@ Gate 3 spec: docs/communications/EXT-AUDIT-COMMS-01_GATE3_READONLY_IMPLEMENTATIO
 Gate 4 spec: docs/communications/EXT-AUDIT-COMMS-01_GATE4_READONLY_IMPLEMENTATION_SPEC.md
 Gate 5 plan: docs/communications/EXT-AUDIT-COMMS-01_GATE5_BOUNDED_BUILD_PLAN_READONLY.md
 
+## EXT-WECHAT-07 — Public Key Distribution & Auditor Verification
+
+Status: Closed (Governance locked)  
+Purpose:
+Regulator-guarded, read-only distribution of export-signature verification key material for independent detached signature verification.
+
+Core Interaction:
+This Extension does not modify the Immutable Core and operates strictly within Core constraints.
+
+Lifecycle Notes:
+Closed and governance-locked; no authority expansion; no mutation rights introduced; change control required to reopen.
+Close Pack: docs/communications/EXT-WECHAT-07_CLOSE_PACK.md
+Regulator Addendum: docs/communications/REGULATOR_ADDENDUM_EXT-WECHAT-07_v1.0.md
+Aggregator Rule: GOV-WECHAT-07 (critical, binary PASS/FAIL)
+Aggregator + CI Baseline: 9e2ab9a3e6f0cd808f535f6d5ec29fc6ebc3a982
+Board Resolution: docs/governance/BOARD_RESOLUTION_EXT-WECHAT-07_RATIFICATION_v1.0.md
+
 ## EXT-26 — Marketing Orchestration & Campaign Governance
 
 Status: Complete (Governance complete; implementation not authorized)  
