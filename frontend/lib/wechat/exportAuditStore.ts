@@ -6,9 +6,26 @@ const EXPORT_AUDIT_COLLECTION = "wechat_regulator_export_audit_log";
 type IndexSpec = Record<string, 1 | -1>;
 type IndexOptions = Record<string, unknown>;
 
+type FindCursor = {
+  sort: (spec: Record<string, 1 | -1>) => {
+    skip: (value: number) => {
+      limit: (value: number) => {
+        toArray: () => Promise<any[]>;
+      };
+    };
+    limit: (value: number) => {
+      toArray: () => Promise<any[]>;
+    };
+    toArray: () => Promise<any[]>;
+  };
+  toArray: () => Promise<any[]>;
+};
+
 type CollectionLike = {
   createIndex: (spec: IndexSpec, options?: IndexOptions) => Promise<unknown>;
   insertOne: (doc: any) => Promise<{ insertedId: { toString: () => string } | string }>;
+  find: (query: Record<string, unknown>) => FindCursor;
+  countDocuments: (query: Record<string, unknown>) => Promise<number>;
 };
 
 export type WeChatExportAuditStoreDependencies = {
@@ -147,4 +164,54 @@ export async function appendWeChatRegulatorExportAuditEvent(
   await collection.insertOne(event);
 
   return event;
+}
+
+export async function listWeChatRegulatorExportAuditEvents(
+  input: {
+    limit?: number;
+    page?: number;
+    manifestSha256?: string;
+  } = {},
+  dependencyOverrides: Partial<WeChatExportAuditStoreDependencies> = {}
+) {
+  const deps = resolveDependencies(dependencyOverrides);
+  await ensureWeChatExportAuditIndexes(dependencyOverrides);
+
+  const limit = Math.min(Math.max(Math.floor(Number(input.limit || 50)), 1), 200);
+  const page = Math.min(Math.max(Math.floor(Number(input.page || 1)), 1), 10_000);
+  const skip = (page - 1) * limit;
+
+  const manifestSha256 = String(input.manifestSha256 || "").trim().toLowerCase();
+  if (manifestSha256) {
+    assertSha256Hex(manifestSha256, "manifestSha256");
+  }
+
+  const query: Record<string, unknown> = {};
+  if (manifestSha256) {
+    query.manifestSha256 = manifestSha256;
+  }
+
+  const collection = await deps.getCollection(EXPORT_AUDIT_COLLECTION);
+  const [rows, total] = await Promise.all([
+    collection
+      .find(query)
+      .sort({ requestedAt: -1, eventId: 1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray(),
+    collection.countDocuments(query),
+  ]);
+
+  return {
+    items: rows.map((row) => {
+      const { _id, ...rest } = row || {};
+      return {
+        ...rest,
+        _id: _id?.toString?.() || String(_id || ""),
+      } as WeChatRegulatorExportAuditEvent;
+    }),
+    total,
+    limit,
+    page,
+  };
 }

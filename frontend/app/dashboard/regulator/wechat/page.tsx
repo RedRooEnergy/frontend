@@ -39,10 +39,32 @@ type RegulatorSliceResponse = {
   generatedAt: string;
 };
 
+type RegulatorExportAuditResponse = {
+  items: Array<{
+    eventIdMasked: string;
+    requestedAt: string;
+    format: "zip" | "json";
+    scope: {
+      bindingId: string | null;
+      limit: number;
+      page: number;
+    };
+    manifestSha256: string;
+    canonicalHashSha256: string;
+  }>;
+  paging: {
+    limit: number;
+    page: number;
+    total: number;
+  };
+  generatedAt: string;
+};
+
 export default function RegulatorWeChatGovernancePage() {
   const router = useRouter();
   const session = getSession();
   const [slice, setSlice] = useState<RegulatorSliceResponse | null>(null);
+  const [audit, setAudit] = useState<RegulatorExportAuditResponse | null>(null);
   const [status, setStatus] = useState<string>("Loading…");
 
   useEffect(() => {
@@ -52,13 +74,24 @@ export default function RegulatorWeChatGovernancePage() {
     }
 
     const run = async () => {
-      const res = await fetch("/api/wechat/regulator-slice?limit=25&page=1");
-      const json = await res.json();
-      if (!res.ok) {
-        setStatus(json?.error || "Unable to load WeChat regulator slice");
+      const [sliceRes, auditRes] = await Promise.all([
+        fetch("/api/wechat/regulator-slice?limit=25&page=1"),
+        fetch("/api/wechat/regulator-export-audit?limit=25&page=1"),
+      ]);
+
+      const [sliceJson, auditJson] = await Promise.all([sliceRes.json(), auditRes.json()]);
+
+      if (!sliceRes.ok) {
+        setStatus(sliceJson?.error || "Unable to load WeChat regulator slice");
         return;
       }
-      setSlice(json);
+      if (!auditRes.ok) {
+        setStatus(auditJson?.error || "Unable to load WeChat export audit log");
+        return;
+      }
+
+      setSlice(sliceJson);
+      setAudit(auditJson);
       setStatus("Loaded");
     };
 
@@ -173,6 +206,47 @@ export default function RegulatorWeChatGovernancePage() {
         >
           Download Export Pack
         </a>
+      </div>
+
+      <div className="buyer-card">
+        <div className="buyer-card-header">
+          <div>
+            <div className="buyer-section-title">Export Audit Log</div>
+            <p className="text-sm text-muted">
+              Read-only chain-of-custody events for regulator export requests.
+            </p>
+          </div>
+        </div>
+        {!audit ? (
+          <p className="text-sm text-muted">{status === "Loaded" ? "No export audit log loaded." : status}</p>
+        ) : (
+          <div className="space-y-3 text-sm">
+            <div>
+              <strong>Total Events:</strong> {audit.paging.total}
+            </div>
+            <div>
+              <strong>Generated:</strong> {new Date(audit.generatedAt).toISOString()}
+            </div>
+            {audit.items.length === 0 ? (
+              <div className="text-xs text-muted">No export audit events.</div>
+            ) : (
+              <div className="space-y-2">
+                {audit.items.map((row) => (
+                  <div key={`${row.eventIdMasked}:${row.requestedAt}`} className="rounded-md border p-2">
+                    <div className="font-mono text-xs">event={row.eventIdMasked}</div>
+                    <div className="text-xs">format={row.format}</div>
+                    <div className="text-xs">
+                      scope: bindingId={row.scope.bindingId || "null"}, limit={row.scope.limit}, page={row.scope.page}
+                    </div>
+                    <div className="font-mono text-xs break-all">manifestSha256={row.manifestSha256}</div>
+                    <div className="font-mono text-xs break-all">canonicalHashSha256={row.canonicalHashSha256}</div>
+                    <div className="text-xs text-muted">requestedAt={new Date(row.requestedAt).toISOString()}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </RegulatorDashboardLayout>
   );
