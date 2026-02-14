@@ -36,6 +36,9 @@ export function resolveWeChatExportSignaturePublicKey(
   } catch {
     throw new Error("WECHAT_EXPORT_SIGNATURE_INVALID: private key malformed");
   }
+  if (privateKey.asymmetricKeyType !== "rsa") {
+    throw new Error("WECHAT_EXPORT_SIGNATURE_INVALID: RSA key required");
+  }
 
   const publicKey = crypto.createPublicKey(privateKey);
   const publicKeyPem = String(publicKey.export({ type: "spki", format: "pem" }));

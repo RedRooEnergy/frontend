@@ -316,6 +316,9 @@ async function main() {
         routeSource.includes("WECHAT_EXPORT_SIGNATURE_ENABLED"),
         "Regulator public key route missing signature-enable flag gate"
       );
+      assert(routeSource.includes("WeChat extension disabled"), "Regulator public key route missing extension-disabled 404 path");
+      assert(routeSource.includes("WeChat export signature disabled"), "Regulator public key route missing signature-disabled 404 path");
+      assert((routeSource.match(/status:\s*404/g) || []).length >= 2, "Regulator public key route must include explicit 404 disabled guards");
       assert(routeSource.includes("keyId"), "Regulator public key route missing keyId in response");
       assert(routeSource.includes("algorithm"), "Regulator public key route missing algorithm in response");
       assert(routeSource.includes("publicKeyPem"), "Regulator public key route missing publicKeyPem in response");
@@ -330,6 +333,7 @@ async function main() {
         helperSource.includes("crypto.createPrivateKey"),
         "Public key helper must derive public key from private key via createPrivateKey"
       );
+      assert(helperSource.includes("privateKey.asymmetricKeyType !== \"rsa\""), "Public key helper must enforce RSA-only keys");
       assert(
         helperSource.includes("crypto.createPublicKey"),
         "Public key helper must derive SPKI public key via createPublicKey"
