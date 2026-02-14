@@ -157,6 +157,28 @@ Aggregator Rule: GOV-WECHAT-07 (critical, binary PASS/FAIL)
 Aggregator + CI Baseline: 9e2ab9a3e6f0cd808f535f6d5ec29fc6ebc3a982
 Board Resolution: docs/governance/BOARD_RESOLUTION_EXT-WECHAT-07_RATIFICATION_v1.0.md
 
+## EXT-CHAIN-INTEGRITY-01 — Cross-Subsystem Cryptographic Assurance Layer
+
+Status: Implemented (Integrity Activated; Runtime Enforcement Not Authorized)  
+Purpose:
+Deterministic cryptographic linkage across Payment Snapshot, Export Manifest, and Freight Settlement for static verifiability and governance-grade mismatch detection.
+
+Core Interaction:
+This Extension does not modify the Immutable Core and operates strictly within Core constraints.
+
+Lifecycle Notes:
+Implementation complete within integrity-only scope; runtime enforcement not authorized; no authority expansion; change control required for any boundary expansion.
+Assertion Document: docs/communications/EXT-CHAIN-INTEGRITY-01_ASSERTION.md
+Schema Design Pack: docs/communications/EXT-CHAIN-INTEGRITY-01_SCHEMA_DESIGN_PACK.md
+Invariant Scaffolding Spec: docs/communications/EXT-CHAIN-INTEGRITY-01_INVARIANT_TEST_SCAFFOLDING_SPEC.md
+Design-Lock Close Pack: docs/communications/EXT-CHAIN-INTEGRITY-01_CLOSE_PACK.md
+Implementation Authorization Packet: docs/communications/EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_AUTHORIZATION_PACKET.md
+Implementation Close Pack: docs/communications/EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_CLOSE_PACK.md
+Board Authorization: docs/governance/BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_AUTHORIZATION_v1.0.md
+Board Ratification: docs/governance/BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_RATIFICATION_v1.0.md
+Aggregator Rule: GOV-CHAIN-01 (critical, binary PASS/FAIL)
+PGA + CI Activation Baseline: b9823ce
+
 ## EXT-26 — Marketing Orchestration & Campaign Governance
 
 Status: Complete (Governance complete; implementation not authorized)  

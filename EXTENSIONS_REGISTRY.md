@@ -132,6 +132,30 @@ References:
 - Aggregator + CI Baseline: `9e2ab9a3e6f0cd808f535f6d5ec29fc6ebc3a982`
 - Board Ratification: `docs/governance/BOARD_RESOLUTION_EXT-WECHAT-07_RATIFICATION_v1.0.md`
 
+## EXT-CHAIN-INTEGRITY-01 — Cross-Subsystem Cryptographic Assurance Layer
+
+Status: IMPLEMENTED (INTEGRITY ACTIVATED; RUNTIME ENFORCEMENT NOT AUTHORIZED)
+Operational State: Integrity assurance layer active via static governance controls
+Change Control: REQUIRED (any enforcement expansion requires reopening)
+Scope:
+- Deterministic linkage across payment snapshot, export manifest, and freight settlement hashes
+- Write-once linkage immutability safeguards
+- Deterministic canonical settlement serialization and chain recomputation
+- Read-only mismatch detection and failure taxonomy mapping
+- PGA static rule activation (`GOV-CHAIN-01`) with CI fail-gate
+
+References:
+- Assertion: `docs/communications/EXT-CHAIN-INTEGRITY-01_ASSERTION.md`
+- Schema Design Pack: `docs/communications/EXT-CHAIN-INTEGRITY-01_SCHEMA_DESIGN_PACK.md`
+- Invariant Scaffolding: `docs/communications/EXT-CHAIN-INTEGRITY-01_INVARIANT_TEST_SCAFFOLDING_SPEC.md`
+- Design-Lock Close Pack: `docs/communications/EXT-CHAIN-INTEGRITY-01_CLOSE_PACK.md`
+- Implementation Authorization Packet: `docs/communications/EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_AUTHORIZATION_PACKET.md`
+- Implementation Close Pack: `docs/communications/EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_CLOSE_PACK.md`
+- Board Authorization: `docs/governance/BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_AUTHORIZATION_v1.0.md`
+- Board Ratification: `docs/governance/BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_RATIFICATION_v1.0.md`
+- Aggregator Rule: `GOV-CHAIN-01` (CRITICAL, binary PASS/FAIL)
+- PGA + CI Activation Baseline: `b9823ce`
+
 ## EXT-INTERNAL-MSG-01 — Governed Internal Messaging
 
 Status: DESIGN LOCK (no runtime impact)

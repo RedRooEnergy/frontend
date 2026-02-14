@@ -28,6 +28,24 @@ On FAIL:
 - Regulator addendum baseline: `c777b1a3808e48f95b0ca0156b89f0f126f52f0d`
 - Board ratification reference: `docs/governance/BOARD_RESOLUTION_EXT-WECHAT-07_RATIFICATION_v1.0.md`
 
+## EXT-CHAIN-INTEGRITY-01 Inclusion
+
+Rule: `GOV-CHAIN-01`  
+Impact Surface: Platform / IntegrityChain  
+Severity: CRITICAL  
+Score Mode: Binary PASS/FAIL (no partial credit)
+
+On FAIL:
+- Platform badge state = `DEGRADED`
+- Cryptographic integrity pill = `RED`
+- Governance score deduction = `12%`
+
+## Baseline References (Chain Integrity)
+
+- PGA and CI activation baseline: `b9823ce`
+- Implementation close pack: `docs/communications/EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_CLOSE_PACK.md`
+- Board ratification reference: `docs/governance/BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_RATIFICATION_v1.0.md`
+
 ## Authority Statement
 
 This index summary is a derived governance surface only.
