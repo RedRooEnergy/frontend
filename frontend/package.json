@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "test:audit-comms": "tsx tests/audit-comms/runAuditCommsTests.ts",
+    "test:wechat-ui": "tsx tests/wechat-ui/runWeChatUiTests.ts",
     "lint": "next lint"
   },
   "dependencies": {
