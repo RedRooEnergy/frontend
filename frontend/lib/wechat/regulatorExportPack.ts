@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { sha256Hex, stableStringify } from "./hash";
 import {
   listWeChatDispatchSliceForRegulator,
@@ -55,14 +56,23 @@ type Manifest = {
   canonicalHashSha256: string;
 };
 
+type ManifestSignature = {
+  fileName: "manifest.sig.txt";
+  keyId: string;
+  algorithm: "RSA-SHA256";
+  signatureSha256: string;
+};
+
 export type WeChatRegulatorExportPack = {
   zipBuffer: Buffer;
   slice: RegulatorSlice;
   manifest: Manifest;
   manifestSha256: string;
+  manifestSignature?: ManifestSignature;
   sliceJson: string;
   manifestJson: string;
   manifestSha256Text: string;
+  manifestSignatureText?: string;
   readmeText: string;
 };
 
@@ -88,7 +98,7 @@ function isoCompact(value: string) {
   return value.replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
 }
 
-function buildReadmeText(input: { generatedAt: string; scope: ExportScope }) {
+function buildReadmeText(input: { generatedAt: string; scope: ExportScope; signatureEnabled: boolean }) {
   const lines = [
     "RRE WeChat Regulator Export Pack",
     `Generated At: ${input.generatedAt}`,
@@ -104,6 +114,9 @@ function buildReadmeText(input: { generatedAt: string; scope: ExportScope }) {
     "2) Validate each listed file hash in manifest.json",
     "3) Use manifest.sha256.txt as the authoritative checksum for manifest.json",
   ];
+  if (input.signatureEnabled) {
+    lines.push("4) Verify detached signature in manifest.sig.txt against manifest.json using configured keyId");
+  }
   return `${lines.join("\n")}\n`;
 }
 
@@ -229,6 +242,11 @@ export async function buildWeChatRegulatorExportPack(input: {
   bindingId?: string;
   limit?: number;
   page?: number;
+  signature?: {
+    enabled?: boolean;
+    privateKeyPem?: string;
+    keyId?: string;
+  };
 } = {}): Promise<WeChatRegulatorExportPack> {
   const scope: ExportScope = {
     bindingId: String(input.bindingId || "").trim() || null,
@@ -257,7 +275,8 @@ export async function buildWeChatRegulatorExportPack(input: {
 
   const sliceBytes = toJsonBytes(slice);
   const sliceSha256 = sha256Hex(sliceBytes);
-  const readmeText = buildReadmeText({ generatedAt, scope });
+  const signatureEnabled = Boolean(input.signature?.enabled);
+  const readmeText = buildReadmeText({ generatedAt, scope, signatureEnabled });
   const readmeBytes = toTextBytes(readmeText);
 
   // Policy: manifest.json intentionally excludes itself and manifest.sha256.txt from files[].
@@ -287,21 +306,52 @@ export async function buildWeChatRegulatorExportPack(input: {
   const finalManifestSha256Text = `${manifestSha256}  manifest.json\n`;
   const finalManifestSha256Bytes = toTextBytes(finalManifestSha256Text);
 
-  const zipBuffer = buildStoredZip([
+  let manifestSignatureText: string | undefined;
+  let manifestSignatureBytes: Buffer | undefined;
+  let manifestSignature: ManifestSignature | undefined;
+
+  if (signatureEnabled) {
+    const keyId = String(input.signature?.keyId || "").trim();
+    const privateKeyPem = String(input.signature?.privateKeyPem || "").trim();
+    if (!keyId) throw new Error("WECHAT_EXPORT_SIGNATURE_INVALID: WECHAT_EXPORT_SIGNATURE_KEY_ID required");
+    if (!privateKeyPem) throw new Error("WECHAT_EXPORT_SIGNATURE_INVALID: WECHAT_EXPORT_SIGNATURE_PRIVATE_KEY_PEM required");
+
+    const signer = crypto.createSign("RSA-SHA256");
+    signer.update(manifestBytes);
+    signer.end();
+    const signatureBase64 = signer.sign(privateKeyPem).toString("base64");
+
+    manifestSignatureText = `keyId=${keyId}\nalgorithm=RSA-SHA256\nsignatureBase64=${signatureBase64}\n`;
+    manifestSignatureBytes = toTextBytes(manifestSignatureText);
+    manifestSignature = {
+      fileName: "manifest.sig.txt",
+      keyId,
+      algorithm: "RSA-SHA256",
+      signatureSha256: sha256Hex(manifestSignatureBytes),
+    };
+  }
+
+  const zipEntries: ZipEntryInput[] = [
     { name: "slice.json", data: sliceBytes },
     { name: "manifest.json", data: manifestBytes },
     { name: "manifest.sha256.txt", data: finalManifestSha256Bytes },
     { name: "README.txt", data: readmeBytes },
-  ]);
+  ];
+  if (manifestSignatureBytes) {
+    zipEntries.push({ name: "manifest.sig.txt", data: manifestSignatureBytes });
+  }
+  const zipBuffer = buildStoredZip(zipEntries);
 
   return {
     zipBuffer,
     slice,
     manifest: manifestCore,
     manifestSha256,
+    manifestSignature,
     sliceJson: sliceBytes.toString("utf8"),
     manifestJson: manifestBytes.toString("utf8"),
     manifestSha256Text: finalManifestSha256Text,
+    manifestSignatureText,
     readmeText,
   };
 }
