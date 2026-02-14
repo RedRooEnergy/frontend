@@ -157,6 +157,19 @@ async function main() {
       for (const fileName of requiredPackNames) {
         assert(builderSource.includes(`\"${fileName}\"`), `Export pack builder missing required filename: ${fileName}`);
       }
+
+      assert(
+        builderSource.includes("manifest.json intentionally excludes itself and manifest.sha256.txt from files[]"),
+        "Builder missing no-self-hash manifest policy assertion"
+      );
+      assert(
+        !builderSource.includes('name: "manifest.json",\n        bytes:'),
+        "Manifest file list should not include manifest.json self-hash entry"
+      );
+      assert(
+        builderSource.includes("const finalManifestSha256Text = `${manifestSha256}  manifest.json\\n`;"),
+        "manifest.sha256.txt must be derived from computed manifestSha256"
+      );
     })
   );
 
