@@ -123,7 +123,6 @@ export async function appendWeChatRegulatorExportAuditEvent(
     manifestSha256: string;
     canonicalHashSha256: string;
     route: string;
-    requestedAt?: string;
     client?: { ipHash?: string; userAgentHash?: string };
   },
   dependencyOverrides: Partial<WeChatExportAuditStoreDependencies> = {}
@@ -137,7 +136,8 @@ export async function appendWeChatRegulatorExportAuditEvent(
   const route = String(input.route || "").trim();
   if (!route) throw new Error("WECHAT_EXPORT_AUDIT_INVALID_ROUTE");
 
-  const requestedAt = String(input.requestedAt || deps.now().toISOString()).trim();
+  // requestedAt is always derived at write time to avoid caller-supplied timestamp drift.
+  const requestedAt = deps.now().toISOString();
   if (!requestedAt) throw new Error("WECHAT_EXPORT_AUDIT_INVALID_REQUESTED_AT");
 
   const manifestSha256 = String(input.manifestSha256 || "").trim().toLowerCase();

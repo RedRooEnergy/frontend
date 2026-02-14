@@ -122,7 +122,6 @@ export async function GET(request: Request) {
       manifestSha256: pack.manifestSha256,
       canonicalHashSha256: pack.manifest.canonicalHashSha256,
       route: routePath,
-      requestedAt,
       client: {
         ipHash: hashOptionalValue(clientIp, auditSalt),
         userAgentHash: hashOptionalValue(userAgent, auditSalt),
