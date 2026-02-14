@@ -223,3 +223,21 @@ This Extension does not modify the Immutable Core and operates strictly within C
 
 Lifecycle Notes:
 Governance complete; implementation not authorized; change control required to reopen.
+
+## Master Domain Status (Append-Only)
+
+Domain: WeChat  
+WECHAT DOMAIN STATUS: COMPLETE  
+Integrity Layer Status: ACTIVE  
+Enforcement Authority: NOT AUTHORIZED
+
+Status classification:
+- IMPLEMENTED
+- GOVERNANCE-ACTIVE
+- CI-ENFORCED
+- BOARD-RATIFIED
+- REGULATOR-DISCLOSABLE
+
+Activation Baseline: `b9823ce`  
+Closure Baseline: `c6bd401`  
+Reference: `docs/governance/WECHAT_SUBSYSTEM_COMPLETION_DECLARATION_v1.0.md`

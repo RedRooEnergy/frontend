@@ -46,6 +46,18 @@ On FAIL:
 - Implementation close pack: `docs/communications/EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_CLOSE_PACK.md`
 - Board ratification reference: `docs/governance/BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_RATIFICATION_v1.0.md`
 
+## Subsystem Completion Declaration — WeChat
+
+WeChat domain (export signatures, regulator public key distribution,
+cross-subsystem integrity linkage, and PGA enforcement) is marked COMPLETE.
+
+Active and CI-enforced rules:
+- `GOV-WECHAT-07`
+- `GOV-CHAIN-01`
+
+Completion declaration:
+- `docs/governance/WECHAT_SUBSYSTEM_COMPLETION_DECLARATION_v1.0.md`
+
 ## Authority Statement
 
 This index summary is a derived governance surface only.
