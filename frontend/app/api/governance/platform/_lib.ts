@@ -11,7 +11,7 @@ export type GovernanceCheckResult = {
   status: GovernanceRuleStatus;
   severity: GovernanceRuleSeverity;
   evidence: string[];
-  impactSurface: "Communications/Cryptographic";
+  impactSurface: "Communications/Cryptographic" | "Platform/IntegrityChain";
   notes: string[];
 };
 
@@ -357,6 +357,128 @@ function evaluateExtWeChat07(root: string): GovernanceCheckResult {
   };
 }
 
+function evaluateChainIntegrity01(root: string): GovernanceCheckResult {
+  const repoRoot =
+    fs.existsSync(path.join(root, "frontend")) && fs.existsSync(path.join(root, "docs"))
+      ? root
+      : fs.existsSync(path.join(root, "..", "frontend")) && fs.existsSync(path.join(root, "..", "docs"))
+        ? path.resolve(root, "..")
+        : root;
+  const frontendRoot = fs.existsSync(path.join(repoRoot, "frontend", "app"))
+    ? path.join(repoRoot, "frontend")
+    : fs.existsSync(path.join(repoRoot, "app"))
+      ? repoRoot
+      : path.join(repoRoot, "frontend");
+
+  const evidence = [
+    "docs/communications/EXT-CHAIN-INTEGRITY-01_ASSERTION.md",
+    "docs/communications/EXT-CHAIN-INTEGRITY-01_SCHEMA_DESIGN_PACK.md",
+    "docs/communications/EXT-CHAIN-INTEGRITY-01_INVARIANT_TEST_SCAFFOLDING_SPEC.md",
+    "docs/communications/EXT-CHAIN-INTEGRITY-01_CLOSE_PACK.md",
+    "docs/communications/EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_AUTHORIZATION_PACKET.md",
+    "docs/governance/BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_AUTHORIZATION_v1.0.md",
+    "frontend/lib/chainIntegrity/canonicalSettlement.ts",
+    "frontend/lib/chainIntegrity/chainComputation.ts",
+    "frontend/lib/chainIntegrity/verifyIntegrityChain.ts",
+    "frontend/lib/chainIntegrity/writeOnceGuards.ts",
+    "frontend/lib/chainIntegrity/exportManifestStore.ts",
+    "frontend/lib/chainIntegrity/freightSettlementStore.ts",
+    "frontend/tests/chain-integrity/runChainIntegrityPhase1Tests.ts",
+    "frontend/tests/chain-integrity/runChainIntegrityPhase2Tests.ts",
+  ];
+  const notes: string[] = [];
+
+  const requiredDocs = [
+    path.join(repoRoot, "docs", "communications", "EXT-CHAIN-INTEGRITY-01_ASSERTION.md"),
+    path.join(repoRoot, "docs", "communications", "EXT-CHAIN-INTEGRITY-01_SCHEMA_DESIGN_PACK.md"),
+    path.join(repoRoot, "docs", "communications", "EXT-CHAIN-INTEGRITY-01_INVARIANT_TEST_SCAFFOLDING_SPEC.md"),
+    path.join(repoRoot, "docs", "communications", "EXT-CHAIN-INTEGRITY-01_CLOSE_PACK.md"),
+    path.join(repoRoot, "docs", "communications", "EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_AUTHORIZATION_PACKET.md"),
+    path.join(repoRoot, "docs", "governance", "BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_AUTHORIZATION_v1.0.md"),
+  ];
+  for (const filePath of requiredDocs) {
+    if (!fs.existsSync(filePath)) {
+      notes.push(`Required artefact missing: ${path.relative(repoRoot, filePath)}`);
+    }
+  }
+
+  const canonicalPath = path.join(frontendRoot, "lib", "chainIntegrity", "canonicalSettlement.ts");
+  const chainPath = path.join(frontendRoot, "lib", "chainIntegrity", "chainComputation.ts");
+  const verifyPath = path.join(frontendRoot, "lib", "chainIntegrity", "verifyIntegrityChain.ts");
+  const guardsPath = path.join(frontendRoot, "lib", "chainIntegrity", "writeOnceGuards.ts");
+  const manifestStorePath = path.join(frontendRoot, "lib", "chainIntegrity", "exportManifestStore.ts");
+  const settlementStorePath = path.join(frontendRoot, "lib", "chainIntegrity", "freightSettlementStore.ts");
+  const phase1TestPath = path.join(frontendRoot, "tests", "chain-integrity", "runChainIntegrityPhase1Tests.ts");
+  const phase2TestPath = path.join(frontendRoot, "tests", "chain-integrity", "runChainIntegrityPhase2Tests.ts");
+
+  const requiredImplFiles = [
+    canonicalPath,
+    chainPath,
+    verifyPath,
+    guardsPath,
+    manifestStorePath,
+    settlementStorePath,
+    phase1TestPath,
+    phase2TestPath,
+  ];
+  for (const filePath of requiredImplFiles) {
+    if (!fs.existsSync(filePath)) {
+      notes.push(`Required implementation file missing: ${path.relative(repoRoot, filePath)}`);
+    }
+  }
+
+  const canonicalSource = readTextIfExists(canonicalPath);
+  const chainSource = readTextIfExists(chainPath);
+  const verifySource = readTextIfExists(verifyPath);
+  const guardSource = readTextIfExists(guardsPath);
+  const manifestStoreSource = readTextIfExists(manifestStorePath);
+  const settlementStoreSource = readTextIfExists(settlementStorePath);
+
+  if (canonicalSource && !canonicalSource.includes("FREIGHT_SETTLEMENT_CANONICAL_V1")) {
+    notes.push("canonicalSettlement.ts missing schema-version guard.");
+  }
+  if (chainSource) {
+    if (!chainSource.includes("computeChainRoot")) notes.push("chainComputation.ts missing computeChainRoot.");
+    if (!chainSource.includes('createHash("sha256")')) notes.push("chainComputation.ts missing SHA-256 computation.");
+  }
+  if (guardSource) {
+    if (!guardSource.includes("assertWriteOnceTransition")) notes.push("writeOnceGuards.ts missing assertWriteOnceTransition.");
+    if (!guardSource.includes("assertFinalOnlyCanonicalPayload")) notes.push("writeOnceGuards.ts missing FINAL-only canonical guard.");
+  }
+  if (manifestStoreSource && !manifestStoreSource.includes("EXPORT_MANIFEST_WRITE_ONCE_FIELDS")) {
+    notes.push("exportManifestStore.ts missing protected write-once field list.");
+  }
+  if (settlementStoreSource && !settlementStoreSource.includes("FREIGHT_SETTLEMENT_WRITE_ONCE_FIELDS")) {
+    notes.push("freightSettlementStore.ts missing protected write-once field list.");
+  }
+  if (verifySource) {
+    const requiredFailureClasses = [
+      "SNAPSHOT_MISMATCH",
+      "MANIFEST_MISMATCH",
+      "SETTLEMENT_MISMATCH",
+      "CHAIN_ROOT_INVALID",
+      "MISSING_REFERENCE",
+    ];
+    for (const failureClass of requiredFailureClasses) {
+      if (!verifySource.includes(`"${failureClass}"`)) {
+        notes.push(`verifyIntegrityChain.ts missing failure class: ${failureClass}`);
+      }
+    }
+    if (!verifySource.includes("computeChainRoot")) {
+      notes.push("verifyIntegrityChain.ts missing chain root recomputation.");
+    }
+  }
+
+  return {
+    id: "GOV-CHAIN-01",
+    status: notes.length === 0 ? "PASS" : "FAIL",
+    severity: "CRITICAL",
+    evidence,
+    impactSurface: "Platform/IntegrityChain",
+    notes,
+  };
+}
+
 export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
   const root = resolveRepoRoot();
 
@@ -395,7 +517,7 @@ export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
       fileMatcher: (name) => name.startsWith("scorecard.") && name.endsWith(".json"),
     }),
   ];
-  const governanceChecks: GovernanceCheckResult[] = [evaluateExtWeChat07(root)];
+  const governanceChecks: GovernanceCheckResult[] = [evaluateExtWeChat07(root), evaluateChainIntegrity01(root)];
 
   const summary = subsystems.reduce(
     (acc, subsystem) => {
