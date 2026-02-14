@@ -157,6 +157,7 @@ async function main() {
       for (const fileName of requiredPackNames) {
         assert(builderSource.includes(`\"${fileName}\"`), `Export pack builder missing required filename: ${fileName}`);
       }
+      assert(builderSource.includes("\"manifest.sig.txt\""), "Export pack builder missing optional signature filename");
 
       assert(
         builderSource.includes("manifest.json intentionally excludes itself and manifest.sha256.txt from files[]"),
@@ -170,6 +171,50 @@ async function main() {
         builderSource.includes("const finalManifestSha256Text = `${manifestSha256}  manifest.json\\n`;"),
         "manifest.sha256.txt must be derived from computed manifestSha256"
       );
+    })
+  );
+
+  results.push(
+    await runCheck("REGULATOR-EXPORT-SIGNATURE-GUARDS", () => {
+      const exportRouteSource = readFile("app/api/wechat/regulator-export-pack/route.ts");
+      const builderSource = readFile("lib/wechat/regulatorExportPack.ts");
+
+      assert(
+        exportRouteSource.includes("WECHAT_EXPORT_SIGNATURE_ENABLED"),
+        "Export route missing signature-enable env control"
+      );
+      assert(
+        exportRouteSource.includes("WECHAT_EXPORT_SIGNATURE_PRIVATE_KEY_PEM"),
+        "Export route missing signature private-key env control"
+      );
+      assert(
+        exportRouteSource.includes("WECHAT_EXPORT_SIGNATURE_KEY_ID"),
+        "Export route missing signature key-id env control"
+      );
+      assert(
+        exportRouteSource.includes("\"x-wechat-export-signature-enabled\""),
+        "Export route missing signature-enabled response header"
+      );
+      assert(
+        exportRouteSource.includes("manifestSignature: pack.manifestSignature || null"),
+        "Export route missing manifestSignature metadata passthrough"
+      );
+      assert(
+        !exportRouteSource.includes("manifestSignatureText"),
+        "Export route must not expose detached signature text directly"
+      );
+
+      assert(builderSource.includes("crypto.createSign(\"RSA-SHA256\")"), "Builder missing RSA-SHA256 signer setup");
+      assert(builderSource.includes("signer.update(manifestBytes);"), "Builder must sign final manifest bytes");
+      assert(
+        builderSource.includes("WECHAT_EXPORT_SIGNATURE_INVALID: WECHAT_EXPORT_SIGNATURE_PRIVATE_KEY_PEM required"),
+        "Builder missing fail-closed private key validation"
+      );
+      assert(
+        builderSource.includes("WECHAT_EXPORT_SIGNATURE_INVALID: WECHAT_EXPORT_SIGNATURE_KEY_ID required"),
+        "Builder missing fail-closed keyId validation"
+      );
+      assert(builderSource.includes("manifestSignatureBytes"), "Builder missing detached signature artifact handling");
     })
   );
 
