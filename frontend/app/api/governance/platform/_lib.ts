@@ -660,7 +660,11 @@ export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
     { totalSubsystems: 0, passCount: 0, failCount: 0, noDataCount: 0 }
   );
 
-  const overall: "PASS" | "FAIL" = summary.failCount > 0 || summary.noDataCount > 0 ? "FAIL" : "PASS";
+  const governanceBlockingFail = governanceChecks.some(
+    (check) => check.severity === "CRITICAL" && check.status === "FAIL"
+  );
+  const overall: "PASS" | "FAIL" =
+    summary.failCount > 0 || summary.noDataCount > 0 || governanceBlockingFail ? "FAIL" : "PASS";
   let trendStatus: TrendStatus = "STABLE";
   if (subsystems.some((subsystem) => subsystem.trendStatus === "REGRESSION") || overall === "FAIL") {
     trendStatus = "REGRESSION";
@@ -671,6 +675,8 @@ export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
   const ruleWeights: Record<string, number> = {
     "GOV-WECHAT-07": 8,
     "GOV-CHAIN-01": 12,
+    // GOV-CHAT-01 remains binary critical gate; numeric deduction is currently zero by contract.
+    "GOV-CHAT-01": 0,
   };
   const deductions = governanceChecks
     .filter((check) => check.status === "FAIL")
@@ -683,6 +689,7 @@ export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
     0,
     basePercent - deductions.reduce((sum, deduction) => sum + deduction.percent, 0)
   );
+  const badgeDegradeRuleIds = new Set(["GOV-WECHAT-07", "GOV-CHAIN-01", "GOV-CHAT-01"]);
   const cryptographicIntegrity: "GREEN" | "RED" = governanceChecks.some(
     (check) => (check.id === "GOV-WECHAT-07" || check.id === "GOV-CHAIN-01") && check.status === "FAIL"
   )
@@ -691,9 +698,7 @@ export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
 
   let badgeState: PlatformGovernanceStatus["badgeState"] = "PASS";
   if (
-    governanceChecks.some(
-      (check) => (check.id === "GOV-WECHAT-07" || check.id === "GOV-CHAIN-01") && check.status === "FAIL"
-    )
+    governanceChecks.some((check) => badgeDegradeRuleIds.has(check.id) && check.status === "FAIL")
   ) {
     badgeState = "DEGRADED";
   } else if (summary.noDataCount > 0) {
