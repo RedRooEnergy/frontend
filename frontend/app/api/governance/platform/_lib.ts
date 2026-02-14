@@ -540,6 +540,7 @@ export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
 
   const ruleWeights: Record<string, number> = {
     "GOV-WECHAT-07": 8,
+    "GOV-CHAIN-01": 12,
   };
   const deductions = governanceChecks
     .filter((check) => check.status === "FAIL")
@@ -553,13 +554,17 @@ export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
     basePercent - deductions.reduce((sum, deduction) => sum + deduction.percent, 0)
   );
   const cryptographicIntegrity: "GREEN" | "RED" = governanceChecks.some(
-    (check) => check.id === "GOV-WECHAT-07" && check.status === "FAIL"
+    (check) => (check.id === "GOV-WECHAT-07" || check.id === "GOV-CHAIN-01") && check.status === "FAIL"
   )
     ? "RED"
     : "GREEN";
 
   let badgeState: PlatformGovernanceStatus["badgeState"] = "PASS";
-  if (governanceChecks.some((check) => check.id === "GOV-WECHAT-07" && check.status === "FAIL")) {
+  if (
+    governanceChecks.some(
+      (check) => (check.id === "GOV-WECHAT-07" || check.id === "GOV-CHAIN-01") && check.status === "FAIL"
+    )
+  ) {
     badgeState = "DEGRADED";
   } else if (summary.noDataCount > 0) {
     badgeState = "NO_DATA";
