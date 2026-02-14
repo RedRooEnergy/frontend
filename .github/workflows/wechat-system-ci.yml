@@ -1,0 +1,51 @@
+name: WeChat Governance CI
+
+on:
+  pull_request:
+    paths:
+      - "frontend/lib/wechat/**"
+      - "frontend/app/api/wechat/**"
+      - "frontend/app/api/admin/wechat/**"
+      - "frontend/app/api/regulator/wechat/**"
+      - "frontend/app/dashboard/supplier/wechat/**"
+      - "frontend/app/dashboard/admin/wechat/**"
+      - "frontend/app/dashboard/regulator/wechat/**"
+      - "frontend/tests/wechat/**"
+      - "docs/wechat/**"
+  push:
+    branches:
+      - "main"
+    paths:
+      - "frontend/lib/wechat/**"
+      - "frontend/app/api/wechat/**"
+      - "frontend/app/api/admin/wechat/**"
+      - "frontend/app/api/regulator/wechat/**"
+      - "frontend/app/dashboard/supplier/wechat/**"
+      - "frontend/app/dashboard/admin/wechat/**"
+      - "frontend/app/dashboard/regulator/wechat/**"
+      - "frontend/tests/wechat/**"
+      - "docs/wechat/**"
+
+jobs:
+  wechat-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Enforce WeChat audit signing secret on main
+        if: github.ref == 'refs/heads/main'
+        env:
+          WECHAT_AUDIT_SIGNING_SECRET: ${{ secrets.WECHAT_AUDIT_SIGNING_SECRET }}
+        run: |
+          if [ -z "$WECHAT_AUDIT_SIGNING_SECRET" ]; then
+            echo "WECHAT_AUDIT_SIGNING_SECRET must be set for main branch runs."
+            exit 1
+          fi
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+      - name: Run WeChat governance tests
+        run: npm run test:wechat
+        working-directory: frontend
