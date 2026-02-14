@@ -137,6 +137,7 @@ Governance charter: docs/communications/EXT-AUDIT-COMMS-01_GOVERNANCE.md
 Gate 1 spec: docs/communications/EXT-AUDIT-COMMS-01_GATE1_READONLY_DASHBOARD_SPEC.md
 Gate 2 spec: docs/communications/EXT-AUDIT-COMMS-01_GATE2_IMPLEMENTATION_CONTRACT_BOUNDARIES.md
 Gate 3 spec: docs/communications/EXT-AUDIT-COMMS-01_GATE3_READONLY_IMPLEMENTATION_PLANNING_CONTRACT.md
+Gate 4 spec: docs/communications/EXT-AUDIT-COMMS-01_GATE4_READONLY_IMPLEMENTATION_SPEC.md
 
 ## EXT-26 — Marketing Orchestration & Campaign Governance
 
