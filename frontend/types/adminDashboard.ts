@@ -122,6 +122,7 @@ export type GovernanceCheck = {
 export type GovernanceStatusResponse = {
   generatedAt?: string;
   generatedAtUtc?: string;
+  snapshotStateHash?: string;
   overall: "PASS" | "FAIL" | "NO_DATA";
   badgeState: "GREEN" | "DEGRADED" | "NO_DATA" | "PASS" | "REGRESSION" | "IMPROVING";
   governanceScore:

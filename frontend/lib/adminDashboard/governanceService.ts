@@ -1,5 +1,6 @@
 import { writeAdminAudit } from "./auditWriter";
 import { createChangeControlEvent, listChangeControlEvents } from "./changeControlStore";
+import { hashCanonicalPayload } from "./auditWriter";
 
 export class GovernanceAdminError extends Error {
   status: number;
@@ -28,7 +29,49 @@ function required(value: string, field: string) {
 
 export async function getGovernanceStatusSnapshot() {
   const { getPlatformGovernanceStatus } = await import("../../app/api/governance/platform/_lib");
-  return getPlatformGovernanceStatus();
+  const snapshot = getPlatformGovernanceStatus() as Record<string, unknown>;
+  return {
+    ...snapshot,
+    snapshotStateHash: computeGovernanceSnapshotStateHash(snapshot),
+  };
+}
+
+function normalizeGovernanceSnapshotForHash(snapshot: Record<string, unknown>) {
+  const normalized = {
+    ...snapshot,
+    generatedAt: undefined,
+    generatedAtUtc: undefined,
+    snapshotStateHash: undefined,
+  };
+  delete (normalized as any).generatedAt;
+  delete (normalized as any).generatedAtUtc;
+  delete (normalized as any).snapshotStateHash;
+  return normalized;
+}
+
+export function computeGovernanceSnapshotStateHash(snapshot: Record<string, unknown>) {
+  return hashCanonicalPayload(normalizeGovernanceSnapshotForHash(snapshot));
+}
+
+export function verifyGovernanceSnapshotHash(snapshot: Record<string, unknown>) {
+  const expected = computeGovernanceSnapshotStateHash(snapshot);
+  const actual = String(snapshot.snapshotStateHash || "").trim();
+  return {
+    status: actual && actual === expected ? "PASS" : "FAIL",
+    expected,
+    actual,
+  } as const;
+}
+
+export async function verifyGovernanceSnapshotIntegrity() {
+  const snapshot = (await getGovernanceStatusSnapshot()) as Record<string, unknown>;
+  const verification = verifyGovernanceSnapshotHash(snapshot);
+  return {
+    checkedAt: new Date().toISOString(),
+    status: verification.status,
+    snapshotStateHash: verification.actual || verification.expected,
+    expectedSnapshotStateHash: verification.expected,
+  } as const;
 }
 
 export async function triggerGovernanceAudit(input: {
