@@ -84,6 +84,12 @@ function toPublicRecord<T>(raw: any): T {
   return { ...rest, _id: _id?.toString() } as T;
 }
 
+export function maskId(id: string) {
+  const normalized = String(id || "").trim();
+  if (!normalized) return "";
+  return `****${normalized.slice(-4)}`;
+}
+
 function normalizeEntityType(value: string): WeChatEntityType {
   const normalized = String(value || "").trim().toUpperCase();
   if (normalized === "SUPPLIER" || normalized === "BUYER" || normalized === "ADMIN") {
@@ -452,6 +458,59 @@ export async function listWeChatBindings(
 
   return {
     items: items.map((row) => toPublicRecord<WeChatChannelBindingRecord>(row)),
+    total,
+    page,
+    limit,
+  };
+}
+
+export async function listWeChatLedgerSliceForRegulator(
+  params: {
+    bindingId?: string;
+    limit?: number;
+    page?: number;
+  } = {},
+  dependencyOverrides: Partial<WeChatStoreDependencies> = {}
+): Promise<{
+  items: Array<{
+    bindingIdMasked: string;
+    status: WeChatBindingStatus;
+    createdAt: string;
+    entityType: WeChatEntityType;
+    entityHash: string;
+  }>;
+  total: number;
+  page: number;
+  limit: number;
+}> {
+  await ensureWeChatIndexes(dependencyOverrides);
+  const deps = resolveDependencies(dependencyOverrides);
+  const bindings = await deps.getCollection(BINDING_COLLECTION);
+
+  const query: Record<string, unknown> = {};
+  if (params.bindingId) query.bindingId = String(params.bindingId || "").trim();
+
+  const limit = Math.min(Math.max(Number(params.limit || 50), 1), 200);
+  const page = Math.max(Number(params.page || 1), 1);
+  const skip = (page - 1) * limit;
+
+  const [rows, total] = await Promise.all([
+    bindings.find(query).sort({ createdAt: -1, bindingId: 1 }).skip(skip).limit(limit).toArray(),
+    bindings.countDocuments(query),
+  ]);
+
+  return {
+    items: rows.map((row) => {
+      const publicRow = toPublicRecord<WeChatChannelBindingRecord>(row);
+      const entityHash = sha256Hex(stableStringify({ entityType: publicRow.entityType, entityId: publicRow.entityId }));
+      return {
+        bindingIdMasked: maskId(publicRow.bindingId),
+        status: publicRow.status,
+        createdAt: publicRow.createdAt,
+        entityType: publicRow.entityType,
+        entityHash,
+      };
+    }),
     total,
     page,
     limit,
@@ -907,6 +966,63 @@ export async function listWeChatDispatches(
   };
 }
 
+export async function listWeChatDispatchSliceForRegulator(
+  params: {
+    bindingId?: string;
+    limit?: number;
+    page?: number;
+  } = {},
+  dependencyOverrides: Partial<WeChatStoreDependencies> = {}
+): Promise<{
+  items: Array<{
+    dispatchIdMasked: string;
+    bindingIdMasked: string;
+    bodyHash: string;
+    bodyLength: number;
+    status: WeChatDispatchRecord["provider"]["providerStatus"];
+    createdAt: string;
+  }>;
+  total: number;
+  page: number;
+  limit: number;
+}> {
+  await ensureWeChatIndexes(dependencyOverrides);
+  const deps = resolveDependencies(dependencyOverrides);
+  const dispatches = await deps.getCollection(DISPATCH_COLLECTION);
+
+  const query: Record<string, unknown> = {};
+  if (params.bindingId) query.recipientBindingId = String(params.bindingId || "").trim();
+
+  const limit = Math.min(Math.max(Number(params.limit || 50), 1), 200);
+  const page = Math.max(Number(params.page || 1), 1);
+  const skip = (page - 1) * limit;
+
+  const [rows, total] = await Promise.all([
+    dispatches.find(query).sort({ createdAt: -1, dispatchId: 1 }).skip(skip).limit(limit).toArray(),
+    dispatches.countDocuments(query),
+  ]);
+
+  return {
+    items: rows.map((row) => {
+      const publicRow = toPublicRecord<WeChatDispatchRecord>(row);
+      const renderedBody = String(publicRow.render?.renderedPayload || "");
+      const bodyHash = sha256Hex(renderedBody);
+      const bodyLength = Buffer.byteLength(renderedBody, "utf8");
+      return {
+        dispatchIdMasked: maskId(publicRow.dispatchId),
+        bindingIdMasked: maskId(publicRow.recipientBindingId),
+        bodyHash,
+        bodyLength,
+        status: publicRow.provider.providerStatus,
+        createdAt: publicRow.createdAt,
+      };
+    }),
+    total,
+    page,
+    limit,
+  };
+}
+
 export async function listWeChatInboundMessageRecords(
   params: {
     recipientBindingId?: string;
@@ -942,6 +1058,63 @@ export async function listWeChatInboundMessageRecords(
 
   return {
     items: rows.map((row) => toPublicRecord<WeChatInboundMessageRecord>(row)),
+    total,
+    page,
+    limit,
+  };
+}
+
+export async function listWeChatInboundSliceForRegulator(
+  params: {
+    bindingId?: string;
+    limit?: number;
+    page?: number;
+  } = {},
+  dependencyOverrides: Partial<WeChatStoreDependencies> = {}
+): Promise<{
+  items: Array<{
+    inboundIdMasked: string;
+    bindingIdMasked: string;
+    bodyHash: string;
+    bodyLength: number;
+    receivedAt: string;
+    processed: boolean;
+  }>;
+  total: number;
+  page: number;
+  limit: number;
+}> {
+  await ensureWeChatIndexes(dependencyOverrides);
+  const deps = resolveDependencies(dependencyOverrides);
+  const inbound = await deps.getCollection(INBOUND_COLLECTION);
+
+  const query: Record<string, unknown> = {};
+  if (params.bindingId) query.recipientBindingId = String(params.bindingId || "").trim();
+
+  const limit = Math.min(Math.max(Number(params.limit || 50), 1), 200);
+  const page = Math.max(Number(params.page || 1), 1);
+  const skip = (page - 1) * limit;
+
+  const [rows, total] = await Promise.all([
+    inbound.find(query).sort({ receivedAt: -1, inboundId: 1 }).skip(skip).limit(limit).toArray(),
+    inbound.countDocuments(query),
+  ]);
+
+  return {
+    items: rows.map((row) => {
+      const publicRow = toPublicRecord<WeChatInboundMessageRecord>(row);
+      const payloadCanonical = stableStringify(publicRow.inboundPayload || {});
+      const bodyHash = sha256Hex(payloadCanonical);
+      const bodyLength = Buffer.byteLength(payloadCanonical, "utf8");
+      return {
+        inboundIdMasked: maskId(publicRow.inboundId),
+        bindingIdMasked: maskId(publicRow.recipientBindingId || ""),
+        bodyHash,
+        bodyLength,
+        receivedAt: publicRow.receivedAt,
+        processed: Boolean(publicRow.processed),
+      };
+    }),
     total,
     page,
     limit,
