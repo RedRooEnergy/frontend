@@ -155,6 +155,25 @@ export default function RegulatorWeChatGovernancePage() {
           </div>
         )}
       </div>
+
+      <div className="buyer-card">
+        <div className="buyer-card-header">
+          <div>
+            <div className="buyer-section-title">Download Export Pack</div>
+            <p className="text-sm text-muted">
+              ZIP contains <span className="font-mono">slice.json</span> + <span className="font-mono">manifest.json</span> +
+              <span className="font-mono"> manifest.sha256.txt</span> + <span className="font-mono">README.txt</span> for
+              verification.
+            </p>
+          </div>
+        </div>
+        <a
+          href="/api/wechat/regulator-export-pack?limit=25&page=1"
+          className="inline-flex items-center rounded-md border border-brand-600 bg-brand-700 px-4 py-2 text-sm font-semibold text-brand-100"
+        >
+          Download Export Pack
+        </a>
+      </div>
     </RegulatorDashboardLayout>
   );
 }
