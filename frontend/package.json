@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "test:chain-integrity-phase1": "tsx tests/chain-integrity/runChainIntegrityPhase1Tests.ts && tsx scripts/proof-chain-integrity-phase1.ts",
+    "test:chain-integrity-phase2": "tsx tests/chain-integrity/runChainIntegrityPhase2Tests.ts",
     "test:audit-comms": "tsx tests/audit-comms/runAuditCommsTests.ts",
     "test:wechat-ui": "tsx tests/wechat-ui/runWeChatUiTests.ts",
     "lint": "next lint"
