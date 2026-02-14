@@ -215,6 +215,47 @@ async function main() {
     })
   );
 
+  results.push(
+    await runCheck("REGULATOR-EXPORT-RATE-LIMIT-GUARDS", () => {
+      const exportRouteSource = readFile("app/api/wechat/regulator-export-pack/route.ts");
+      const auditStoreSource = readFile("lib/wechat/exportAuditStore.ts");
+
+      assert(
+        exportRouteSource.includes("countWeChatRegulatorExportAuditEventsInWindow"),
+        "Export route is missing ledger-backed rate-limit counter usage"
+      );
+      assert(
+        exportRouteSource.includes("status: 429"),
+        "Export route missing explicit 429 handling for rate limit"
+      );
+      assert(
+        exportRouteSource.includes("\"retry-after\""),
+        "Export route missing Retry-After header on rate limit response"
+      );
+      assert(
+        exportRouteSource.includes("WECHAT_EXPORT_RATE_LIMIT_MAX_REQUESTS"),
+        "Export route missing max-requests env control"
+      );
+      assert(
+        exportRouteSource.includes("WECHAT_EXPORT_RATE_LIMIT_WINDOW_SECONDS"),
+        "Export route missing window-seconds env control"
+      );
+      assert(
+        exportRouteSource.includes("WECHAT_EXPORT_RATE_LIMIT_ENABLED"),
+        "Export route missing enable/disable env control"
+      );
+
+      assert(
+        auditStoreSource.includes("export async function countWeChatRegulatorExportAuditEventsInWindow"),
+        "Audit store missing window-count helper"
+      );
+      assert(
+        auditStoreSource.includes("requestedAt"),
+        "Audit store window counter missing requestedAt window query"
+      );
+    })
+  );
+
   const passCount = results.filter((row) => row.pass).length;
   const failCount = results.length - passCount;
 
