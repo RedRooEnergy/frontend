@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { getAdminMemoryCollection } from "./memoryCollection";
 
 export const ADMIN_AUDIT_COLLECTION = "admin_audit_logs";
 
@@ -14,6 +15,9 @@ type AuditDependencies = {
 
 const defaultDependencies: AuditDependencies = {
   getCollection: async (name) => {
+    if (!process.env.MONGODB_URI && process.env.NODE_ENV !== "production") {
+      return getAdminMemoryCollection(name) as unknown as CollectionLike;
+    }
     const { getDb } = await import("../db/mongo");
     const db = await getDb();
     return db.collection(name) as unknown as CollectionLike;

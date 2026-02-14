@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { AdminAuditError } from "./auditWriter";
+import { getAdminMemoryCollection } from "./memoryCollection";
 
 type CollectionLike = {
   createIndex: (spec: Record<string, 1 | -1>, options?: Record<string, unknown>) => Promise<unknown>;
@@ -26,6 +27,9 @@ export type VersionedConfigDependencies = {
 
 const defaultDependencies: VersionedConfigDependencies = {
   getCollection: async (name) => {
+    if (!process.env.MONGODB_URI && process.env.NODE_ENV !== "production") {
+      return getAdminMemoryCollection(name) as unknown as CollectionLike;
+    }
     const { getDb } = await import("../db/mongo");
     const db = await getDb();
     return db.collection(name) as unknown as CollectionLike;
