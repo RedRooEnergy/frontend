@@ -1,9 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { getGovernanceStatus } from "../../../lib/adminDashboard/client";
-import type { GovernanceStatusResponse } from "../../../types/adminDashboard";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import AuditReceiptToast from "../_components/AuditReceiptToast";
 import StatusPill from "../_components/StatusPill";
+import {
+  createGovernanceChangeControl,
+  getGovernanceStatus,
+  listGovernanceChangeControls,
+} from "../../../lib/adminDashboard/client";
+import type {
+  AdminAuditReceipt,
+  ChangeControlEvent,
+  CreateChangeControlPayload,
+  GovernanceStatusResponse,
+} from "../../../types/adminDashboard";
+import ChangeControlForm from "./_components/ChangeControlForm";
+import ChangeControlTable from "./_components/ChangeControlTable";
 import GovernanceStatusMatrix from "./_components/GovernanceStatusMatrix";
 import SubSystemBadgeStrip from "./_components/SubSystemBadgeStrip";
 
@@ -15,32 +27,37 @@ function badgeToneFromOverall(overall: GovernanceStatusResponse["overall"]) {
 
 export default function AdminGovernancePage() {
   const [status, setStatus] = useState<GovernanceStatusResponse | null>(null);
+  const [changeControls, setChangeControls] = useState<ChangeControlEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [receipt, setReceipt] = useState<AdminAuditReceipt | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [statusResponse, changeControlsResponse] = await Promise.all([
+        getGovernanceStatus(),
+        listGovernanceChangeControls(),
+      ]);
+      setStatus(statusResponse);
+      setChangeControls(Array.isArray(changeControlsResponse.items) ? changeControlsResponse.items : []);
+    } catch (requestError: any) {
+      setError(String(requestError?.message || requestError));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     let active = true;
-
-    async function load() {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await getGovernanceStatus();
-        if (!active) return;
-        setStatus(response);
-      } catch (requestError: any) {
-        if (!active) return;
-        setError(String(requestError?.message || requestError));
-      } finally {
-        if (active) setLoading(false);
-      }
-    }
-
-    load();
+    load().catch(() => {
+      if (!active) return;
+    });
     return () => {
       active = false;
     };
-  }, []);
+  }, [load]);
 
   const content = useMemo(() => {
     if (loading) {
@@ -84,16 +101,35 @@ export default function AdminGovernancePage() {
 
         <SubSystemBadgeStrip checks={status.governanceChecks} />
         <GovernanceStatusMatrix status={status} />
+
+        <section className="grid gap-4 xl:grid-cols-[1.1fr_1.9fr]">
+          <ChangeControlForm
+            onSubmit={async (payload: CreateChangeControlPayload) => {
+              const result = await createGovernanceChangeControl(payload);
+              setReceipt({
+                auditId: result.auditId,
+                entityId: result.entityId,
+              });
+              await load();
+            }}
+          />
+          <div>
+            <h3 className="mb-2 text-base font-semibold text-slate-900">Change Control Ledger</h3>
+            <ChangeControlTable items={changeControls} />
+          </div>
+        </section>
       </div>
     );
-  }, [loading, error, status]);
+  }, [loading, error, status, changeControls, load]);
 
   return (
     <div className="space-y-4">
       <header>
         <h2 className="text-xl font-semibold text-slate-900">Governance Controls</h2>
-        <p className="text-sm text-slate-600">Read-only snapshot in B2.1. Mutation controls are introduced in subsequent commits.</p>
+        <p className="text-sm text-slate-600">Status is live. Change-control mutations are reason- and rationale-gated with immutable audit receipts.</p>
       </header>
+
+      <AuditReceiptToast receipt={receipt} onDismiss={() => setReceipt(null)} />
       {content}
     </div>
   );
