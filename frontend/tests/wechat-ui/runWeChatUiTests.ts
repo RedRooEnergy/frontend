@@ -301,6 +301,42 @@ async function main() {
     })
   );
 
+  results.push(
+    await runCheck("REGULATOR-PUBLIC-KEY-GUARDS", () => {
+      const routeSource = readFile("app/api/wechat/regulator-public-key/route.ts");
+      const helperSource = readFile("lib/wechat/signaturePublicKey.ts");
+
+      const exportedMethods = Array.from(routeSource.matchAll(/export\s+async\s+function\s+(GET|POST|PUT|PATCH|DELETE)\s*\(/g)).map(
+        (match) => match[1]
+      );
+      assert(exportedMethods.includes("GET"), "Regulator public key route must export GET");
+      assert(!exportedMethods.some((method) => method !== "GET"), "Regulator public key route exports mutation method");
+
+      assert(
+        routeSource.includes("WECHAT_EXPORT_SIGNATURE_ENABLED"),
+        "Regulator public key route missing signature-enable flag gate"
+      );
+      assert(routeSource.includes("keyId"), "Regulator public key route missing keyId in response");
+      assert(routeSource.includes("algorithm"), "Regulator public key route missing algorithm in response");
+      assert(routeSource.includes("publicKeyPem"), "Regulator public key route missing publicKeyPem in response");
+      assert(routeSource.includes("fingerprintSha256"), "Regulator public key route missing fingerprintSha256 in response");
+
+      const forbiddenRoutePatterns = [/PRIVATE_KEY/i, /manifestSignatureText/, /accessToken/i, /appSecret/i];
+      for (const pattern of forbiddenRoutePatterns) {
+        assert(!pattern.test(routeSource), `Forbidden sensitive pattern found in regulator public key route: ${pattern}`);
+      }
+
+      assert(
+        helperSource.includes("crypto.createPrivateKey"),
+        "Public key helper must derive public key from private key via createPrivateKey"
+      );
+      assert(
+        helperSource.includes("crypto.createPublicKey"),
+        "Public key helper must derive SPKI public key via createPublicKey"
+      );
+    })
+  );
+
   const passCount = results.filter((row) => row.pass).length;
   const failCount = results.length - passCount;
 

@@ -5,6 +5,10 @@ import { resolveWeChatExportSignaturePublicKey } from "../../../../../lib/wechat
 
 export const runtime = "nodejs";
 
+function isEnabled(value: string | undefined) {
+  return String(value || "").trim().toLowerCase() === "true";
+}
+
 export async function GET(request: Request) {
   const regulator = requireRegulator(request.headers);
   if (!regulator) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -12,6 +16,10 @@ export async function GET(request: Request) {
   const runtimeConfig = resolveWeChatRuntimeConfig();
   if (!runtimeConfig.flags.extensionEnabled) {
     return NextResponse.json({ error: "WeChat extension disabled" }, { status: 404 });
+  }
+
+  if (!isEnabled(process.env.WECHAT_EXPORT_SIGNATURE_ENABLED)) {
+    return NextResponse.json({ error: "WeChat export signature disabled" }, { status: 404 });
   }
 
   try {
