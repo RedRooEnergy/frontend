@@ -18,6 +18,13 @@ type FreightSettlementCollection = {
     update: Record<string, unknown>,
     options?: { returnDocument?: "after" | "before"; upsert?: boolean }
   ) => Promise<any | null>;
+  find?: (query: Record<string, unknown>) => {
+    sort: (spec: Record<string, 1 | -1>) => {
+      limit: (value: number) => {
+        toArray: () => Promise<any[]>;
+      };
+    };
+  };
 };
 
 export type FreightSettlementRecord = {
@@ -265,4 +272,25 @@ export async function upsertFreightSettlementRecord(
   }
 
   return toPublicRecord(updated);
+}
+
+export async function getLatestFinalFreightSettlementRecordByOrderId(
+  orderId: string,
+  dependencyOverrides: Partial<FreightSettlementStoreDependencies> = {}
+): Promise<FreightSettlementRecord | null> {
+  await ensureFreightSettlementIndexes(dependencyOverrides);
+  const deps = resolveDependencies(dependencyOverrides);
+  const collection = await deps.getCollection();
+
+  const normalizedOrderId = String(orderId || "").trim();
+  if (!normalizedOrderId) return null;
+
+  const query = { orderId: normalizedOrderId, status: "FINAL" };
+  if (collection.find) {
+    const rows = await collection.find(query).sort({ updatedAt: -1, createdAt: -1 }).limit(1).toArray();
+    if (rows.length > 0) return toPublicRecord(rows[0]);
+  }
+
+  const row = await collection.findOne(query);
+  return row ? toPublicRecord(row) : null;
 }

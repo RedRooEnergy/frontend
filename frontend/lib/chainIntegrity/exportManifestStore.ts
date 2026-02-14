@@ -16,6 +16,13 @@ type ExportManifestCollection = {
     update: Record<string, unknown>,
     options?: { returnDocument?: "after" | "before"; upsert?: boolean }
   ) => Promise<any | null>;
+  find?: (query: Record<string, unknown>) => {
+    sort: (spec: Record<string, 1 | -1>) => {
+      limit: (value: number) => {
+        toArray: () => Promise<any[]>;
+      };
+    };
+  };
 };
 
 export type ExportManifestRecord = {
@@ -213,4 +220,24 @@ export async function upsertExportManifestRecord(
   }
 
   return toPublicRecord(updated);
+}
+
+export async function getLatestExportManifestRecordByOrderId(
+  orderId: string,
+  dependencyOverrides: Partial<ExportManifestStoreDependencies> = {}
+): Promise<ExportManifestRecord | null> {
+  await ensureExportManifestIndexes(dependencyOverrides);
+  const deps = resolveDependencies(dependencyOverrides);
+  const collection = await deps.getCollection();
+
+  const normalizedOrderId = String(orderId || "").trim();
+  if (!normalizedOrderId) return null;
+
+  if (collection.find) {
+    const rows = await collection.find({ orderId: normalizedOrderId }).sort({ generatedAt: -1, updatedAt: -1 }).limit(1).toArray();
+    if (rows.length > 0) return toPublicRecord(rows[0]);
+  }
+
+  const row = await collection.findOne({ orderId: normalizedOrderId });
+  return row ? toPublicRecord(row) : null;
 }
