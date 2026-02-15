@@ -42,6 +42,7 @@ Governance aggregator check state:
 ## 4) Boundary Integrity Confirmation
 
 Confirmed in this tranche:
+- Activation Surface Delta: `0`
 - no runtime activation path was enabled,
 - no RBAC identifier changes were introduced,
 - no permission surface expansion was introduced,
