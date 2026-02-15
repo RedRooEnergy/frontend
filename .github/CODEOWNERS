@@ -1,0 +1,26 @@
+# Platform governance mapping under locked authority baseline.
+# Repository currently has a single write collaborator; paths are
+# intentionally mapped to that account until governance lead accounts are provisioned.
+
+# Immutable Core
+/frontend/core/                          @RedRooEnergy
+/backend/core/                           @RedRooEnergy
+/docs/07*/                               @RedRooEnergy
+
+# Finance
+/backend/payments/                       @RedRooEnergy
+/backend/escrow/                         @RedRooEnergy
+
+# Compliance
+/backend/compliance/                     @RedRooEnergy
+
+# Commercial
+/backend/pricing/                        @RedRooEnergy
+/backend/promotions/                     @RedRooEnergy
+
+# Governance Docs
+/docs/00_master_project_definition/      @RedRooEnergy
+/docs/governance/                        @RedRooEnergy
+
+# Authority Extension
+/docs/extensions/EXT-GOV-AUTH-01/        @RedRooEnergy
