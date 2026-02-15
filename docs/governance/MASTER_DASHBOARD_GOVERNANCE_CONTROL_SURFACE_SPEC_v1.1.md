@@ -191,3 +191,9 @@ It does not authorize:
 - bypass of Immutable Core constraints.
 
 Implementation and activation require separate approved change-control and ratification artefacts.
+
+## 16) Activation Protocol Cross-Reference
+
+State promotion for this control surface is governed by:
+- `docs/governance/GOVERNANCE_ACTIVATION_AND_RATIFICATION_PROTOCOL_v1.0.md`
+- `docs/governance/GOVERNANCE_ACTIVATION_REGISTER.md`

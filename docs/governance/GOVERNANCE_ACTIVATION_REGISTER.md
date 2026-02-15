@@ -28,4 +28,4 @@ Primary Series: 00 – Project Definition & Governance
 
 | surfaceName | state | stateEffectiveAtUTC | activatedAtCommit | ciArtefactHash | manifestHash | ratifiedBy | dmsRow | notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| MASTER_DASHBOARD_GOVERNANCE_CONTROL_SURFACE | LOCK-READY | 2026-02-15T00:00:00Z | N/A | N/A | N/A | Governance Drafting Authority | N/A | Baseline anchored by tag `governance-dashboard-control-surface-v1.1-baseline` at commit `33c3c70`. |
+| MASTER_DASHBOARD_GOVERNANCE_CONTROL_SURFACE | LOCK-READY | 2026-02-15T06:36:30Z | N/A | N/A | N/A | Governance Lead + Domain Lead | 00.XX.10 | Baseline anchored by tag `governance-dashboard-control-surface-v1.1-baseline` at commit `33c3c70`. |
