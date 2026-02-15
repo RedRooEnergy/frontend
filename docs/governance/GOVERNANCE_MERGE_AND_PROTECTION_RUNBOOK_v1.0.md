@@ -37,16 +37,27 @@ If any row in Section 1.1 is incomplete or failing, STOP.
 Command:
 ```bash
 gh api repos/<OWNER>/<REPO>/branches/main/protection > /tmp/main-protection.before.json
-# Apply temporary branch lock in repository settings (or equivalent admin API), then verify:
+# Freeze mechanism (temporary hardening):
+gh api \
+  --method PATCH \
+  /repos/<OWNER>/<REPO>/branches/main/protection/required_pull_request_reviews \
+  -F dismiss_stale_reviews=true \
+  -F require_code_owner_reviews=true \
+  -F required_approving_review_count=6
+
+# Verify freeze settings:
+gh api /repos/<OWNER>/<REPO>/branches/main/protection/required_pull_request_reviews \
+  --jq '{required_approving_review_count, require_code_owner_reviews, dismiss_stale_reviews}'
 gh api repos/<OWNER>/<REPO>/branches/main/protection > /tmp/main-protection.freeze.json
 ```
 Expected output:
 - Protection snapshots captured before and during freeze window.
-- Main branch merge is blocked for non-governance updates during window.
+- Required approvals temporarily set to `6` with CODEOWNERS enforcement.
+- Non-governance PRs are blocked by review threshold during freeze window.
 - Temporary communication issued: "Governance merge window active."
 Abort criteria:
 - Unable to capture branch protection snapshots.
-- Unable to enforce temporary lock window.
+- Freeze settings do not match verification output.
 
 ### 2.2 Step 2 — Rebase governance branch on latest main
 
@@ -93,16 +104,22 @@ Abort criteria:
 
 ### 2.5 Step 5 — Verify required checks pass
 
-Required check names:
-- `governance-control-surface-enforcement`
-- Repository standard `build`
-- Repository standard `test`
+Capture exact check names from GitHub UI/CLI before protection updates:
+```bash
+gh pr checks <PR_NUMBER> --json name --jq '.[].name'
+```
+
+Record exact strings in evidence and branch protection:
+- governance enforcement check name (exact)
+- build check name (exact)
+- test check name (exact)
 
 Expected output:
+- Exact check names captured and match branch protection required checks.
 - All required checks green.
 Abort criteria:
 - Any required check fails.
-- Any required check missing from branch protection policy.
+- Any captured check name does not exactly match branch protection required-check entry.
 
 ### 2.6 Step 6 — Merge policy
 
@@ -137,18 +154,30 @@ Abort criteria:
 
 ### 2.8 Step 8 — Activation register update
 
-Action:
-- Append new row in `docs/governance/GOVERNANCE_ACTIVATION_REGISTER.md` reflecting the post-merge state.
+State rule (deterministic):
+- This runbook does **not** set `ACTIVATED`.
+- After Sections 2, 3, and 4 all pass on `main`, append state `CI-VERIFIED`.
+- `ACTIVATED` requires a separate board activation resolution per activation protocol.
+
+Append row template:
+```text
+| <surfaceName> | CI-VERIFIED | <UTC> | N/A | <scorecardSha> | <manifestHash_or_N/A> | Governance Lead + CI/Platform Owner | <dmsRow> | Post-merge governance enforcement and protection checks verified on main. |
+```
+
 Expected output:
-- Row appended only (no edits/removals).
+- One append-only row added with state `CI-VERIFIED`.
+- `dmsRow` populated and evidence hashes referenced.
+
 Abort criteria:
-- Register edited in-place.
-- Missing `dmsRow` linkage.
+- Any in-place edit of existing rows.
+- Attempt to set `ACTIVATED` without board resolution.
+- Missing `dmsRow` or missing evidence hashes.
 
 ## 3) Protected Branch Configuration (Main)
 
 ### 3.1 Required settings
 
+- Restore freeze approvals (`6`) back to steady-state approvals (`2`) in this step.
 - Require pull request before merging: `ENABLED`
 - Require approvals: `2`
 - Require review from CODEOWNERS: `ENABLED`
@@ -163,9 +192,12 @@ Abort criteria:
 
 ### 3.2 Required status checks
 
-- `governance-control-surface-enforcement`
-- `build`
-- `test`
+Use exact check run names captured in Section 2.5.
+
+Minimum required checks (exact string values in branch protection):
+- `<governance enforcement check name from PR checks output>`
+- `<build check name from PR checks output>`
+- `<test check name from PR checks output>`
 
 Optional checks:
 - `code-scanning`
@@ -272,7 +304,7 @@ Authorized by:
 - Grand-Master + Platform Architect Council.
 
 Actions:
-1. Revert merge commit.
+1. Revert the merged governance change commit on `main` (squash commit in this runbook).
 2. Retag baseline if required.
 3. Re-run enforcement.
 4. Re-open controlled PR with corrected artefacts.
