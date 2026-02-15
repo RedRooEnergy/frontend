@@ -1,0 +1,67 @@
+{
+  "documentId": "RRE-GOV-AUTH-02-ACTIVATION-IMPLEMENTATION-TRANCHE-2-MANIFEST-v1.0",
+  "version": "v1.0",
+  "status": "IMPLEMENTATION TRANCHE 2 COMPLETE",
+  "timestampUTC": "2026-02-15T03:56:07Z",
+  "extensionId": "EXT-GOV-AUTH-02-ACTIVATION",
+  "runtimeActivation": "NOT AUTHORIZED",
+  "commitAnchors": [
+    "b3098b63fac5a3b34d7861d531b06fa78db08d19",
+    "813822436a05c0a4f34b739427252657e8432754"
+  ],
+  "documents": [
+    {
+      "name": "EXT-GOV-AUTH-02-ACTIVATION_IMPLEMENTATION_TRANCHE_2_CLOSE_REPORT_v1.0.md",
+      "path": "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_IMPLEMENTATION_TRANCHE_2_CLOSE_REPORT_v1.0.md",
+      "sha256": "7f99c71881ecf023ebf3f65a021e8b77887f845080c1a371ecc80da63dcaf2b1"
+    },
+    {
+      "name": "EXT-GOV-AUTH-02-ACTIVATION_CLOSE_PACK_v1.0.md",
+      "path": "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_CLOSE_PACK_v1.0.md",
+      "sha256": "44ed06a402f50b4df5978b49d108c7d1336dc582cfbcb53634710e0c5d7a27cf"
+    },
+    {
+      "name": "EXT-GOV-AUTH-02-ACTIVATION_MANIFEST_v1.0.json",
+      "path": "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_MANIFEST_v1.0.json",
+      "sha256": "ce44ce2891e50518e19c0d03a1800b186556c4a9cbc3862b977ed29218466517"
+    },
+    {
+      "name": "GOV-AUTH-02-ACTIVATION_STATIC_RULE_CI_CONTRACT_v1.0.md",
+      "path": "docs/governance/GOV-AUTH-02-ACTIVATION_STATIC_RULE_CI_CONTRACT_v1.0.md",
+      "sha256": "25108b5c833693c7b3cac5e6264fb7e6f1055515a13cf6754528cc7832f4b33e"
+    },
+    {
+      "name": "EXT-GOV-AUTH-02-ACTIVATION_ROLLBACK_REHEARSAL_RECORD_TEMPLATE_v1.0.md",
+      "path": "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_ROLLBACK_REHEARSAL_RECORD_TEMPLATE_v1.0.md",
+      "sha256": "414d0cdd11f979a92ccdef3ab9e7acb42f943fbb12f150e32518da82b903c30f"
+    },
+    {
+      "name": "frontend/app/api/governance/platform/_lib.ts",
+      "path": "frontend/app/api/governance/platform/_lib.ts",
+      "sha256": "24ed450e1bed9a3f237a37d3301eb927b6ce505b298bef41a49c63df29f6f404"
+    },
+    {
+      "name": ".github/workflows/governance-platform-aggregator.yml",
+      "path": ".github/workflows/governance-platform-aggregator.yml",
+      "sha256": "fe4fa141c9fe22f9374107c9ec3a3aac913e3d5975bfe01adf2baba31c99b5f1"
+    },
+    {
+      "name": "frontend/tests/governance/authority/runGovAuth02ActivationBuildOnlyTests.ts",
+      "path": "frontend/tests/governance/authority/runGovAuth02ActivationBuildOnlyTests.ts",
+      "sha256": "62ca83fdd75ccd370de046d85fa53b5cf1bce70e7d297260fe1b6530761dbcc2"
+    }
+  ],
+  "anchorManifests": [
+    {
+      "name": "EXT-GOV-AUTH-02-ACTIVATION_MANIFEST_v1.0.json",
+      "path": "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_MANIFEST_v1.0.json",
+      "sha256": "ce44ce2891e50518e19c0d03a1800b186556c4a9cbc3862b977ed29218466517"
+    },
+    {
+      "name": "EXT-GOV-AUTH-02-ACTIVATION_IMPLEMENTATION_AUTHORIZATION_MANIFEST_v1.0.json",
+      "path": "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_IMPLEMENTATION_AUTHORIZATION_MANIFEST_v1.0.json",
+      "sha256": "c6d02b96e78a05f28dcc3bcabbafe9bed06041de149807a1c996e3239ecb858c"
+    }
+  ],
+  "integrityStatement": "Implementation Tranche 2 is build-only and non-operational; runtime activation remains deferred."
+}
