@@ -252,6 +252,7 @@ Optional checks:
    - `.github/workflows/governance-weekly-snapshot.yml`
 2. Confirm destination branch exists:
    - `governance-weekly-snapshots`
+   - Integrity rule: `governance-weekly-snapshots` is append-only and must not be force-pushed or rebased.
 3. Confirm workflow permissions include:
    - `contents: write`
 4. Run manual dispatch.
