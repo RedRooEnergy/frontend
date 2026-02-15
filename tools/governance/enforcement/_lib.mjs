@@ -22,6 +22,14 @@ export const DEFAULT_CONFIG = {
     "artifacts/governance/dashboard-control-surface.scorecard.json",
   nextApiRoot: "frontend/app/api",
   backendRoutesRoot: "backend/routes",
+  governedRoutePrefixes: [
+    "/api/admin",
+    "/api/installer",
+    "/api/freight",
+    "/api/insurance",
+    "/api/compliance",
+    "/api/governance"
+  ],
   mountProbeFiles: ["backend/app.js", "backend/server.js", "backend/index.js"],
   rbacScanRoots: [
     "backend/middleware",

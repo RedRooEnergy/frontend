@@ -8,6 +8,7 @@ import {
   discoverExpressRoutes,
   discoverNextRoutes,
   loadConfig,
+  normalizePath,
   parseAppendixInventoryRoutes,
   routeKey
 } from "./_lib.mjs";
@@ -17,7 +18,23 @@ export async function runCheck(repoRoot = process.cwd()) {
   const appendixAbs = path.join(repoRoot, config.appendixAPath);
   const appendixText = await fs.readFile(appendixAbs, "utf8");
 
-  const declaredRoutes = parseAppendixInventoryRoutes(appendixText);
+  const governedPrefixes = (config.governedRoutePrefixes || [])
+    .map((prefix) => normalizePath(prefix))
+    .filter(Boolean);
+
+  function isGovernedPath(routePath) {
+    if (governedPrefixes.length === 0) {
+      return true;
+    }
+    const p = normalizePath(routePath);
+    return governedPrefixes.some(
+      (prefix) => p === prefix || p.startsWith(`${prefix}/`)
+    );
+  }
+
+  const declaredRoutes = parseAppendixInventoryRoutes(appendixText).filter(
+    (route) => isGovernedPath(route.path)
+  );
   const declaredMap = new Map(
     declaredRoutes.map((route) => [routeKey(route.method, route.path), route])
   );
@@ -28,7 +45,9 @@ export async function runCheck(repoRoot = process.cwd()) {
     config.backendRoutesRoot,
     config.mountProbeFiles
   );
-  const discoveredRoutes = dedupeRoutes([...nextRoutes, ...expressRoutes]);
+  const discoveredRoutes = dedupeRoutes([...nextRoutes, ...expressRoutes]).filter(
+    (route) => isGovernedPath(route.path)
+  );
   const discoveredMap = new Map(
     discoveredRoutes.map((route) => [routeKey(route.method, route.path), route])
   );
@@ -66,8 +85,8 @@ export async function runCheck(repoRoot = process.cwd()) {
   const pass = undeclaredFindings.length === 0;
 
   const summary = pass
-    ? `PASS: ${discoveredRoutes.length} discovered routes all declared.`
-    : `FAIL: ${undeclaredFindings.length} undeclared discovered route(s).`;
+    ? `PASS: ${discoveredRoutes.length} governed discovered routes all declared.`
+    : `FAIL: ${undeclaredFindings.length} undeclared governed discovered route(s).`;
 
   return checkResult("endpoint-inventory-check", pass, summary, findings, warnings);
 }
