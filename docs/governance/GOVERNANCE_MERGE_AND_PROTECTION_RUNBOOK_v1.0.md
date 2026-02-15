@@ -173,6 +173,41 @@ Abort criteria:
 - Attempt to set `ACTIVATED` without board resolution.
 - Missing `dmsRow` or missing evidence hashes.
 
+### 2.9 Step 9 — Restore branch protection to baseline
+
+Purpose:
+- Ensure temporary freeze settings are fully reverted and no unintended policy drift remains.
+
+Commands:
+```bash
+# Capture protection state after merge and activation-register update
+gh api repos/<OWNER>/<REPO>/branches/main/protection > /tmp/main-protection.after-merge.json
+
+# Compare baseline snapshot to current protection state
+diff -u /tmp/main-protection.before.json /tmp/main-protection.after-merge.json || true
+
+# Restore steady-state required review count
+gh api \
+  --method PATCH \
+  /repos/<OWNER>/<REPO>/branches/main/protection/required_pull_request_reviews \
+  -F required_approving_review_count=2
+
+# Re-capture post-restore state for evidence
+gh api repos/<OWNER>/<REPO>/branches/main/protection > /tmp/main-protection.after-restore.json
+```
+
+Expected outcome:
+- Only intentional differences remain (if any).
+- Temporary freeze settings removed.
+- `required_approving_review_count` restored to steady-state value (`2`).
+- No new required checks introduced.
+- No enforcement fields removed unintentionally.
+
+Abort criteria:
+- Any unintended difference remains.
+- Required checks missing after restore.
+- Protection configuration drift cannot be reconciled to baseline.
+
 ## 3) Protected Branch Configuration (Main)
 
 ### 3.1 Required settings
@@ -331,7 +366,27 @@ Mandatory reviews:
 - Day 7 review: stability and drift status.
 - Day 14 review: closure and baseline confirmation.
 
-## 8) Completion Criteria
+## 8) Governance Merge Evidence Pack (Mandatory Retention)
+
+Retain the following artefacts:
+- `/tmp/main-protection.before.json`
+- `/tmp/main-protection.freeze.json`
+- `/tmp/main-protection.after-merge.json`
+- `/tmp/main-protection.after-restore.json`
+- PR URL and PR number
+- Squash commit SHA on `main`
+- Baseline tag name and tag commit SHA
+- Pre-merge scorecard SHA
+- Post-merge scorecard SHA
+- Weekly snapshot run ID (if executed)
+- Activation register append-row reference
+- DMS row reference(s)
+
+Retention rule:
+- Evidence artefacts must be retained per governance retention policy.
+- Evidence hash references must be included in the DMS register.
+
+## 9) Completion Criteria
 
 Runbook execution is complete only when all are true:
 1. Governance branch merged.
@@ -341,7 +396,7 @@ Runbook execution is complete only when all are true:
 5. Baseline declaration created.
 6. 14-day stabilization window entered.
 
-## 9) Non-Authorization Clause
+## 10) Non-Authorization Clause
 
 This runbook institutionalizes governance operations only.
 
