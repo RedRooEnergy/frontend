@@ -1,0 +1,67 @@
+{
+  "documentId": "RRE-GOV-REGULATOR-TRANSPARENCY-PACK-MANIFEST-v1.0",
+  "version": "v1.0",
+  "status": "LOCK-READY",
+  "timestampUTC": "2026-02-15T02:11:22.833Z",
+  "baselineLock": {
+    "extensionId": "EXT-GOV-AUTH-01",
+    "authorityManifestSha256": "45edfccb03ae6642c95871e553f96c8d9990f754c42b53fa758c298809026e25",
+    "authorityLockTimestampUTC": "2026-02-14T17:25:43.261Z"
+  },
+  "documents": [
+    {
+      "name": "REGULATOR_TRANSPARENCY_PACK_v1.0.md",
+      "path": "docs/governance/REGULATOR_TRANSPARENCY_PACK_v1.0.md",
+      "sha256": "64413b507364b6923c51df32ed5cc8c21a9d8b39f38abbaa0d44b5622dd1ab4c"
+    },
+    {
+      "name": "RRE-00-PLATFORM-AUTHORITY-HIERARCHY-v1.0.md",
+      "path": "docs/00_master_project_definition/RRE-00-PLATFORM-AUTHORITY-HIERARCHY-v1.0.md",
+      "sha256": "f7ee9c00f3d04a8466ebac56473c08e1b045474452a151af75be2ae2337730ae"
+    },
+    {
+      "name": "EXT-GOV-AUTH-01_SPEC.md",
+      "path": "docs/extensions/EXT-GOV-AUTH-01/EXT-GOV-AUTH-01_SPEC.md",
+      "sha256": "a8b8863c68e8d0acb6cfc2c82e3ede0c86c41adadab383ad269ae8ba6383194b"
+    },
+    {
+      "name": "PLATFORM_DESIGN_AUTHORITY_LOCK_CLOSE_PACK_v1.0.md",
+      "path": "docs/governance/PLATFORM_DESIGN_AUTHORITY_LOCK_CLOSE_PACK_v1.0.md",
+      "sha256": "5fa46d5d43ff34b6d0d91f9198a542c932680e6a2d3ef326eea896ae4b7b7937"
+    },
+    {
+      "name": "BOARD_RESOLUTION_PLATFORM_DESIGN_AUTHORITY_LOCK_v1.0.md",
+      "path": "docs/governance/BOARD_RESOLUTION_PLATFORM_DESIGN_AUTHORITY_LOCK_v1.0.md",
+      "sha256": "5a67bb2c5818b749f3a5707dad6d7e654f07ecf09eb9c414aaf1de65078331c7"
+    },
+    {
+      "name": "PLATFORM_DESIGN_AUTHORITY_LOCK_MANIFEST_v1.0.json",
+      "path": "docs/governance/PLATFORM_DESIGN_AUTHORITY_LOCK_MANIFEST_v1.0.json",
+      "sha256": "45edfccb03ae6642c95871e553f96c8d9990f754c42b53fa758c298809026e25"
+    },
+    {
+      "name": "CODEOWNERS",
+      "path": ".github/CODEOWNERS",
+      "sha256": "8c1f1e437b06722931e2f364bbf9aef3b7cca3de57b3ed918873b12de137c622"
+    }
+  ],
+  "repositoryEnforcementSnapshot": {
+    "repo": "RedRooEnergy/frontend",
+    "branch": "main",
+    "requiredPullRequests": true,
+    "requiredApprovingReviewCount": 2,
+    "requireCodeOwnerReviews": true,
+    "strictStatusChecks": true,
+    "requiredConversationResolution": true,
+    "requiredLinearHistory": true,
+    "allowForcePushes": false,
+    "allowDeletions": false,
+    "enforceAdmins": true,
+    "requiredContexts": [
+      "Buyer Onboarding Audit (Blocking) / buyer-onboarding-audit",
+      "Freight & Customs Audit (Blocking) / freight-customs-audit",
+      "Installer Onboarding Audit (Blocking) / installer-onboarding-audit"
+    ]
+  },
+  "integrityStatement": "Referenced governance artefacts and repository governance controls are hash-linked and regulator-disclosable."
+}
