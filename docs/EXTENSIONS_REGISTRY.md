@@ -211,6 +211,7 @@ Extension spec: `docs/extensions/EXT-GOV-AUTH-02/EXT-GOV-AUTH-02_SPEC.md`
 Workflow contract: `docs/governance/GOV-AUTH-02_MULTISIGNATURE_WORKFLOW_CONTRACT_v1.0.md`
 Design-lock close pack: `docs/governance/EXT-GOV-AUTH-02_DESIGN_LOCK_CLOSE_PACK_v1.0.md`
 Board preview packet: `docs/governance/BOARD_PREVIEW_PACKET_EXT-GOV-AUTH-02_v1.0.md`
+Board design endorsement: `docs/governance/BOARD_RESOLUTION_EXT-GOV-AUTH-02_DESIGN_ENDORSEMENT_v1.0.md`
 
 ## EXT-26 — Marketing Orchestration & Campaign Governance
 
