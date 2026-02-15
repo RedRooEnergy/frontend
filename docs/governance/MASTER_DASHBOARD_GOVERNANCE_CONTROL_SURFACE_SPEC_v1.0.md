@@ -9,143 +9,165 @@ Change Control: REQUIRED
 
 ## 1) Purpose
 
-Define one unified governance architecture for all platform dashboards so visibility, mutation authority, audit obligations, and enforcement behavior are consistent across domains.
-
-This spec governs:
-- dashboard authority boundaries,
-- mutation control protocol,
-- audit and evidence requirements,
-- unified PASS/FAIL control rules,
-- governance score and badge integration expectations.
-
-## 2) Dashboard Scope
-
-This unified model applies to:
-- CEO / Executive Oversight Dashboard,
+Define one enforceable governance model for all dashboard control surfaces so authority boundaries, mutation controls, audit evidence, and CI gates are consistent across:
+- CEO / Executive Dashboard,
 - Grand-Master (Platform Admin) Dashboard,
 - Installer Dashboard,
 - Freight Dashboard,
 - Insurance Dashboard,
 - Accreditation / Compliance Dashboard.
 
-Out of scope:
+## 2) Controlled Vocabulary
+
+- `Dashboard Mutation`: any `POST`/`PATCH`/`PUT`/`DELETE` route that changes persistent state.
+- `Override Class`: a mutation that changes hold state, policy state, payout gating, compliance decision state, or risk flag state.
+- `Evidence Artefact`: any hash-verifiable report/export/reference used to support a governance decision.
+- `Receipt Envelope`: deterministic mutation response payload:
+  - `{ ok, auditId, entityId, version?, hash? }`
+- `Audit Triple` (mandatory):
+  1. versioned config document or domain state document,
+  2. admin action/event record,
+  3. immutable audit log record linked by `auditId`.
+
+## 3) Mandatory Shared Primitives (Canonical Mapping)
+
+All dashboards inherit the same primitives. Existing repo canonical names are:
+
+| Primitive | Canonical Name / Path | Notes |
+| --- | --- | --- |
+| Immutable audit ledger | `admin_audit_logs` via `frontend/lib/adminDashboard/auditWriter.ts` (`ADMIN_AUDIT_COLLECTION`) | Append-only evidence ledger. |
+| Admin action/event record | `admin_audit_logs` (current canonical) | If a separate `admin_action_records` collection is introduced later, it must maintain 1:1 link to `auditId`. |
+| Evidence pack / report artefact | Evidence manifests and hash artefacts from `frontend/lib/auditComms/export/evidencePackAssembler.ts` and `frontend/scripts/evidence/build-evidence-pack.ts` | Hash and manifest are mandatory. |
+| Settlement hold lifecycle | `admin_settlement_holds` via `frontend/lib/adminDashboard/settlementHoldStore.ts` | Status transitions must link to immutable audit records. |
+| Freight hold lifecycle (domain-specific) | `freight_settlement_holds` via `frontend/lib/freightAudit/FreightSettlementHoldStore.ts` | Used for freight enforcement surfaces. |
+| Change control events | `admin_change_control_events` via `frontend/lib/adminDashboard/changeControlStore.ts` | Governance change surface. |
+
+## 4) Dashboard Scope and Layer Separation
+
+- CEO Dashboard: strategic read-only insight only.
+- Grand-Master Dashboard: governed operational mutation surface.
+- Installer/Freight/Insurance/Accreditation Dashboards: domain-scoped operations under explicit allow-lists.
+
+Out of scope for this document:
 - runtime role-key changes,
-- direct mutation of Immutable Core controls,
-- subsystem-specific implementation details not linked to dashboard control surfaces.
+- direct Immutable Core rewrites,
+- endpoint activation by documentation alone.
 
-## 3) Authority Model
+## 5) Immutable Core Invariants (Global)
 
-### 3.1 Control Layer Separation
-
-- Executive Dashboard: strategic read-only aggregate visibility.
-- Grand-Master Dashboard: governed operational control surface.
-- Domain Dashboards (Installer/Freight/Insurance/Accreditation): domain-scoped execution and evidence surfaces.
-
-### 3.2 Non-Bypass Rule
-
-No dashboard may:
-- bypass Immutable Core constraints,
-- bypass server-side RBAC,
-- bypass audit logging,
-- mutate state without governed justification.
-
-## 4) Immutable Core Invariants (Global)
-
-The following are non-bypassable across all dashboards:
+No dashboard may bypass:
 - pricing snapshot immutability,
-- escrow and settlement integrity gates,
-- append-only audit log semantics,
-- role boundary enforcement and default-deny access,
-- deterministic evidence hashing and manifest generation,
-- governance CI required checks and branch protection controls.
+- escrow/settlement integrity gates,
+- append-only audit semantics,
+- server-side RBAC default-deny controls,
+- deterministic evidence hash and manifest requirements,
+- required CI + branch protection enforcement.
 
-## 5) Unified Dashboard Control Matrix
+## 6) Authority-by-Endpoint Rule (No Silent Scope Creep)
 
-| Dashboard | Primary Role(s) | Default Mode | Permitted Mutations | Explicitly Prohibited |
-| --- | --- | --- | --- | --- |
-| CEO / Executive | Executive, Board Observer, Auditor | Read-only | None | Operational overrides, payout/release actions, compliance decisions |
-| Grand-Master Admin | Platform Admin (Grand-Master), Governance Leads | Read + Governed Mutation | Config versioning, queue triage, approvals, escalation, evidence generation | Core bypass, unaudited changes, single-step overrides without policy |
-| Installer | Installer Ops, Service Coordinators | Domain Read/Write (Scoped) | Assigned job/case lifecycle updates under policy | Cross-domain financial/compliance overrides |
-| Freight | Freight Ops, Customs Coordinators | Domain Read/Write (Scoped) | Shipment/case updates, freight exception handling, governed holds requests | Direct escrow release bypass, pricing mutation |
-| Insurance | Claims/Oversight Roles | Domain Read/Write (Scoped) | Claim progression and evidence actions | Payment authority escalation outside policy |
-| Accreditation / Compliance | Compliance Officers, Accreditation Ops | Domain Read/Write (Scoped) | Certification review status, compliance incident lifecycle | Manual compliance bypass of Core constraints |
+1. Every dashboard must publish an explicit endpoint allow-list by role and method.  
+2. No dashboard is PASS without endpoint inventory coverage.  
+3. Any endpoint not listed in the allow-list is denied by policy.  
+4. Endpoint inventory is authoritative only when listed in:
+   - `docs/governance/MASTER_DASHBOARD_GOVERNANCE_CONTROL_SURFACE_APPENDIX_A_RBAC_ENDPOINT_MATRIX_v1.0.md`.
 
-## 6) Global Mutation Protocol (Mandatory)
+## 7) Unified Dashboard Control Matrix (High-Level)
 
-Any dashboard mutation must enforce, in order:
-1. server-side RBAC authorization (default deny),
-2. allow-list request validation,
+| Dashboard | Default Mode | Mutation Class | Required Approval |
+| --- | --- | --- | --- |
+| CEO / Executive | Read-only | None | N/A |
+| Grand-Master Admin | Read + Governed Mutation | Config, queue, hold, governance control actions | Single for normal, Dual for override class |
+| Installer | Domain-scoped | Assigned operational lifecycle updates | Single |
+| Freight | Domain-scoped | Freight lifecycle updates and governed hold actions | Single (Dual for override class) |
+| Insurance | Domain-scoped | Claim lifecycle and evidence recommendations | Single |
+| Accreditation / Compliance | Domain-scoped | Certification/compliance lifecycle updates | Single (Dual for override class) |
+
+## 8) Mandatory Mutation Protocol (Global)
+
+Every dashboard mutation must enforce:
+1. server-side RBAC (default deny),
+2. allow-list payload validation,
 3. mandatory `justification`,
-4. mandatory `incidentId` for override classes,
-5. governed approval requirements where applicable (dual approval for override classes),
-6. immutable audit event write with before/after snapshot hash,
-7. deterministic mutation receipt payload.
+4. mandatory `requestId` (idempotency key),
+5. mandatory `incidentId` for override class,
+6. required approval policy (none/single/dual as declared in Appendix A),
+7. Audit Triple creation,
+8. deterministic Receipt Envelope response.
 
-Standard receipt envelope:
-```json
-{
-  "ok": true,
-  "auditId": "string",
-  "entityId": "string",
-  "version": "optional",
-  "hash": "optional"
-}
-```
+`requestId` mapping note:
+- Existing surfaces using `correlationId` are treated as legacy alias and must map 1:1 to `requestId`.
 
-## 7) Unified PASS/FAIL Governance Rules
+## 9) Evidence Binding Requirements by Dashboard
 
-Global FAIL conditions (any one triggers FAIL):
-- mutation without immutable `AdminActionLog` (or equivalent governed audit record),
-- override execution without required approvals,
-- payout/release path bypassing snapshot or escrow integrity guards,
+| Dashboard | Required Evidence Binding |
+| --- | --- |
+| CEO / Executive | Aggregated scorecards, governance status snapshots, export hash manifest references only (no raw mutable artifacts). |
+| Grand-Master Admin | Mutation receipt (`auditId`), before/after hash, version references, change-control/event linkage, evidence pack hash references. |
+| Installer | Work logs, installation proof references, milestone timestamps, linked case/order refs. |
+| Freight | DDP breakdown references, customs clearance refs, delivery confirmation refs, freight hold refs and audit links. |
+| Insurance | Claim evidence pack refs, adjuster notes refs, payout recommendation refs (execution prohibited). |
+| Accreditation / Compliance | Certificate artefacts, lab/body refs, expiry schedule, rejection reasons, compliance incident linkage. |
+
+## 10) Fail-Closed Operational Behavior
+
+| Condition | API Behavior | UI Behavior | Audit Behavior |
+| --- | --- | --- | --- |
+| Authorization failure | Return `403` | Show denied state; no mutation UI action | Log access-denied event where policy requires |
+| Missing required governance fields (`justification`, `requestId`, `incidentId` for override) | Return `400` | Block submit; show required-field errors | No mutation write; validation error logged |
+| Governance integrity uncertainty / hold condition | Return `409` or `412` with governance hold code | Render `DEGRADED`/`UNKNOWN`; never show success | Record hold/degraded event |
+| Evidence hash/manifest mismatch | Return `409` | Show integrity failure; disable downstream action | Log integrity error event |
+| CI-required check or critical rule failure state surfaced in mutation gate | Return `409`/`423` per endpoint contract | Disable mutation controls; show governance blocking reason | Record blocked mutation attempt |
+
+No mutation route may return soft success under integrity uncertainty.
+
+## 11) Unified Global PASS/FAIL Rules
+
+Global FAIL if any one occurs:
+- mutation without immutable audit linkage,
+- override class execution without declared approvals,
+- payout/release path bypassing snapshot or escrow integrity,
 - restricted endpoint reachable by unauthorized role,
-- evidence/report artefact generated without hash manifest,
-- dashboard hides active subsystem FAIL conditions,
-- missing or empty mandatory justification fields.
+- evidence/report artefact without hash manifest,
+- mandatory justification missing/empty,
+- mandatory `requestId` missing/empty,
+- mandatory `incidentId` missing/empty for override class,
+- endpoint not declared in Appendix A.
 
-PASS requires all controls above to be enforced and test-verified.
+Global PASS requires all controls above to be enforced and test-verified.
 
-## 8) CI and Badge Integration Contract
+## 12) Dashboard-Specific PASS/FAIL Requirement
 
-Unified dashboard governance CI must:
-- run dashboard governance tests and mutation guard tests,
-- emit deterministic scorecard artefacts,
-- fail on any critical governance rule breach,
-- publish badge/status endpoint outputs from governance scorecards only.
+Dashboard-specific gates are mandatory and are defined in:
+- `docs/governance/MASTER_DASHBOARD_GOVERNANCE_CONTROL_SURFACE_APPENDIX_B_PASSFAIL_GATES_v1.0.md`
+
+No dashboard may claim PASS by global gates alone.
+
+## 13) CI and Badge Integration Contract
+
+Dashboard governance CI must:
+- execute mutation guard tests and role/route access tests,
+- produce dashboard scorecard artefacts with timestamp and hash,
+- fail on any critical governance gate failure,
+- publish badge/status outputs from scorecard evidence only.
 
 No dashboard may self-assert PASS without CI artefact evidence.
 
-## 9) Data and Evidence Requirements
+## 14) Required Inheritance Appendices
 
-All dashboards must support:
-- UTC timestamped event and report trails,
-- reproducible report generation metadata,
-- SHA-256 hash-verifiable artefacts,
-- cross-reference from summary views to underlying governed evidence.
+This master spec is lock-ready only with:
+- Appendix A RBAC + endpoint + mutation allow-list matrix:
+  - `docs/governance/MASTER_DASHBOARD_GOVERNANCE_CONTROL_SURFACE_APPENDIX_A_RBAC_ENDPOINT_MATRIX_v1.0.md`
+- Appendix B executable PASS/FAIL gates and CI proof requirements:
+  - `docs/governance/MASTER_DASHBOARD_GOVERNANCE_CONTROL_SURFACE_APPENDIX_B_PASSFAIL_GATES_v1.0.md`
 
-Sensitive data display must follow masking and least-privilege rules.
+## 15) Non-Authorization Clause
 
-## 10) Operational Safety and Failure Behavior
+This document is governance specification only.
 
-On governance uncertainty or data integrity failure:
-- dashboards fail closed for mutation paths,
-- read paths show degraded/unknown status explicitly,
-- no inferred or silent fallback mutation behavior is permitted.
+It does not authorize:
+- runtime permission expansion,
+- endpoint activation,
+- RBAC role-key mutation,
+- bypass of Immutable Core constraints.
 
-## 11) Governance Sequencing Requirement
-
-For any new dashboard control surface:
-1. design spec lock,
-2. schema and API contract lock,
-3. PASS/FAIL rule lock,
-4. CI gate integration,
-5. close pack and manifest registration,
-6. board ratification as required by authority class.
-
-No sequencing step may be skipped.
-
-## 12) Non-Authorization Clause
-
-This document does not grant new runtime permissions.
-
-It is a unified control-surface governance specification only. Any implementation or authority expansion requires separate change control and board-governed ratification.
+Implementation and activation require separate approved change-control and ratification artefacts.
