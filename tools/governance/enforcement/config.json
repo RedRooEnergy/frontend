@@ -1,0 +1,37 @@
+{
+  "appendixAPath": "docs/governance/MASTER_DASHBOARD_GOVERNANCE_CONTROL_SURFACE_APPENDIX_A_RBAC_ENDPOINT_MATRIX_v1.0.md",
+  "activationRegisterPath": "docs/governance/GOVERNANCE_ACTIVATION_REGISTER.md",
+  "scorecardOutputPath": "artifacts/governance/dashboard-control-surface.scorecard.json",
+  "nextApiRoot": "frontend/app/api",
+  "backendRoutesRoot": "backend/routes",
+  "mountProbeFiles": [
+    "backend/app.js",
+    "backend/server.js",
+    "backend/index.js"
+  ],
+  "rbacScanRoots": [
+    "backend/middleware",
+    "backend/routes",
+    "backend/models",
+    "frontend/app/api",
+    "frontend/lib",
+    "frontend/middleware.ts",
+    "frontend/middleware.js"
+  ],
+  "allowedStates": [
+    "DRAFT",
+    "LOCK-READY",
+    "CI-VERIFIED",
+    "ACTIVATED",
+    "REGULATOR-READY",
+    "FROZEN"
+  ],
+  "stateOrder": [
+    "DRAFT",
+    "LOCK-READY",
+    "CI-VERIFIED",
+    "ACTIVATED",
+    "REGULATOR-READY"
+  ],
+  "maxFindings": 200
+}

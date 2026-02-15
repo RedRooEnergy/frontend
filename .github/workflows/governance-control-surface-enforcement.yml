@@ -1,0 +1,50 @@
+name: governance-control-surface-enforcement
+
+on:
+  pull_request:
+    paths:
+      - "docs/governance/**"
+      - "docs/00_master_document_inventory.md"
+      - "frontend/app/api/**"
+      - "backend/routes/**"
+      - "backend/middleware/**"
+      - "frontend/lib/**"
+      - "tools/governance/enforcement/**"
+      - ".github/workflows/governance-control-surface-enforcement.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/governance/**"
+      - "docs/00_master_document_inventory.md"
+      - "frontend/app/api/**"
+      - "backend/routes/**"
+      - "backend/middleware/**"
+      - "frontend/lib/**"
+      - "tools/governance/enforcement/**"
+      - ".github/workflows/governance-control-surface-enforcement.yml"
+
+jobs:
+  governance-enforcement:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run Governance Control Surface Enforcement
+        run: node tools/governance/enforcement/governance-scorecard-check.mjs
+
+      - name: Upload Governance Scorecard Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-control-surface-scorecard
+          path: artifacts/governance/dashboard-control-surface.scorecard.json
+          if-no-files-found: warn
