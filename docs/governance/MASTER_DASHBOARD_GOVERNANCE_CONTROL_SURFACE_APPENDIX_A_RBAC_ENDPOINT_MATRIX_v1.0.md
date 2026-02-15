@@ -65,18 +65,26 @@ CI requirement:
 | `/api/governance/platform/status` | `GET` | `executive`, `board-observer`, `auditor` | `NONE` | `ALL` | `NONE` | `N/A` |
 | `/api/governance/platform/badge` | `GET` | `executive`, `board-observer`, `auditor` | `NONE` | `ALL` | `NONE` | `N/A` |
 | `/api/governance/chatbot/status` | `GET` | `executive`, `board-observer`, `auditor` | `NONE` | `ALL` | `NONE` | `N/A` |
+| `/api/governance/chatbot/badge` | `GET` | `executive`, `board-observer`, `auditor` | `NONE` | `ALL` | `NONE` | `N/A` |
 
 ## 4) Grand-Master Dashboard Matrix
 
 | Endpoint | Method | Allowed Roles | Allowed Mutation Entity Types | Prohibited Entity Types | Approval Requirement | Required Fields |
 | --- | --- | --- | --- | --- | --- | --- |
+| `/api/admin/dashboard` | `GET` | `admin` | `NONE` | `ALL` | `NONE` | `N/A` |
 | `/api/admin/dashboard/overview` | `GET` | `admin` | `NONE` | `ALL` | `NONE` | `N/A` |
+| `/api/admin/dashboard/financial` | `GET` | `admin` | `NONE` | `ALL` | `NONE` | `N/A` |
+| `/api/admin/dashboard/financial` | `POST` | `admin` | `PlatformFeeConfig`, `FxPolicy`, `EscrowPolicy` | `PricingSnapshot`, `EscrowReleaseExecution`, `RBACRoleKey` | `SINGLE` | `justification`, `requestId` (`correlationId` alias accepted) |
 | `/api/admin/dashboard/financial/config` | `GET` | `admin` | `NONE` | `ALL` | `NONE` | `N/A` |
 | `/api/admin/dashboard/financial/config` | `POST` | `admin` | `PlatformFeeConfig`, `FxPolicy`, `EscrowPolicy` | `PricingSnapshot`, `EscrowReleaseExecution`, `RBACRoleKey` | `SINGLE` | `justification`, `requestId` (`correlationId` alias accepted) |
 | `/api/admin/dashboard/financial/holds` | `GET` | `admin` | `NONE` | `ALL` | `NONE` | `N/A` |
 | `/api/admin/dashboard/financial/holds` | `POST` | `admin` | `SettlementHold` | `PricingSnapshot`, `EscrowReleaseExecution` | `SINGLE` | `justification`, `requestId`, `scope`, `subsystem` |
 | `/api/admin/dashboard/financial/holds/:holdId/override` | `POST` | `admin` | `SettlementHoldOverride` | `EscrowReleaseExecution`, `PricingSnapshot`, `CorePolicyBypass` | `DUAL` | `justification`, `requestId`, `incidentId`, `durationHours?` |
+| `/api/admin/dashboard/governance` | `GET` | `admin` | `NONE` | `ALL` | `NONE` | `N/A` |
+| `/api/admin/dashboard/governance` | `POST` | `admin` | `GovernanceControlAction` | `RuntimePermissionGrant`, `CoreBypassToggle`, `EnforcementActivation` | `SINGLE` | `justification`, `requestId` |
 | `/api/admin/dashboard/governance/status` | `GET` | `admin` | `NONE` | `ALL` | `NONE` | `N/A` |
+| `/api/admin/dashboard/governance/audit-integrity` | `GET` | `admin` | `NONE` | `ALL` | `NONE` | `N/A` |
+| `/api/admin/dashboard/governance/snapshot-integrity` | `GET` | `admin` | `NONE` | `ALL` | `NONE` | `N/A` |
 | `/api/admin/dashboard/governance/change-control` | `GET` | `admin` | `NONE` | `ALL` | `NONE` | `N/A` |
 | `/api/admin/dashboard/governance/change-control` | `POST` | `admin` | `ChangeControlEvent` | `RuntimePermissionGrant`, `CoreBypassToggle` | `SINGLE` | `justification`, `requestId`, `rationale`, `type` |
 | `/api/admin/dashboard/governance/run-audit` | `POST` | `admin` | `GovernanceAuditRunRequest` | `EnforcementActivation`, `RBACExpansion` | `SINGLE` | `justification`, `requestId` |
