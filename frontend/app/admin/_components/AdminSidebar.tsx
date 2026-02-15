@@ -4,6 +4,7 @@ const navItems = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/financial", label: "Financial" },
   { href: "/admin/governance", label: "Governance" },
+  { href: "/admin/governance/authority", label: "Authority Tree" },
   { href: "/admin/suppliers", label: "Suppliers" },
   { href: "/admin/products", label: "Products" },
   { href: "/admin/risk", label: "Risk" },

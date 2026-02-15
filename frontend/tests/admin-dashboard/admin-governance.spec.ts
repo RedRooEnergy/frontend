@@ -13,6 +13,27 @@ test("admin can load /admin/governance", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Governance Controls" })).toBeVisible();
 });
 
+test("non-admin is blocked from /admin/governance/authority", async ({ page }) => {
+  await loginAs(page, "buyer", "buyer-governance-authority@rre.test");
+  await page.goto("/admin/governance/authority");
+  await expect(page).toHaveURL(/\/signin\?role=admin/);
+});
+
+test("admin can load /admin/governance/authority with locked manifest hash", async ({ page }) => {
+  await loginAs(page, "admin", "admin-governance-authority@rre.test");
+  await page.goto("/admin/governance/authority");
+  await expect(page.getByRole("heading", { name: "Design Authority Tree" })).toBeVisible();
+  await expect(
+    page
+      .locator("article")
+      .filter({ hasText: "Extension" })
+      .getByText("EXT-GOV-AUTH-01", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("45edfccb03ae6642c95871e553f96c8d9990f754c42b53fa758c298809026e25"),
+  ).toBeVisible();
+});
+
 test("change-control create requires reason and rationale", async ({ page }) => {
   await loginAs(page, "admin", "admin-cc@rre.test");
   await page.goto("/admin/governance");
