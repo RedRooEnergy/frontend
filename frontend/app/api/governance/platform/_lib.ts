@@ -658,6 +658,12 @@ function evaluateGovAuth02Activation(root: string): GovernanceCheckResult {
     "governance",
     "EXT-GOV-AUTH-02-ACTIVATION_ROLLOUT_ROLLBACK_CONTROLS_v1.0.md"
   );
+  const rollbackRehearsalTemplatePath = path.join(
+    repoRoot,
+    "docs",
+    "governance",
+    "EXT-GOV-AUTH-02-ACTIVATION_ROLLBACK_REHEARSAL_RECORD_TEMPLATE_v1.0.md"
+  );
   const closePackPath = path.join(repoRoot, "docs", "governance", "EXT-GOV-AUTH-02-ACTIVATION_CLOSE_PACK_v1.0.md");
   const manifestPath = path.join(repoRoot, "docs", "governance", "EXT-GOV-AUTH-02-ACTIVATION_MANIFEST_v1.0.json");
   const implementationAuthorizationPath = path.join(
@@ -685,6 +691,7 @@ function evaluateGovAuth02Activation(root: string): GovernanceCheckResult {
     "docs/governance/GOV-AUTH-02-ACTIVATION_STATIC_RULE_CI_CONTRACT_v1.0.md",
     "docs/governance/GOV-AUTH-02_MULTISIGNATURE_WORKFLOW_CONTRACT_v1.0.md",
     "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_ROLLOUT_ROLLBACK_CONTROLS_v1.0.md",
+    "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_ROLLBACK_REHEARSAL_RECORD_TEMPLATE_v1.0.md",
     "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_CLOSE_PACK_v1.0.md",
     "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_MANIFEST_v1.0.json",
     "docs/governance/BOARD_RESOLUTION_EXT-GOV-AUTH-02-ACTIVATION_IMPLEMENTATION_AUTHORIZATION_v1.0.md",
@@ -704,6 +711,7 @@ function evaluateGovAuth02Activation(root: string): GovernanceCheckResult {
     staticContractPath,
     multisigContractPath,
     rollbackControlsPath,
+    rollbackRehearsalTemplatePath,
     closePackPath,
     manifestPath,
     implementationAuthorizationPath,
@@ -724,6 +732,7 @@ function evaluateGovAuth02Activation(root: string): GovernanceCheckResult {
   const activationSpecSource = readTextIfExists(activationSpecPath);
   const staticContractSource = readTextIfExists(staticContractPath);
   const rollbackControlsSource = readTextIfExists(rollbackControlsPath);
+  const rollbackRehearsalTemplateSource = readTextIfExists(rollbackRehearsalTemplatePath);
   const closePackSource = readTextIfExists(closePackPath);
   const implementationAuthorizationSource = readTextIfExists(implementationAuthorizationPath);
   const configSource = readTextIfExists(configPath);
@@ -763,6 +772,18 @@ function evaluateGovAuth02Activation(root: string): GovernanceCheckResult {
     }
     if (!rollbackControlsSource.includes("No rollback step may delete immutable evidence.")) {
       addNote("AUTH02_ACTIVATION_EVIDENCE_PRESERVATION_CLAUSE_MISSING");
+    }
+  }
+
+  if (rollbackRehearsalTemplateSource) {
+    if (!rollbackRehearsalTemplateSource.includes("Rehearsal Metadata")) {
+      addNote("AUTH02_ACTIVATION_ROLLBACK_REHEARSAL_TEMPLATE_SECTION_MISSING");
+    }
+    if (!rollbackRehearsalTemplateSource.includes("Deterministic Rollback Sequence Evidence")) {
+      addNote("AUTH02_ACTIVATION_ROLLBACK_REHEARSAL_SEQUENCE_SECTION_MISSING");
+    }
+    if (!rollbackRehearsalTemplateSource.includes("No runtime activation or authority expansion was introduced.")) {
+      addNote("AUTH02_ACTIVATION_ROLLBACK_REHEARSAL_NON_EXPANSION_ATTESTATION_MISSING");
     }
   }
 

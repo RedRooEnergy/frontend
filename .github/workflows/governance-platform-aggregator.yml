@@ -65,6 +65,9 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
         working-directory: frontend
+      - name: Run GOV-AUTH-02 build-only guard tests
+        run: npx tsx tests/governance/authority/runGovAuth02ActivationBuildOnlyTests.ts
+        working-directory: frontend
       - name: Assert GOV-WECHAT-07 PASS
         run: |
           npx tsx --eval "import { getPlatformGovernanceStatus } from './app/api/governance/platform/_lib.ts'; const status = getPlatformGovernanceStatus(); const check = status.governanceChecks?.find((entry) => entry.id === 'GOV-WECHAT-07'); if (!(check && check.id === 'GOV-WECHAT-07' && check.status === 'PASS')) { console.error('GOV-WECHAT-07 must be PASS in platform governance aggregator'); process.exit(1); } console.log('PASS GOV-WECHAT-07');"
