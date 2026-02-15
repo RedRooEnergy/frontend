@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -11,7 +12,11 @@ export type GovernanceCheckResult = {
   status: GovernanceRuleStatus;
   severity: GovernanceRuleSeverity;
   evidence: string[];
-  impactSurface: "Communications/Cryptographic" | "Platform/IntegrityChain" | "Platform/CommunicationIntegrity";
+  impactSurface:
+    | "Communications/Cryptographic"
+    | "Platform/IntegrityChain"
+    | "Platform/CommunicationIntegrity"
+    | "Platform/DesignAuthorityActivation";
   notes: string[];
 };
 
@@ -285,6 +290,16 @@ function readTextIfExists(filePath: string) {
   try {
     if (!fs.existsSync(filePath)) return null;
     return fs.readFileSync(filePath, "utf8");
+  } catch {
+    return null;
+  }
+}
+
+function sha256FileIfExists(filePath: string) {
+  try {
+    if (!fs.existsSync(filePath)) return null;
+    const bytes = fs.readFileSync(filePath);
+    return crypto.createHash("sha256").update(bytes).digest("hex");
   } catch {
     return null;
   }
@@ -605,6 +620,296 @@ function evaluateChatGovernance01(root: string): GovernanceCheckResult {
   };
 }
 
+function evaluateGovAuth02Activation(root: string): GovernanceCheckResult {
+  const repoRoot =
+    fs.existsSync(path.join(root, "frontend")) && fs.existsSync(path.join(root, "docs"))
+      ? root
+      : fs.existsSync(path.join(root, "..", "frontend")) && fs.existsSync(path.join(root, "..", "docs"))
+        ? path.resolve(root, "..")
+        : root;
+  const frontendRoot = fs.existsSync(path.join(repoRoot, "frontend", "app"))
+    ? path.join(repoRoot, "frontend")
+    : fs.existsSync(path.join(repoRoot, "app"))
+      ? repoRoot
+      : path.join(repoRoot, "frontend");
+
+  const activationSpecPath = path.join(
+    repoRoot,
+    "docs",
+    "extensions",
+    "EXT-GOV-AUTH-02-ACTIVATION",
+    "EXT-GOV-AUTH-02-ACTIVATION_AUTHORIZATION_SPEC_v1.0.md"
+  );
+  const staticContractPath = path.join(
+    repoRoot,
+    "docs",
+    "governance",
+    "GOV-AUTH-02-ACTIVATION_STATIC_RULE_CI_CONTRACT_v1.0.md"
+  );
+  const multisigContractPath = path.join(
+    repoRoot,
+    "docs",
+    "governance",
+    "GOV-AUTH-02_MULTISIGNATURE_WORKFLOW_CONTRACT_v1.0.md"
+  );
+  const rollbackControlsPath = path.join(
+    repoRoot,
+    "docs",
+    "governance",
+    "EXT-GOV-AUTH-02-ACTIVATION_ROLLOUT_ROLLBACK_CONTROLS_v1.0.md"
+  );
+  const closePackPath = path.join(repoRoot, "docs", "governance", "EXT-GOV-AUTH-02-ACTIVATION_CLOSE_PACK_v1.0.md");
+  const manifestPath = path.join(repoRoot, "docs", "governance", "EXT-GOV-AUTH-02-ACTIVATION_MANIFEST_v1.0.json");
+  const implementationAuthorizationPath = path.join(
+    repoRoot,
+    "docs",
+    "governance",
+    "BOARD_RESOLUTION_EXT-GOV-AUTH-02-ACTIVATION_IMPLEMENTATION_AUTHORIZATION_v1.0.md"
+  );
+
+  const configPath = path.join(frontendRoot, "lib", "governance", "authority", "multisig", "config.ts");
+  const hashPath = path.join(frontendRoot, "lib", "governance", "authority", "multisig", "hash.ts");
+  const ledgerStorePath = path.join(frontendRoot, "lib", "governance", "authority", "multisig", "ledgerStore.ts");
+  const servicePath = path.join(frontendRoot, "lib", "governance", "authority", "multisig", "service.ts");
+  const testPath = path.join(
+    frontendRoot,
+    "tests",
+    "governance",
+    "authority",
+    "runGovAuth02ActivationBuildOnlyTests.ts"
+  );
+  const workflowPath = path.join(repoRoot, ".github", "workflows", "governance-platform-aggregator.yml");
+
+  const evidence = [
+    "docs/extensions/EXT-GOV-AUTH-02-ACTIVATION/EXT-GOV-AUTH-02-ACTIVATION_AUTHORIZATION_SPEC_v1.0.md",
+    "docs/governance/GOV-AUTH-02-ACTIVATION_STATIC_RULE_CI_CONTRACT_v1.0.md",
+    "docs/governance/GOV-AUTH-02_MULTISIGNATURE_WORKFLOW_CONTRACT_v1.0.md",
+    "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_ROLLOUT_ROLLBACK_CONTROLS_v1.0.md",
+    "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_CLOSE_PACK_v1.0.md",
+    "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_MANIFEST_v1.0.json",
+    "docs/governance/BOARD_RESOLUTION_EXT-GOV-AUTH-02-ACTIVATION_IMPLEMENTATION_AUTHORIZATION_v1.0.md",
+    "frontend/lib/governance/authority/multisig/config.ts",
+    "frontend/lib/governance/authority/multisig/hash.ts",
+    "frontend/lib/governance/authority/multisig/ledgerStore.ts",
+    "frontend/lib/governance/authority/multisig/service.ts",
+    "frontend/tests/governance/authority/runGovAuth02ActivationBuildOnlyTests.ts",
+    ".github/workflows/governance-platform-aggregator.yml",
+  ];
+
+  const notes: string[] = [];
+  const addNote = (code: string, detail?: string) => notes.push(detail ? `${code}:${detail}` : code);
+
+  const requiredPaths = [
+    activationSpecPath,
+    staticContractPath,
+    multisigContractPath,
+    rollbackControlsPath,
+    closePackPath,
+    manifestPath,
+    implementationAuthorizationPath,
+    configPath,
+    hashPath,
+    ledgerStorePath,
+    servicePath,
+    testPath,
+    workflowPath,
+  ];
+
+  for (const requiredPath of requiredPaths) {
+    if (!fs.existsSync(requiredPath)) {
+      addNote("AUTH02_ACTIVATION_REQUIRED_ARTIFACT_MISSING", path.relative(repoRoot, requiredPath));
+    }
+  }
+
+  const activationSpecSource = readTextIfExists(activationSpecPath);
+  const staticContractSource = readTextIfExists(staticContractPath);
+  const rollbackControlsSource = readTextIfExists(rollbackControlsPath);
+  const closePackSource = readTextIfExists(closePackPath);
+  const implementationAuthorizationSource = readTextIfExists(implementationAuthorizationPath);
+  const configSource = readTextIfExists(configPath);
+  const serviceSource = readTextIfExists(servicePath);
+  const workflowSource = readTextIfExists(workflowPath);
+
+  if (activationSpecSource) {
+    if (!activationSpecSource.includes("Runtime Authorization: NOT GRANTED")) {
+      addNote("AUTH02_ACTIVATION_NON_AUTH_CLAUSE_MISSING");
+    }
+    if (!activationSpecSource.includes("Out of scope:")) {
+      addNote("AUTH02_ACTIVATION_SCOPE_BOUNDARY_MISSING");
+    }
+  }
+
+  if (staticContractSource) {
+    if (!staticContractSource.includes("Rule ID: `GOV-AUTH-02-ACTIVATION`")) {
+      addNote("AUTH02_ACTIVATION_RULE_ID_DECLARATION_MISSING");
+    }
+    if (!staticContractSource.includes("Mode: Binary PASS/FAIL")) {
+      addNote("AUTH02_ACTIVATION_BINARY_SCORING_DECLARATION_MISSING");
+    }
+    if (!staticContractSource.includes("Severity: CRITICAL")) {
+      addNote("AUTH02_ACTIVATION_CRITICAL_SEVERITY_DECLARATION_MISSING");
+    }
+    if (!staticContractSource.includes("CI bypass language present.")) {
+      addNote("AUTH02_ACTIVATION_CI_BYPASS_DRIFT_CHECK_MISSING");
+    }
+  }
+
+  if (rollbackControlsSource) {
+    if (!rollbackControlsSource.includes("Rollback is mandatory on:")) {
+      addNote("AUTH02_ACTIVATION_ROLLBACK_TRIGGER_DECLARATION_MISSING");
+    }
+    if (!rollbackControlsSource.includes("ledger immutability breach")) {
+      addNote("AUTH02_ACTIVATION_LEDGER_IMMUTABILITY_ROLLBACK_MISSING");
+    }
+    if (!rollbackControlsSource.includes("No rollback step may delete immutable evidence.")) {
+      addNote("AUTH02_ACTIVATION_EVIDENCE_PRESERVATION_CLAUSE_MISSING");
+    }
+  }
+
+  if (closePackSource) {
+    const requiredClosePackReferences = [
+      "EXT-GOV-AUTH-02-ACTIVATION_AUTHORIZATION_SPEC_v1.0.md",
+      "GOV-AUTH-02-ACTIVATION_STATIC_RULE_CI_CONTRACT_v1.0.md",
+      "EXT-GOV-AUTH-02-ACTIVATION_ROLLOUT_ROLLBACK_CONTROLS_v1.0.md",
+      "EXT-GOV-AUTH-02-ACTIVATION_CLOSE_PACK_v1.0.md",
+    ];
+    for (const reference of requiredClosePackReferences) {
+      if (!closePackSource.includes(reference)) {
+        addNote("AUTH02_ACTIVATION_CLOSE_PACK_REFERENCE_MISSING", reference);
+      }
+    }
+    if (!closePackSource.includes("Runtime authorization remains NOT GRANTED")) {
+      addNote("AUTH02_ACTIVATION_CLOSE_PACK_NON_AUTH_DECLARATION_MISSING");
+    }
+  }
+
+  if (implementationAuthorizationSource) {
+    if (!implementationAuthorizationSource.includes("build-phase development only")) {
+      addNote("AUTH02_ACTIVATION_IMPLEMENTATION_SCOPE_NOT_BOUNDED");
+    }
+    if (!implementationAuthorizationSource.includes("Runtime activation remains deferred and not authorized.")) {
+      addNote("AUTH02_ACTIVATION_IMPLEMENTATION_NON_AUTH_DECLARATION_MISSING");
+    }
+  }
+
+  if (configSource) {
+    if (!configSource.includes("ENABLE_EXT_GOV_AUTH_02_ACTIVATION_BUILD")) {
+      addNote("AUTH02_ACTIVATION_BUILD_FLAG_GUARD_MISSING");
+    }
+    if (!configSource.includes("GOV_AUTH02_RUNTIME_ACTIVATION_NOT_AUTHORIZED")) {
+      addNote("AUTH02_ACTIVATION_RUNTIME_FORBIDDEN_GUARD_MISSING");
+    }
+  }
+
+  if (serviceSource) {
+    if (!serviceSource.includes("assertGovAuth02ActivationBuildEnabled")) {
+      addNote("AUTH02_ACTIVATION_BUILD_ASSERTION_MISSING");
+    }
+    if (!serviceSource.includes("writeAdminAudit")) {
+      addNote("AUTH02_ACTIVATION_AUDIT_COUPLING_MISSING");
+    }
+    if (!serviceSource.includes("triggerAuthorityMultisigRuntimeActivation")) {
+      addNote("AUTH02_ACTIVATION_RUNTIME_TRIGGER_GUARD_MISSING");
+    }
+  }
+
+  if (workflowSource) {
+    if (!workflowSource.includes("Assert GOV-AUTH-02-ACTIVATION PASS")) {
+      addNote("AUTH02_ACTIVATION_PGA_CI_ASSERTION_MISSING");
+    }
+    if (!workflowSource.includes("GOV-AUTH-02-ACTIVATION")) {
+      addNote("AUTH02_ACTIVATION_PGA_CI_RULE_ID_MISSING");
+    }
+  }
+
+  const manifestSource = readTextIfExists(manifestPath);
+  if (!manifestSource) {
+    addNote("AUTH02_ACTIVATION_MANIFEST_MISSING");
+  } else {
+    try {
+      const manifest = JSON.parse(manifestSource) as {
+        extensionId?: string;
+        runtimeAuthorization?: string;
+        documents?: Array<{ path?: string; sha256?: string }>;
+        authorityAnchors?: Array<{ extensionId?: string; manifestPath?: string; manifestSha256?: string }>;
+      };
+
+      if (manifest.extensionId !== "EXT-GOV-AUTH-02-ACTIVATION") {
+        addNote("AUTH02_ACTIVATION_MANIFEST_EXTENSION_ID_INVALID");
+      }
+      if (String(manifest.runtimeAuthorization || "").toUpperCase() !== "NOT GRANTED") {
+        addNote("AUTH02_ACTIVATION_MANIFEST_RUNTIME_AUTH_STATE_INVALID");
+      }
+
+      const documents = Array.isArray(manifest.documents) ? manifest.documents : [];
+      if (documents.length === 0) {
+        addNote("AUTH02_ACTIVATION_MANIFEST_DOCUMENTS_EMPTY");
+      } else {
+        const requiredManifestPaths = [
+          "docs/extensions/EXT-GOV-AUTH-02-ACTIVATION/EXT-GOV-AUTH-02-ACTIVATION_AUTHORIZATION_SPEC_v1.0.md",
+          "docs/governance/GOV-AUTH-02-ACTIVATION_STATIC_RULE_CI_CONTRACT_v1.0.md",
+          "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_ROLLOUT_ROLLBACK_CONTROLS_v1.0.md",
+          "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_CLOSE_PACK_v1.0.md",
+        ];
+
+        for (const requiredManifestPath of requiredManifestPaths) {
+          const entry = documents.find((doc) => doc.path === requiredManifestPath);
+          if (!entry) {
+            addNote("AUTH02_ACTIVATION_MANIFEST_REQUIRED_PATH_MISSING", requiredManifestPath);
+            continue;
+          }
+
+          const expectedSha = String(entry.sha256 || "").trim().toLowerCase();
+          if (!/^[0-9a-f]{64}$/.test(expectedSha)) {
+            addNote("AUTH02_ACTIVATION_MANIFEST_ENTRY_INVALID", requiredManifestPath);
+            continue;
+          }
+
+          const absolutePath = path.join(repoRoot, requiredManifestPath);
+          const actualSha = sha256FileIfExists(absolutePath);
+          if (!actualSha) {
+            addNote("AUTH02_ACTIVATION_MANIFEST_FILE_MISSING", requiredManifestPath);
+            continue;
+          }
+          if (actualSha !== expectedSha) {
+            addNote("AUTH02_ACTIVATION_MANIFEST_HASH_MISMATCH", requiredManifestPath);
+          }
+        }
+      }
+
+      const authorityAnchors = Array.isArray(manifest.authorityAnchors) ? manifest.authorityAnchors : [];
+      for (const anchor of authorityAnchors) {
+        const manifestAnchorPath = String(anchor.manifestPath || "").trim();
+        const expectedAnchorSha = String(anchor.manifestSha256 || "").trim().toLowerCase();
+        if (!manifestAnchorPath || !/^[0-9a-f]{64}$/.test(expectedAnchorSha)) {
+          addNote("AUTH02_ACTIVATION_AUTHORITY_ANCHOR_INVALID", String(anchor.extensionId || "UNKNOWN"));
+          continue;
+        }
+        const resolvedAnchorPath = path.join(repoRoot, manifestAnchorPath);
+        const actualAnchorSha = sha256FileIfExists(resolvedAnchorPath);
+        if (!actualAnchorSha) {
+          addNote("AUTH02_ACTIVATION_AUTHORITY_ANCHOR_FILE_MISSING", manifestAnchorPath);
+          continue;
+        }
+        if (actualAnchorSha !== expectedAnchorSha) {
+          addNote("AUTH02_ACTIVATION_AUTHORITY_ANCHOR_HASH_MISMATCH", manifestAnchorPath);
+        }
+      }
+    } catch {
+      addNote("AUTH02_ACTIVATION_MANIFEST_PARSE_INVALID");
+    }
+  }
+
+  return {
+    id: "GOV-AUTH-02-ACTIVATION",
+    status: notes.length === 0 ? "PASS" : "FAIL",
+    severity: "CRITICAL",
+    evidence,
+    impactSurface: "Platform/DesignAuthorityActivation",
+    notes,
+  };
+}
+
 export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
   const root = resolveRepoRoot();
 
@@ -647,6 +952,7 @@ export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
     evaluateExtWeChat07(root),
     evaluateChainIntegrity01(root),
     evaluateChatGovernance01(root),
+    evaluateGovAuth02Activation(root),
   ];
 
   const summary = {
@@ -673,6 +979,8 @@ export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
     "GOV-CHAIN-01": 12,
     // GOV-CHAT-01 remains binary critical gate; numeric deduction is currently zero by contract.
     "GOV-CHAT-01": 0,
+    // GOV-AUTH-02-ACTIVATION remains binary critical gate; numeric deduction is currently zero by contract.
+    "GOV-AUTH-02-ACTIVATION": 0,
   };
   const deductions = governanceChecks
     .filter((check) => check.status === "FAIL")
@@ -685,7 +993,12 @@ export function getPlatformGovernanceStatus(): PlatformGovernanceStatus {
     0,
     basePercent - deductions.reduce((sum, deduction) => sum + deduction.percent, 0)
   );
-  const badgeDegradeRuleIds = new Set(["GOV-WECHAT-07", "GOV-CHAIN-01", "GOV-CHAT-01"]);
+  const badgeDegradeRuleIds = new Set([
+    "GOV-WECHAT-07",
+    "GOV-CHAIN-01",
+    "GOV-CHAT-01",
+    "GOV-AUTH-02-ACTIVATION",
+  ]);
   const cryptographicIntegrity: "GREEN" | "RED" = governanceChecks.some(
     (check) => (check.id === "GOV-WECHAT-07" || check.id === "GOV-CHAIN-01") && check.status === "FAIL"
   )
