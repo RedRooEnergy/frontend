@@ -11,6 +11,7 @@ on:
       - "frontend/lib/wechat/signaturePublicKey.ts"
       - "frontend/tests/chatbot/**"
       - "frontend/tests/governance/authority/runGovAuth02ActivationBuildOnlyTests.ts"
+      - "frontend/tests/governance/authority/runGovAuth02ActivationEngineBuildOnlyTests.ts"
       - "frontend/tests/governance/authority/scanActivationMutationSurface.ts"
       - "frontend/tests/wechat-ui/**"
       - "frontend/tests/chain-integrity/**"
@@ -39,6 +40,7 @@ on:
       - "frontend/lib/wechat/signaturePublicKey.ts"
       - "frontend/tests/chatbot/**"
       - "frontend/tests/governance/authority/runGovAuth02ActivationBuildOnlyTests.ts"
+      - "frontend/tests/governance/authority/runGovAuth02ActivationEngineBuildOnlyTests.ts"
       - "frontend/tests/governance/authority/scanActivationMutationSurface.ts"
       - "frontend/tests/wechat-ui/**"
       - "frontend/tests/chain-integrity/**"
@@ -69,6 +71,9 @@ jobs:
         working-directory: frontend
       - name: Run GOV-AUTH-02 build-only guard tests
         run: npx tsx tests/governance/authority/runGovAuth02ActivationBuildOnlyTests.ts
+        working-directory: frontend
+      - name: Run GOV-AUTH-02 engine build-only tests
+        run: npx tsx tests/governance/authority/runGovAuth02ActivationEngineBuildOnlyTests.ts
         working-directory: frontend
       - name: Scan GOV-AUTH-02 activation mutation surface
         run: npx tsx tests/governance/authority/scanActivationMutationSurface.ts
