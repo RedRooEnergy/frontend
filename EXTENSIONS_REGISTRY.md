@@ -229,6 +229,7 @@ References:
 - Rollout and rollback controls: `docs/governance/EXT-GOV-AUTH-02-ACTIVATION_ROLLOUT_ROLLBACK_CONTROLS_v1.0.md`
 - Activation close pack: `docs/governance/EXT-GOV-AUTH-02-ACTIVATION_CLOSE_PACK_v1.0.md`
 - Activation manifest: `docs/governance/EXT-GOV-AUTH-02-ACTIVATION_MANIFEST_v1.0.json`
+- Board implementation authorization: `docs/governance/BOARD_RESOLUTION_EXT-GOV-AUTH-02-ACTIVATION_IMPLEMENTATION_AUTHORIZATION_v1.0.md`
 
 ## EXT-INTERNAL-MSG-01 — Governed Internal Messaging
 

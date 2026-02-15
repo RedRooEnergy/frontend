@@ -1,0 +1,16 @@
+{
+  "documentId": "RRE-GOV-AUTH-02-ACTIVATION-IMPLEMENTATION-AUTH-MANIFEST-v1.0",
+  "version": "v1.0",
+  "status": "IMPLEMENTATION AUTHORIZATION LOCK",
+  "timestampUTC": "2026-02-15T03:23:36.748Z",
+  "resolution": {
+    "documentId": "RRE-BRD-RES-EXT-GOV-AUTH-02-ACTIVATION-IMPLEMENTATION-v1.0",
+    "path": "docs/governance/BOARD_RESOLUTION_EXT-GOV-AUTH-02-ACTIVATION_IMPLEMENTATION_AUTHORIZATION_v1.0.md",
+    "sha256": "63d0c061131a936518e9fcdff3a96d5c86fdc2fe54df75bea4389647ca6cbd27"
+  },
+  "activationManifestAnchor": {
+    "path": "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_MANIFEST_v1.0.json",
+    "sha256": "ce44ce2891e50518e19c0d03a1800b186556c4a9cbc3862b977ed29218466517"
+  },
+  "integrityStatement": "Implementation authorization is build-only and non-operational; runtime activation remains deferred pending separate board activation resolution."
+}
