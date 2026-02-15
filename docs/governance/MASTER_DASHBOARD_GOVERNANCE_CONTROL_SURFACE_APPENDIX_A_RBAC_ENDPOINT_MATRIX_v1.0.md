@@ -41,6 +41,7 @@ No role outside this closed set is authorized by this appendix.
 
 Rules:
 - Alias roles are policy labels and do not create runtime role identifiers.
+- Runtime role `regulator` is read-only by default; mutation authority requires explicit endpoint-level declaration in this matrix.
 - Any new runtime role key outside the closed set is non-compliant and must fail CI.
 - Role-key expansion requires formal change control and ratification.
 
@@ -53,7 +54,9 @@ Rules:
 All dashboard implementations must publish this inventory. Unlisted endpoints are non-compliant by default.
 
 CI requirement:
-- Endpoint inventory enforcement must be backed by automated route enumeration and comparison against this appendix.
+- Endpoint inventory enforcement must be backed by automated route enumeration and comparison against this appendix across:
+  - `frontend/app/api/**`,
+  - `backend/routes/**` (where present).
 
 ## 3) CEO / Executive Dashboard Matrix
 

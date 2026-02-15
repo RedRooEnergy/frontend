@@ -101,7 +101,9 @@ If a dashboard is not yet implemented, CI must emit explicit `NO_DATA` status an
 ### 3.2 Mandatory Automation Checks
 
 CI evidence must include:
-- automated route enumeration scan output (`app/api/**`) with undeclared-route findings count,
+- automated route enumeration scan output with undeclared-route findings count across:
+  - `frontend/app/api/**`,
+  - `backend/routes/**` (where present),
 - closed role-key scan output with unknown-role findings count,
 - immutable-ledger linkage check for mutation receipts (`auditId` presence and resolvability).
 

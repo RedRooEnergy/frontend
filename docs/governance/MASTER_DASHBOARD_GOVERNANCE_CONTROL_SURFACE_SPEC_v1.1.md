@@ -1,6 +1,7 @@
 # MASTER DASHBOARD GOVERNANCE CONTROL SURFACE SPEC v1.1
 Document ID: RRE-MASTER-DASHBOARD-GOV-SPEC-v1.1  
 Version: v1.1  
+Supersedes: `RRE-MASTER-DASHBOARD-GOV-SPEC-v1.0` (commit `684e81f9bf6d1416b061d19f64ffad3857983583`)  
 Status: DRAFT  
 Classification: Unified Dashboard Governance Architecture  
 Authority Impact: NONE (Specification Only)  
@@ -64,6 +65,7 @@ Out of scope for this document:
 
 - Governance-layer roles in Appendix A are aliases only and do not create runtime permissions.
 - Governance aliases must map explicitly to one of the closed runtime role keys listed in Appendix A.
+- Runtime role `regulator` is read-only by default and may mutate only where an explicit endpoint-level exception is declared in Appendix A.
 - No new runtime role keys may be introduced without formal change control and ratification.
 - CI must fail if a runtime role key appears outside the closed set.
 
@@ -84,7 +86,9 @@ No dashboard may bypass:
 3. Any endpoint not listed in the allow-list is denied by policy.  
 4. Endpoint inventory is authoritative only when listed in:
    - `docs/governance/MASTER_DASHBOARD_GOVERNANCE_CONTROL_SURFACE_APPENDIX_A_RBAC_ENDPOINT_MATRIX_v1.0.md`.
-5. CI must automatically enumerate repository `app/api/**` routes and compare results against Appendix A inventory controls.
+5. CI must automatically enumerate all server-side route definitions and compare results against Appendix A inventory controls:
+   - `frontend/app/api/**` (Next.js App Router API routes),
+   - `backend/routes/**` (Express routes), where present.
 6. Any undeclared route in governed dashboard surfaces is a governance FAIL.
 
 ## 7) Unified Dashboard Control Matrix (High-Level)
