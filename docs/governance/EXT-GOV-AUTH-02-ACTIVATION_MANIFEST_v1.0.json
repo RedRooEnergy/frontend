@@ -1,0 +1,53 @@
+{
+  "documentId": "RRE-GOV-AUTH-02-ACTIVATION-MANIFEST-v1.0",
+  "version": "v1.0",
+  "status": "AUTHORIZATION DESIGN LOCK",
+  "timestampUTC": "2026-02-15T03:14:39.324Z",
+  "extensionId": "EXT-GOV-AUTH-02-ACTIVATION",
+  "runtimeAuthorization": "NOT GRANTED",
+  "documents": [
+    {
+      "name": "EXT-GOV-AUTH-02-ACTIVATION_AUTHORIZATION_SPEC_v1.0.md",
+      "path": "docs/extensions/EXT-GOV-AUTH-02-ACTIVATION/EXT-GOV-AUTH-02-ACTIVATION_AUTHORIZATION_SPEC_v1.0.md",
+      "sha256": "fa22a0c41538b5e274745caffda66a03631ba66267797b38852765a8561f4b9c"
+    },
+    {
+      "name": "GOV-AUTH-02-ACTIVATION_STATIC_RULE_CI_CONTRACT_v1.0.md",
+      "path": "docs/governance/GOV-AUTH-02-ACTIVATION_STATIC_RULE_CI_CONTRACT_v1.0.md",
+      "sha256": "25108b5c833693c7b3cac5e6264fb7e6f1055515a13cf6754528cc7832f4b33e"
+    },
+    {
+      "name": "EXT-GOV-AUTH-02-ACTIVATION_ROLLOUT_ROLLBACK_CONTROLS_v1.0.md",
+      "path": "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_ROLLOUT_ROLLBACK_CONTROLS_v1.0.md",
+      "sha256": "1875d2d3b7e61e2b25a78ab39721215a2c6568bee4793bd74a79b2aa93be5ca5"
+    },
+    {
+      "name": "EXT-GOV-AUTH-02-ACTIVATION_CLOSE_PACK_v1.0.md",
+      "path": "docs/governance/EXT-GOV-AUTH-02-ACTIVATION_CLOSE_PACK_v1.0.md",
+      "sha256": "44ed06a402f50b4df5978b49d108c7d1336dc582cfbcb53634710e0c5d7a27cf"
+    },
+    {
+      "name": "docs/EXTENSIONS_REGISTRY.md",
+      "path": "docs/EXTENSIONS_REGISTRY.md",
+      "sha256": "aa4e8fd11c73295f7bc50140d31ed4fb5f67539348b87634112348b01126a648"
+    },
+    {
+      "name": "EXTENSIONS_REGISTRY.md",
+      "path": "EXTENSIONS_REGISTRY.md",
+      "sha256": "422ab78a1d4166b1e763d2760b5e91f7ccc975c824f33f3b75bba559d1eccb80"
+    }
+  ],
+  "authorityAnchors": [
+    {
+      "extensionId": "EXT-GOV-AUTH-01",
+      "manifestPath": "docs/governance/PLATFORM_DESIGN_AUTHORITY_LOCK_MANIFEST_v1.0.json",
+      "manifestSha256": "45edfccb03ae6642c95871e553f96c8d9990f754c42b53fa758c298809026e25"
+    },
+    {
+      "extensionId": "EXT-GOV-AUTH-02",
+      "manifestPath": "docs/governance/EXT-GOV-AUTH-02_DESIGN_LOCK_MANIFEST_v1.0.json",
+      "manifestSha256": "3df9b2c7b6823df43142c4b29a25facaa73b6371d93408ebe9a7feb308240a3b"
+    }
+  ],
+  "integrityStatement": "EXT-GOV-AUTH-02-ACTIVATION is authorization-design only; implementation and runtime activation require separate board implementation authorization."
+}

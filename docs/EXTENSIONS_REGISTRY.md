@@ -213,6 +213,23 @@ Design-lock close pack: `docs/governance/EXT-GOV-AUTH-02_DESIGN_LOCK_CLOSE_PACK_
 Board preview packet: `docs/governance/BOARD_PREVIEW_PACKET_EXT-GOV-AUTH-02_v1.0.md`
 Board design endorsement: `docs/governance/BOARD_RESOLUTION_EXT-GOV-AUTH-02_DESIGN_ENDORSEMENT_v1.0.md`
 
+## EXT-GOV-AUTH-02-ACTIVATION — Multi-Signature Workflow Activation Controls
+
+Status: Authorization Design Locked (Non-Operational)  
+Purpose:
+Define activation authorization scope, static governance rule/CI contract, and rollout/rollback controls for future implementation of EXT-GOV-AUTH-02.
+
+Core Interaction:
+This Extension does not modify the Immutable Core and operates strictly within Core constraints.
+
+Lifecycle Notes:
+Docs-first activation planning only; runtime authorization not granted; no RBAC identifier changes; no backend permission expansion.
+Activation authorization spec: `docs/extensions/EXT-GOV-AUTH-02-ACTIVATION/EXT-GOV-AUTH-02-ACTIVATION_AUTHORIZATION_SPEC_v1.0.md`
+Static rule/CI contract: `docs/governance/GOV-AUTH-02-ACTIVATION_STATIC_RULE_CI_CONTRACT_v1.0.md`
+Rollout and rollback controls: `docs/governance/EXT-GOV-AUTH-02-ACTIVATION_ROLLOUT_ROLLBACK_CONTROLS_v1.0.md`
+Activation close pack: `docs/governance/EXT-GOV-AUTH-02-ACTIVATION_CLOSE_PACK_v1.0.md`
+Activation manifest: `docs/governance/EXT-GOV-AUTH-02-ACTIVATION_MANIFEST_v1.0.json`
+
 ## EXT-26 — Marketing Orchestration & Campaign Governance
 
 Status: Complete (Governance complete; implementation not authorized)  

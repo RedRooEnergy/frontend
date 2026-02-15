@@ -205,6 +205,31 @@ References:
 Activation Deferral:
 - Runtime activation is not authorized in this extension and is deferred to `EXT-GOV-AUTH-02-ACTIVATION`.
 
+## EXT-GOV-AUTH-02-ACTIVATION — Multi-Signature Workflow Activation Controls
+
+Status: AUTHORIZATION DESIGN LOCKED (NON-OPERATIONAL)
+Operational State: Docs-first activation authorization controls for EXT-GOV-AUTH-02
+Change Control: REQUIRED for any modification
+Scope:
+- Activation authorization specification
+- Static governance rule and CI contract
+- Rollout gating and rollback control model
+- Activation close-pack and DMS/hash registration requirements
+
+Boundaries:
+- No runtime API activation
+- No workflow engine activation
+- No runtime RBAC identifier changes
+- No backend permission logic expansion
+- No operational authority grants
+
+References:
+- Activation authorization spec: `docs/extensions/EXT-GOV-AUTH-02-ACTIVATION/EXT-GOV-AUTH-02-ACTIVATION_AUTHORIZATION_SPEC_v1.0.md`
+- Static rule/CI contract: `docs/governance/GOV-AUTH-02-ACTIVATION_STATIC_RULE_CI_CONTRACT_v1.0.md`
+- Rollout and rollback controls: `docs/governance/EXT-GOV-AUTH-02-ACTIVATION_ROLLOUT_ROLLBACK_CONTROLS_v1.0.md`
+- Activation close pack: `docs/governance/EXT-GOV-AUTH-02-ACTIVATION_CLOSE_PACK_v1.0.md`
+- Activation manifest: `docs/governance/EXT-GOV-AUTH-02-ACTIVATION_MANIFEST_v1.0.json`
+
 ## EXT-INTERNAL-MSG-01 — Governed Internal Messaging
 
 Status: DESIGN LOCK (no runtime impact)
