@@ -179,6 +179,26 @@ References:
 - Board resolution: `docs/governance/BOARD_RESOLUTION_PLATFORM_DESIGN_AUTHORITY_LOCK_v1.0.md`
 - Manifest: `docs/governance/PLATFORM_DESIGN_AUTHORITY_LOCK_MANIFEST_v1.0.json`
 
+## EXT-GOV-AUTH-02 — Multi-Signature Governance Workflow
+
+Status: DESIGN DRAFT (DESIGN LOCK PENDING; NON-OPERATIONAL)
+Operational State: Governance workflow contract for quorum-based design authority approvals
+Change Control: REQUIRED for lock and implementation authorization
+Scope:
+- Multi-signature approval ledger model for governance proposals
+- Quorum policy definitions by proposal class
+- Workflow transition state model and breach handling
+- Mandatory audit coupling for approval transitions
+
+Boundaries:
+- No runtime RBAC identifier changes
+- No backend permission logic expansion
+- No operational transaction authority grants
+
+References:
+- Extension spec: `docs/extensions/EXT-GOV-AUTH-02/EXT-GOV-AUTH-02_SPEC.md`
+- Workflow contract: `docs/governance/GOV-AUTH-02_MULTISIGNATURE_WORKFLOW_CONTRACT_v1.0.md`
+
 ## EXT-INTERNAL-MSG-01 — Governed Internal Messaging
 
 Status: DESIGN LOCK (no runtime impact)

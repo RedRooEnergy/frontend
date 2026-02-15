@@ -196,6 +196,20 @@ Close pack: `docs/governance/PLATFORM_DESIGN_AUTHORITY_LOCK_CLOSE_PACK_v1.0.md`
 Board resolution: `docs/governance/BOARD_RESOLUTION_PLATFORM_DESIGN_AUTHORITY_LOCK_v1.0.md`
 Manifest: `docs/governance/PLATFORM_DESIGN_AUTHORITY_LOCK_MANIFEST_v1.0.json`
 
+## EXT-GOV-AUTH-02 — Multi-Signature Governance Workflow
+
+Status: Design Draft (Design Lock Pending; Non-Operational)  
+Purpose:
+Define quorum-based, multi-signature governance workflow for design-authority change approvals with immutable approval ledger and mandatory audit coupling.
+
+Core Interaction:
+This Extension does not modify the Immutable Core and operates strictly within Core constraints.
+
+Lifecycle Notes:
+Draft stage only; no runtime authorization; no RBAC identifier changes; no backend permission expansion; change control required for lock and implementation authorization.
+Extension spec: `docs/extensions/EXT-GOV-AUTH-02/EXT-GOV-AUTH-02_SPEC.md`
+Workflow contract: `docs/governance/GOV-AUTH-02_MULTISIGNATURE_WORKFLOW_CONTRACT_v1.0.md`
+
 ## EXT-26 — Marketing Orchestration & Campaign Governance
 
 Status: Complete (Governance complete; implementation not authorized)  
