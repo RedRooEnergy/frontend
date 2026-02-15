@@ -1,0 +1,146 @@
+{
+  "snapshotId": "weekly-2026-02-15T07-19-49Z",
+  "generatedAtUtc": "2026-02-15T07:19:49.140Z",
+  "commitSha": "e8c15ebd0e2c3808056a0ae7388e6be260e028be",
+  "branch": "governance-activation-protocol-v1.0",
+  "overall": "PASS",
+  "scorecardSha256": "a7b704890645cd0557e44807cada6da77504b16ea64f415b32cdc1b4d44f400a",
+  "scorecardPath": "artifacts/governance/dashboard-control-surface.scorecard.json",
+  "workflowRunId": "LOCAL",
+  "checks": [
+    {
+      "name": "endpoint-inventory-check",
+      "pass": true,
+      "summary": "PASS: 22 governed discovered routes all declared.",
+      "findingsCount": 0,
+      "findings": [],
+      "warningsCount": 15,
+      "warnings": [
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "GET",
+          "path": "/api/admin/cec/status",
+          "appendixLine": 124
+        },
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "GET",
+          "path": "/api/admin/compliance-partners",
+          "appendixLine": 122
+        },
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "GET",
+          "path": "/api/admin/freight-settlement-holds",
+          "appendixLine": 105
+        },
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "GET",
+          "path": "/api/admin/freight-settlement-holds/:param",
+          "appendixLine": 106
+        },
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "GET",
+          "path": "/api/governance/platform/status",
+          "appendixLine": 65
+        },
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "GET",
+          "path": "/api/installer/work-orders",
+          "appendixLine": 96
+        },
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "GET",
+          "path": "/api/insurance/claims",
+          "appendixLine": 113
+        },
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "PATCH",
+          "path": "/api/admin/compliance-partners/:param/status",
+          "appendixLine": 123
+        },
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "PATCH",
+          "path": "/api/installer/work-orders/:param/status",
+          "appendixLine": 97
+        },
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "PATCH",
+          "path": "/api/insurance/claims/:param/status",
+          "appendixLine": 114
+        },
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "POST",
+          "path": "/api/admin/cec/sync",
+          "appendixLine": 125
+        },
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "POST",
+          "path": "/api/admin/compliance-partners/:param/status",
+          "appendixLine": 123
+        },
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "POST",
+          "path": "/api/installer/work-orders/:param/evidence",
+          "appendixLine": 98
+        },
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "POST",
+          "path": "/api/insurance/claims/:param/evidence",
+          "appendixLine": 115
+        },
+        {
+          "severity": "WARN",
+          "code": "DECLARED_BUT_NOT_IMPLEMENTED",
+          "method": "POST",
+          "path": "/api/insurance/claims/:param/recommendation",
+          "appendixLine": 116
+        }
+      ]
+    },
+    {
+      "name": "closed-role-set-check",
+      "pass": true,
+      "summary": "PASS: role keys constrained to Appendix A closed set (7 keys).",
+      "findingsCount": 0,
+      "findings": [],
+      "warningsCount": 0,
+      "warnings": []
+    },
+    {
+      "name": "activation-register-check",
+      "pass": true,
+      "summary": "PASS: activation register valid with 1 row(s).",
+      "findingsCount": 0,
+      "findings": [],
+      "warningsCount": 0,
+      "warnings": []
+    }
+  ],
+  "sha256": "eb7a626973a7c7a4a0dd9b80c5b3a1bef6a11a0b046e66ac21d4db6703259bb8"
+}

@@ -1,0 +1,75 @@
+name: governance-weekly-snapshot
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  weekly-governance-snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Prepare dedicated snapshot branch
+        env:
+          SNAPSHOT_BRANCH: governance-weekly-snapshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin "${SNAPSHOT_BRANCH}" || true
+          if git show-ref --verify --quiet "refs/remotes/origin/${SNAPSHOT_BRANCH}"; then
+            git switch -c "${SNAPSHOT_BRANCH}" "origin/${SNAPSHOT_BRANCH}"
+            git merge --no-edit "${GITHUB_SHA}"
+          else
+            git switch -c "${SNAPSHOT_BRANCH}" "${GITHUB_SHA}"
+          fi
+
+      - name: Generate weekly governance snapshot
+        id: generate_snapshot
+        continue-on-error: true
+        env:
+          GOVERNANCE_SOURCE_BRANCH: ${{ github.ref_name }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: node tools/governance/enforcement/weekly-snapshot.mjs
+
+      - name: Commit snapshot and ledger update
+        if: always()
+        env:
+          SNAPSHOT_BRANCH: governance-weekly-snapshots
+        run: |
+          git add docs/governance/snapshots docs/governance/GOVERNANCE_WEEKLY_SNAPSHOT_INDEX.md
+          if git diff --cached --quiet; then
+            echo "No snapshot changes to commit."
+          else
+            git commit -m "Governance weekly snapshot: run ${GITHUB_RUN_ID}"
+            git push origin "HEAD:${SNAPSHOT_BRANCH}"
+          fi
+
+      - name: Upload weekly governance artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-weekly-snapshot
+          path: |
+            artifacts/governance/dashboard-control-surface.scorecard.json
+            artifacts/governance/weekly-snapshot-meta.json
+            docs/governance/snapshots/governance-snapshot-*.json
+          if-no-files-found: warn
+
+      - name: Enforce weekly governance result
+        if: always()
+        run: |
+          node -e 'const fs=require("fs"); const p="artifacts/governance/weekly-snapshot-meta.json"; if(!fs.existsSync(p)){console.error("Missing snapshot meta artifact."); process.exit(1);} const meta=JSON.parse(fs.readFileSync(p,"utf8")); if(!meta.pass){console.error("Weekly governance snapshot failed enforcement checks."); process.exit(1);} console.log("Weekly governance snapshot PASS.");'
