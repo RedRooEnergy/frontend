@@ -1,6 +1,6 @@
-# MASTER DASHBOARD GOVERNANCE CONTROL SURFACE SPEC v1.0
-Document ID: RRE-MASTER-DASHBOARD-GOV-SPEC-v1.0  
-Version: v1.0  
+# MASTER DASHBOARD GOVERNANCE CONTROL SURFACE SPEC v1.1
+Document ID: RRE-MASTER-DASHBOARD-GOV-SPEC-v1.1  
+Version: v1.1  
 Status: DRAFT  
 Classification: Unified Dashboard Governance Architecture  
 Authority Impact: NONE (Specification Only)  
@@ -42,6 +42,13 @@ All dashboards inherit the same primitives. Existing repo canonical names are:
 | Freight hold lifecycle (domain-specific) | `freight_settlement_holds` via `frontend/lib/freightAudit/FreightSettlementHoldStore.ts` | Used for freight enforcement surfaces. |
 | Change control events | `admin_change_control_events` via `frontend/lib/adminDashboard/changeControlStore.ts` | Governance change surface. |
 
+### 3.1 Immutable Ledger Supremacy Clause
+
+- The immutable ledger (`admin_audit_logs`) is the authoritative audit record.
+- Any human-facing admin action view must reference the same `auditId` from the immutable ledger.
+- Parallel mutation logs without immutable-ledger linkage are prohibited.
+- If a separate `admin_action_records` view is introduced in the future, it must be derivative-only and cannot replace ledger authority.
+
 ## 4) Dashboard Scope and Layer Separation
 
 - CEO Dashboard: strategic read-only insight only.
@@ -52,6 +59,13 @@ Out of scope for this document:
 - runtime role-key changes,
 - direct Immutable Core rewrites,
 - endpoint activation by documentation alone.
+
+### 4.1 Role Mapping Constraint Clause
+
+- Governance-layer roles in Appendix A are aliases only and do not create runtime permissions.
+- Governance aliases must map explicitly to one of the closed runtime role keys listed in Appendix A.
+- No new runtime role keys may be introduced without formal change control and ratification.
+- CI must fail if a runtime role key appears outside the closed set.
 
 ## 5) Immutable Core Invariants (Global)
 
@@ -70,6 +84,8 @@ No dashboard may bypass:
 3. Any endpoint not listed in the allow-list is denied by policy.  
 4. Endpoint inventory is authoritative only when listed in:
    - `docs/governance/MASTER_DASHBOARD_GOVERNANCE_CONTROL_SURFACE_APPENDIX_A_RBAC_ENDPOINT_MATRIX_v1.0.md`.
+5. CI must automatically enumerate repository `app/api/**` routes and compare results against Appendix A inventory controls.
+6. Any undeclared route in governed dashboard surfaces is a governance FAIL.
 
 ## 7) Unified Dashboard Control Matrix (High-Level)
 

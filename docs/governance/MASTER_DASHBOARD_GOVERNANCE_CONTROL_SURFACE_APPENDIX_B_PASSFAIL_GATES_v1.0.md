@@ -21,6 +21,7 @@ FAIL if any one is true:
 - mandatory `requestId` is missing/empty,
 - mandatory `incidentId` for override class is missing/empty,
 - endpoint exists but is not declared in Appendix A.
+- a runtime role key appears outside the Appendix A closed role set.
 
 ### Global PASS Condition
 
@@ -82,6 +83,7 @@ Each dashboard must produce, at minimum:
 3. SHA-256 hash of scorecard artefact,
 4. rule-check results for dashboard-specific gates,
 5. evidence of endpoint inventory compliance.
+6. evidence of closed role-set compliance.
 
 ### 3.1 Required Proof Matrix
 
@@ -95,6 +97,13 @@ Each dashboard must produce, at minimum:
 | Accreditation / Compliance | `scorecards/accreditation-dashboard.scorecard.json` | `overall`, `checks[]`, `generatedAtUtc`, `sha256`, `policyBypassGuard=PASS` |
 
 If a dashboard is not yet implemented, CI must emit explicit `NO_DATA` status and block any “activation complete” declaration for that dashboard.
+
+### 3.2 Mandatory Automation Checks
+
+CI evidence must include:
+- automated route enumeration scan output (`app/api/**`) with undeclared-route findings count,
+- closed role-key scan output with unknown-role findings count,
+- immutable-ledger linkage check for mutation receipts (`auditId` presence and resolvability).
 
 ## 4) Evidence and Timestamp Enforcement
 

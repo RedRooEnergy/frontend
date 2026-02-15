@@ -28,6 +28,22 @@ Governance designation roles (dashboard policy layer) that must map to runtime a
 
 No role outside this closed set is authorized by this appendix.
 
+### 1.1 Governance Alias Mapping (Mandatory)
+
+| Governance Alias Role | Runtime Role Key Mapping | Notes |
+| --- | --- | --- |
+| `executive` | `regulator` (read-only constrained view) | Governance alias only; no runtime key creation. |
+| `board-observer` | `regulator` (read-only constrained view) | Governance alias only; no runtime key creation. |
+| `auditor` | `regulator` (read-only constrained view) | Governance alias only; no runtime key creation. |
+| `installer-ops` | `service-partner` | Domain-scoped only. |
+| `insurance-ops` | `service-partner` | Domain-scoped only. |
+| `accreditation-officer` | `admin` (or delegated governance-mapped role under change control) | No compliance bypass authority. |
+
+Rules:
+- Alias roles are policy labels and do not create runtime role identifiers.
+- Any new runtime role key outside the closed set is non-compliant and must fail CI.
+- Role-key expansion requires formal change control and ratification.
+
 ## 2) Endpoint Inventory Template (Mandatory)
 
 | Dashboard | Endpoint | Method | Allowed Roles | Allowed Mutation Entity Types | Prohibited Entity Types | Approval Requirement | Required Fields |
@@ -35,6 +51,9 @@ No role outside this closed set is authorized by this appendix.
 | `[dashboard]` | `[path]` | `[GET/POST/PATCH/...]` | `[roles]` | `[entity classes or NONE]` | `[entity classes]` | `[NONE/SINGLE/DUAL]` | `[justification, requestId, incidentId?, ...]` |
 
 All dashboard implementations must publish this inventory. Unlisted endpoints are non-compliant by default.
+
+CI requirement:
+- Endpoint inventory enforcement must be backed by automated route enumeration and comparison against this appendix.
 
 ## 3) CEO / Executive Dashboard Matrix
 
