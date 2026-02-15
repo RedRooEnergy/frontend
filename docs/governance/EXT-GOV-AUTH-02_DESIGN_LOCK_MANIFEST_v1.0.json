@@ -1,0 +1,47 @@
+{
+  "documentId": "RRE-GOV-AUTH-02-DESIGN-LOCK-MANIFEST-v1.0",
+  "version": "v1.0",
+  "status": "DESIGN LOCK",
+  "timestampUTC": "2026-02-15T02:28:12.923Z",
+  "extensionId": "EXT-GOV-AUTH-02",
+  "activationState": "NOT AUTHORIZED",
+  "activationDeferral": "EXT-GOV-AUTH-02-ACTIVATION",
+  "documents": [
+    {
+      "name": "EXT-GOV-AUTH-02_SPEC.md",
+      "path": "docs/extensions/EXT-GOV-AUTH-02/EXT-GOV-AUTH-02_SPEC.md",
+      "sha256": "6236eba56812371be8b5b6fcd2bc3e805dd640c14eb72d32c8ce5547fc4d913b"
+    },
+    {
+      "name": "GOV-AUTH-02_MULTISIGNATURE_WORKFLOW_CONTRACT_v1.0.md",
+      "path": "docs/governance/GOV-AUTH-02_MULTISIGNATURE_WORKFLOW_CONTRACT_v1.0.md",
+      "sha256": "98e75fe6af7406feda0a1640350f6fa9eea5ddde267f5c852cc7b581d082a4e1"
+    },
+    {
+      "name": "EXT-GOV-AUTH-02_DESIGN_LOCK_CLOSE_PACK_v1.0.md",
+      "path": "docs/governance/EXT-GOV-AUTH-02_DESIGN_LOCK_CLOSE_PACK_v1.0.md",
+      "sha256": "c8c1a58425d3d8623d0f393774552af29ea08fffa04e22d88c1632f00bc30d57"
+    },
+    {
+      "name": "BOARD_PREVIEW_PACKET_EXT-GOV-AUTH-02_v1.0.md",
+      "path": "docs/governance/BOARD_PREVIEW_PACKET_EXT-GOV-AUTH-02_v1.0.md",
+      "sha256": "f2dc80f351059eeac2f0305c0e42268670ce6e8b8d0a4b085e73e0f7cc2265c2"
+    },
+    {
+      "name": "docs/EXTENSIONS_REGISTRY.md",
+      "path": "docs/EXTENSIONS_REGISTRY.md",
+      "sha256": "18ea6a1ce85672aae35721be472ac8c8ed7b062d43e72255cb6fbeefde6daf2e"
+    },
+    {
+      "name": "EXTENSIONS_REGISTRY.md",
+      "path": "EXTENSIONS_REGISTRY.md",
+      "sha256": "8886e3ef1ae19bf5627397efc783bd0153d29f1c8612b850e39e49320e4fe6fe"
+    }
+  ],
+  "authorityAnchor": {
+    "extensionId": "EXT-GOV-AUTH-01",
+    "manifestPath": "docs/governance/PLATFORM_DESIGN_AUTHORITY_LOCK_MANIFEST_v1.0.json",
+    "manifestSha256": "45edfccb03ae6642c95871e553f96c8d9990f754c42b53fa758c298809026e25"
+  },
+  "integrityStatement": "EXT-GOV-AUTH-02 is design-locked for governance policy only; runtime activation requires separate extension authorization."
+}

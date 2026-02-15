@@ -154,3 +154,12 @@ FAIL when:
 1. Draft design-lock close pack for `EXT-GOV-AUTH-02`.
 2. Draft board preview packet for quorum policy ratification.
 3. Draft static governance rule contract for future aggregator integration (`GOV-AUTH-02`), static-only until authorized.
+
+## 13) Activation Deferral (Mandatory)
+
+Runtime activation is explicitly deferred.
+
+Any executable workflow implementation, endpoint activation, or approval-orchestration runtime behavior must be governed under a future extension:
+- `EXT-GOV-AUTH-02-ACTIVATION`
+
+No runtime activation is authorized by `EXT-GOV-AUTH-02` design artefacts.

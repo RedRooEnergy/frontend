@@ -181,9 +181,9 @@ References:
 
 ## EXT-GOV-AUTH-02 — Multi-Signature Governance Workflow
 
-Status: DESIGN DRAFT (DESIGN LOCK PENDING; NON-OPERATIONAL)
+Status: DESIGN LOCK CLOSED (NON-OPERATIONAL)
 Operational State: Governance workflow contract for quorum-based design authority approvals
-Change Control: REQUIRED for lock and implementation authorization
+Change Control: REQUIRED for any modification
 Scope:
 - Multi-signature approval ledger model for governance proposals
 - Quorum policy definitions by proposal class
@@ -198,6 +198,11 @@ Boundaries:
 References:
 - Extension spec: `docs/extensions/EXT-GOV-AUTH-02/EXT-GOV-AUTH-02_SPEC.md`
 - Workflow contract: `docs/governance/GOV-AUTH-02_MULTISIGNATURE_WORKFLOW_CONTRACT_v1.0.md`
+- Design-lock close pack: `docs/governance/EXT-GOV-AUTH-02_DESIGN_LOCK_CLOSE_PACK_v1.0.md`
+- Board preview packet: `docs/governance/BOARD_PREVIEW_PACKET_EXT-GOV-AUTH-02_v1.0.md`
+
+Activation Deferral:
+- Runtime activation is not authorized in this extension and is deferred to `EXT-GOV-AUTH-02-ACTIVATION`.
 
 ## EXT-INTERNAL-MSG-01 — Governed Internal Messaging
 
