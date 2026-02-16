@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
 
 // NOTE: routes in src/routes/* must be router-only modules (no listen(), no DB connect).
+import { paymentsRouter } from "./routes/payments.js";
 import { refundsRouter } from "./routes/refunds.js";
 import { adminQueuesRouter } from "./routes/adminQueues.js";
 import { settlementHoldsRouter } from "./routes/settlementHolds.js";
@@ -21,6 +22,7 @@ export function createApp() {
   });
 
   // Mount existing route families exactly (no path changes)
+  app.use("/api/payments", paymentsRouter);
   app.use("/api/payments/refunds", refundsRouter);
   app.use("/api/admin/queues", adminQueuesRouter);
   app.use("/api/settlement/holds", settlementHoldsRouter);
