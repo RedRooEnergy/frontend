@@ -1,14 +1,6 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
-import { runAuthorityShadowMetricsSnapshot } from "../../../../../../../lib/governance/authority/shadowMetrics";
-
-type MetricsRunner = typeof runAuthorityShadowMetricsSnapshot;
-
-let metricsRunner: MetricsRunner = runAuthorityShadowMetricsSnapshot;
-
-export function __setAuthorityShadowMetricsRunnerForTests(runner?: MetricsRunner) {
-  metricsRunner = runner || runAuthorityShadowMetricsSnapshot;
-}
+import { getAuthorityShadowMetricsRunner } from "../../../../../../../lib/internal/authorityShadowMetricsTestHooks";
 
 function parseBoolean(value: string | undefined) {
   return String(value || "").trim().toLowerCase() === "true";
@@ -101,7 +93,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const report = await metricsRunner({
+    const report = await getAuthorityShadowMetricsRunner()({
       source: parseSource(payload?.source),
       fromUtc: payload?.fromUtc,
       toUtc: payload?.toUtc,

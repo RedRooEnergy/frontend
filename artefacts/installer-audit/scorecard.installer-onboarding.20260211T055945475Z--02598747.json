@@ -1,0 +1,108 @@
+{
+  "meta": {
+    "system": "RedRooEnergy",
+    "auditId": "20260211T055945475Z--02598747",
+    "auditVersion": "ui-v1",
+    "environment": "local"
+  },
+  "run": {
+    "timestampUtc": "2026-02-11T06:00:01.710Z",
+    "baseUrl": "http://127.0.0.1:3001",
+    "runner": {
+      "type": "playwright",
+      "actor": "ui-audit"
+    }
+  },
+  "summary": {
+    "overall": "FAIL",
+    "counts": {
+      "total": 8,
+      "pass": 4,
+      "fail": 4,
+      "notBuilt": 0,
+      "notApplicable": 0
+    }
+  },
+  "checks": [
+    {
+      "id": "INSTALLER-01",
+      "title": "Public entry exposes installer onboarding start",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "INSTALLER-02",
+      "title": "Account creation/sign-in yields onboarding workspace access",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "INSTALLER-03",
+      "title": "Terms gating is enforced before submission",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "INSTALLER-04",
+      "title": "Licence/accreditation verification response is deterministic",
+      "status": "FAIL",
+      "details": "Expired accreditation date did not block progression (no deterministic expiry validation)",
+      "evidence": {
+        "screenshots": [
+          "artefacts/installer-audit/screenshots/20260211T055945475Z--02598747/INSTALLER-04.png"
+        ],
+        "htmlSnapshots": []
+      }
+    },
+    {
+      "id": "INSTALLER-05",
+      "title": "Required-field gating blocks incomplete onboarding",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "INSTALLER-06",
+      "title": "Evidence upload rules are enforced (PDF-only, required artefacts)",
+      "status": "FAIL",
+      "details": "Uploaded file download not accessible (404)",
+      "evidence": {
+        "screenshots": [
+          "artefacts/installer-audit/screenshots/20260211T055945475Z--02598747/INSTALLER-06.png"
+        ],
+        "htmlSnapshots": []
+      }
+    },
+    {
+      "id": "INSTALLER-07",
+      "title": "Final submission transitions state and locks editing",
+      "status": "FAIL",
+      "details": "Submission did not complete successfully (likely backend persistence dependency)",
+      "evidence": {
+        "screenshots": [
+          "artefacts/installer-audit/screenshots/20260211T055945475Z--02598747/INSTALLER-07.png"
+        ],
+        "htmlSnapshots": []
+      }
+    },
+    {
+      "id": "INSTALLER-08",
+      "title": "Admin review produces Reviewed outcome and (if approved) activation gates access",
+      "status": "FAIL",
+      "details": "Admin review queue loaded but no review link became visible (list empty or fetch failed)",
+      "evidence": {
+        "screenshots": [
+          "artefacts/installer-audit/screenshots/20260211T055945475Z--02598747/INSTALLER-08.png"
+        ],
+        "htmlSnapshots": []
+      }
+    }
+  ],
+  "notes": [
+    "Non-blocking v1 audit; FAIL indicates gaps; NOT_BUILT indicates missing surfaces."
+  ],
+  "outputs": {
+    "scorecardPath": "artefacts/installer-audit/scorecard.installer-onboarding.20260211T055945475Z--02598747.json",
+    "pdfPath": "artefacts/installer-audit/summary.installer-onboarding.20260211T055945475Z--02598747.pdf",
+    "pdfSha256Path": "artefacts/installer-audit/summary.installer-onboarding.20260211T055945475Z--02598747.sha256"
+  }
+}

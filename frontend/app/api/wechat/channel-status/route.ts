@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "../../../../../lib/auth/adminGuard";
-import { requireBuyer, requireSupplier } from "../../../../../lib/auth/roleGuard";
-import { resolveWeChatRuntimeConfig } from "../../../../../lib/wechat/config";
-import { getWeChatBindingForEntity, getWeChatInboundBindingSummary } from "../../../../../lib/wechat/store";
-import type { WeChatEntityType } from "../../../../../lib/wechat/types";
+import { requireAdmin } from "../../../../lib/auth/adminGuard";
+import { requireBuyer, requireSupplier } from "../../../../lib/auth/roleGuard";
+import { resolveWeChatRuntimeConfig } from "../../../../lib/wechat/config";
+import { getWeChatBindingForEntity, getWeChatInboundBindingSummary } from "../../../../lib/wechat/store";
+import type { WeChatEntityType } from "../../../../lib/wechat/types";
 
 export const runtime = "nodejs";
 

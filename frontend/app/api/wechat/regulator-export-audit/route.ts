@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { requireRegulator } from "../../../../../lib/auth/roleGuard";
-import { resolveWeChatRuntimeConfig } from "../../../../../lib/wechat/config";
-import { listWeChatRegulatorExportAuditEvents } from "../../../../../lib/wechat/exportAuditStore";
+import { requireRegulator } from "../../../../lib/auth/roleGuard";
+import { resolveWeChatRuntimeConfig } from "../../../../lib/wechat/config";
+import { listWeChatRegulatorExportAuditEvents } from "../../../../lib/wechat/exportAuditStore";
 
 export const runtime = "nodejs";
 

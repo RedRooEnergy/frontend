@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
 import "./globals.css";
+import { I18nProvider } from "../components/I18nProvider";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 export const metadata = {
   title: "RedRoo Governance Marketplace",
@@ -7,25 +10,34 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const supplierPhaseOn = process.env.NEXT_PUBLIC_SUPPLIER_PHASE === "on";
+  const adminPhaseOn = process.env.NEXT_PUBLIC_ADMIN_PHASE === "on";
+  const ext02On = process.env.NEXT_PUBLIC_EXT02 === "on";
+  const ext03On = process.env.NEXT_PUBLIC_EXT03 === "on";
+  const ext04On = process.env.NEXT_PUBLIC_EXT04 === "on";
+  const ext05On = process.env.NEXT_PUBLIC_EXT05 === "on";
+  const isProd = process.env.NODE_ENV === "production";
+  const bannerOn = !isProd && (supplierPhaseOn || adminPhaseOn || ext02On || ext03On || ext04On || ext05On);
+  const phases = [
+    supplierPhaseOn ? "Supplier" : "",
+    adminPhaseOn ? "Admin" : "",
+    ext02On || ext03On || ext04On || ext05On ? "Wave 1 Extensions" : "",
+  ]
+    .filter(Boolean)
+    .join(" / ");
   return (
     <html lang="en">
-      <body className="min-h-screen bg-slate-950 text-slate-50 antialiased">
-        <div className="max-w-6xl mx-auto px-6 py-10 space-y-10">
-          <header className="flex items-center justify-between">
-            <div>
-              <div className="text-sm uppercase tracking-widest text-emerald-300">Governed by Design</div>
-              <h1 className="text-2xl font-semibold">RedRoo Energy Marketplace</h1>
-            </div>
-            <nav className="flex gap-4 text-sm text-slate-300">
-              <a href="/">Home</a>
-              <a href="/about">About</a>
-              <a href="/how-it-works">How it Works</a>
-              <a href="/compliance">Compliance</a>
-              <a href="/contact">Contact</a>
-            </nav>
-          </header>
-          <main>{children}</main>
-        </div>
+      <body className="min-h-screen bg-surface-muted text-strong antialiased">
+        {bannerOn && (
+          <div className="w-full bg-amber-100 text-amber-900 text-center text-sm py-2 border-b border-amber-200">
+            STAGING — {phases} Enabled (feature-flag)
+          </div>
+        )}
+        <I18nProvider>
+          <Header />
+        </I18nProvider>
+        {children}
+        <Footer />
       </body>
     </html>
   );

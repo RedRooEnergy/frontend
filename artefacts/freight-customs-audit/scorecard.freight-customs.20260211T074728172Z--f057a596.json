@@ -1,0 +1,115 @@
+{
+  "meta": {
+    "auditId": "freight-customs",
+    "runId": "20260211T074728172Z--f057a596",
+    "timestampUtc": "2026-02-11T07:47:55.887Z",
+    "baseUrl": "http://127.0.0.1:3001",
+    "environment": "local"
+  },
+  "summary": {
+    "overall": "FAIL",
+    "totalChecks": 8,
+    "passCount": 2,
+    "failCount": 4,
+    "notBuiltCount": 2,
+    "notApplicableCount": 0
+  },
+  "checks": [
+    {
+      "id": "FREIGHT-01",
+      "title": "Public entry exposes freight/DDP governance start",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "FREIGHT-02",
+      "title": "Freight operational surfaces enforce role gating",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "FREIGHT-03",
+      "title": "Customs/DDP control posture is observable and non-editable in UI",
+      "status": "FAIL",
+      "details": "Editable controls=0, freight-duty=200, customs-doc=404",
+      "evidence": {
+        "screenshots": [
+          "artefacts/freight-customs-audit/screenshots/20260211T074728172Z--f057a596/FREIGHT-03.png"
+        ],
+        "notes": ""
+      }
+    },
+    {
+      "id": "FREIGHT-04",
+      "title": "Shipment progression controls are deterministic at existing surfaces",
+      "status": "FAIL",
+      "details": "Out-of-sequence message ok=true, stored=true, reflected=false",
+      "evidence": {
+        "screenshots": [
+          "artefacts/freight-customs-audit/screenshots/20260211T074728172Z--f057a596/FREIGHT-04.png"
+        ],
+        "notes": ""
+      }
+    },
+    {
+      "id": "FREIGHT-05",
+      "title": "Delivery confirmation and settlement gating are enforced on existing endpoints",
+      "status": "NOT_BUILT",
+      "details": "Authenticated settlement/delivery positive-path probe unavailable in baseline; unauth gating verified (settlement status 500)",
+      "evidence": {
+        "screenshots": [
+          "artefacts/freight-customs-audit/screenshots/20260211T074728172Z--f057a596/FREIGHT-05.png"
+        ],
+        "notes": ""
+      }
+    },
+    {
+      "id": "FREIGHT-06",
+      "title": "Freight evidence documents are captured with deterministic metadata",
+      "status": "FAIL",
+      "details": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('TRK-57a596').first() to be visible\u001b[22m\n",
+      "evidence": {
+        "screenshots": [
+          "artefacts/freight-customs-audit/screenshots/20260211T074728172Z--f057a596/FREIGHT-06.png"
+        ],
+        "notes": ""
+      }
+    },
+    {
+      "id": "FREIGHT-07",
+      "title": "Exception classification exists and escalation traceability is observable",
+      "status": "FAIL",
+      "details": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('OPEN').first() to be visible\u001b[22m\n",
+      "evidence": {
+        "screenshots": [
+          "artefacts/freight-customs-audit/screenshots/20260211T074728172Z--f057a596/FREIGHT-07.png"
+        ],
+        "notes": ""
+      }
+    },
+    {
+      "id": "FREIGHT-08",
+      "title": "Freight closure evidence is replayable across current ops/finance audit surfaces",
+      "status": "NOT_BUILT",
+      "details": "No deterministic delivered-order replay dataset available in baseline without additional fixture data",
+      "evidence": {
+        "screenshots": [
+          "artefacts/freight-customs-audit/screenshots/20260211T074728172Z--f057a596/FREIGHT-08.png"
+        ],
+        "notes": ""
+      }
+    }
+  ],
+  "outputs": {
+    "pdfPath": "artefacts/freight-customs-audit/summary.freight-customs.20260211T074728172Z--f057a596.pdf",
+    "pdfSha256Path": "artefacts/freight-customs-audit/summary.freight-customs.20260211T074728172Z--f057a596.sha256"
+  }
+}

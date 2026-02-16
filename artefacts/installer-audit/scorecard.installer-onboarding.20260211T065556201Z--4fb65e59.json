@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "auditId": "installer-onboarding",
+    "runId": "20260211T065556201Z--4fb65e59",
+    "timestampUtc": "2026-02-11T06:56:04.464Z",
+    "baseUrl": "http://127.0.0.1:3001",
+    "environment": "local"
+  },
+  "summary": {
+    "overall": "PASS",
+    "totalChecks": 8,
+    "passCount": 8,
+    "failCount": 0,
+    "notBuiltCount": 0,
+    "notApplicableCount": 0
+  },
+  "checks": [
+    {
+      "id": "INSTALLER-01",
+      "title": "Public entry exposes installer onboarding start",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "INSTALLER-02",
+      "title": "Account creation/sign-in yields onboarding workspace access",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "INSTALLER-03",
+      "title": "Terms gating is enforced before submission",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "INSTALLER-04",
+      "title": "Licence/accreditation verification response is deterministic",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "INSTALLER-05",
+      "title": "Required-field gating blocks incomplete onboarding",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "INSTALLER-06",
+      "title": "Evidence upload rules are enforced (PDF-only, required artefacts)",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "INSTALLER-07",
+      "title": "Final submission transitions state and locks editing",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "INSTALLER-08",
+      "title": "Admin review produces Reviewed outcome and (if approved) activation gates access",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    }
+  ],
+  "outputs": {
+    "pdfPath": "artefacts/installer-audit/summary.installer-onboarding.20260211T065556201Z--4fb65e59.pdf",
+    "pdfSha256Path": "artefacts/installer-audit/summary.installer-onboarding.20260211T065556201Z--4fb65e59.sha256"
+  }
+}

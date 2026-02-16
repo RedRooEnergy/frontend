@@ -1,8 +1,6 @@
 import crypto from "crypto";
-import {
-  POST,
-  __setAuthorityExportRunnerForTests,
-} from "../../../app/api/internal/governance/authority/export/route";
+import { POST } from "../../../app/api/internal/governance/authority/export/route";
+import { setAuthorityExportRunnerForTests } from "../../../lib/internal/authorityExportTestHooks";
 
 function assert(condition: boolean, message: string) {
   if (!condition) throw new Error(message);
@@ -99,7 +97,7 @@ async function testValidSignatureReturnsExport() {
       GOV04_AUTHORITY_EXPORT_JOB_SECRET: "authority-secret",
     },
     async () => {
-      __setAuthorityExportRunnerForTests(async () => ({
+      setAuthorityExportRunnerForTests(async () => ({
         reportVersion: "gov04-authority-export.v1",
         generatedAtUtc: "2026-02-13T12:00:00.000Z",
         windowStartUtc: "2026-02-13T11:00:00.000Z",
@@ -156,7 +154,7 @@ async function testValidSignatureReturnsExport() {
     }
   );
 
-  __setAuthorityExportRunnerForTests();
+  setAuthorityExportRunnerForTests();
 }
 
 async function run() {

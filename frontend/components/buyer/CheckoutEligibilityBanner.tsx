@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { getBuyers, getSession } from "../../lib/store";
-
-type BuyerEligibility = "NON_BUYER" | "BUYER_PENDING" | "BUYER_ACTIVE";
+import { deriveBuyerEligibility, type BuyerEligibility } from "../../lib/buyerEligibility";
 
 type BannerCopy = {
   title: string;
@@ -12,25 +10,13 @@ type BannerCopy = {
   ctaHref: string;
 };
 
-function deriveBuyerEligibility(): BuyerEligibility {
-  const session = getSession();
-  if (!session || session.role !== "buyer") return "NON_BUYER";
-  if (session.userId === "guest-buyer") return "NON_BUYER";
-  const buyer = getBuyers().find((b) => b.buyerId === session.userId || b.email === session.email);
-  if (!buyer) return "NON_BUYER";
-  const hasPhone = Boolean(buyer.phoneNumber || buyer.phone);
-  const hasBuyerType = Boolean(buyer.buyerType);
-  if (!hasPhone || !hasBuyerType) return "BUYER_PENDING";
-  return "BUYER_ACTIVE";
-}
-
 function getBannerCopy(state: BuyerEligibility): BannerCopy | null {
   if (state === "NON_BUYER") {
     return {
       title: "Checkout is locked",
       body: "Your account is not a buyer account yet. Create a buyer account to place orders.",
       ctaLabel: "Create Buyer Account",
-      ctaHref: "/account/upgrade-to-buyer",
+      ctaHref: "/register",
     };
   }
   if (state === "BUYER_PENDING") {
@@ -38,7 +24,7 @@ function getBannerCopy(state: BuyerEligibility): BannerCopy | null {
       title: "Complete your buyer profile",
       body: "Checkout is locked until your buyer profile is complete.",
       ctaLabel: "Complete Buyer Profile",
-      ctaHref: "/buyer/profile",
+      ctaHref: "/dashboard/buyer/profile",
     };
   }
   return null;

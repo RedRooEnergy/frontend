@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { requireRegulator } from "../../../../../lib/auth/roleGuard";
-import { resolveWeChatRuntimeConfig } from "../../../../../lib/wechat/config";
-import { resolveWeChatExportSignaturePublicKey } from "../../../../../lib/wechat/signaturePublicKey";
+import { requireRegulator } from "../../../../lib/auth/roleGuard";
+import { resolveWeChatRuntimeConfig } from "../../../../lib/wechat/config";
+import { resolveWeChatExportSignaturePublicKey } from "../../../../lib/wechat/signaturePublicKey";
 
 export const runtime = "nodejs";
 

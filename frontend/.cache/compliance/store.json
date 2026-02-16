@@ -1,0 +1,104 @@
+{
+  "applications": [
+    {
+      "id": "APP-1770624725241-255a4c3a",
+      "supplierId": "audit-supplier",
+      "productType": "InverterBatteryEV",
+      "markets": [
+        "AU"
+      ],
+      "status": "CHANGES_REQUESTED",
+      "rcmReadiness": "NOT_READY",
+      "checklistRef": {
+        "checklistId": "CHK-INVERTER-BATTERY-EV",
+        "version": "1.0.0"
+      },
+      "createdAt": "2026-02-09T08:12:05.241Z",
+      "updatedAt": "2026-02-09T08:12:06.720Z"
+    },
+    {
+      "id": "APP-1770626440993-841ddb76",
+      "supplierId": "audit-supplier",
+      "productType": "InverterBatteryEV",
+      "markets": [
+        "AU"
+      ],
+      "status": "CHANGES_REQUESTED",
+      "rcmReadiness": "NOT_READY",
+      "checklistRef": {
+        "checklistId": "CHK-INVERTER-BATTERY-EV",
+        "version": "1.0.0"
+      },
+      "createdAt": "2026-02-09T08:40:40.993Z",
+      "updatedAt": "2026-02-09T08:40:42.550Z"
+    }
+  ],
+  "documents": [
+    {
+      "id": "DOC-1770624726014-89e1a905",
+      "applicationId": "APP-1770624725241-255a4c3a",
+      "documentType": "TEST_REPORT",
+      "filename": "audit-test.txt",
+      "contentType": "text/plain",
+      "sizeBytes": 15,
+      "sha256Hash": "4af003550448629252d402c0574dd77cf05b3ecfd93e38a4533f0f9ea751e037",
+      "storageKey": "/Users/redroo/Documents/REDROO_Projects/frontend/.cache/compliance/docs/DOC-1770624726014-89e1a905-audit-test.txt",
+      "uploadedAt": "2026-02-09T08:12:06.014Z"
+    },
+    {
+      "id": "DOC-1770626441745-8d28376d",
+      "applicationId": "APP-1770626440993-841ddb76",
+      "documentType": "TEST_REPORT",
+      "filename": "audit-test.txt",
+      "contentType": "text/plain",
+      "sizeBytes": 15,
+      "sha256Hash": "4af003550448629252d402c0574dd77cf05b3ecfd93e38a4533f0f9ea751e037",
+      "storageKey": "/Users/redroo/Documents/REDROO_Projects/frontend/.cache/compliance/docs/DOC-1770626441745-8d28376d-audit-test.txt",
+      "uploadedAt": "2026-02-09T08:40:41.745Z"
+    }
+  ],
+  "decisions": [
+    {
+      "applicationId": "APP-1770624725241-255a4c3a",
+      "decision": "REQUEST_CHANGES",
+      "reasons": [
+        "Audit test"
+      ],
+      "notes": "Audit test decision",
+      "decidedAt": "2026-02-09T08:12:06.720Z",
+      "actor": {
+        "id": "audit-admin",
+        "role": "admin"
+      }
+    },
+    {
+      "applicationId": "APP-1770626440993-841ddb76",
+      "decision": "REQUEST_CHANGES",
+      "reasons": [
+        "Audit test"
+      ],
+      "notes": "Audit test decision",
+      "decidedAt": "2026-02-09T08:40:42.550Z",
+      "actor": {
+        "id": "audit-admin",
+        "role": "admin"
+      }
+    }
+  ],
+  "exports": [
+    {
+      "exportId": "EXP-1770624727099-93b302d4",
+      "applicationId": "APP-1770624725241-255a4c3a",
+      "manifestSha256": "39e78139c533253bc3da1f1ccd67b1f7800dfe75a7ae95d17aa47762a24f18c0",
+      "jsonPath": "/Users/redroo/Documents/REDROO_Projects/frontend/.cache/compliance/exports/EXP-1770624727099-93b302d4.manifest.json",
+      "createdAt": "2026-02-09T08:12:07.100Z"
+    },
+    {
+      "exportId": "EXP-1770626442950-33646ba5",
+      "applicationId": "APP-1770626440993-841ddb76",
+      "manifestSha256": "d5f55e81a033d27bd279a56e46b7024e80ff2c87193b9ed47bd7c02ed46a5cfa",
+      "jsonPath": "/Users/redroo/Documents/REDROO_Projects/frontend/.cache/compliance/exports/EXP-1770626442950-33646ba5.manifest.json",
+      "createdAt": "2026-02-09T08:40:42.951Z"
+    }
+  ]
+}

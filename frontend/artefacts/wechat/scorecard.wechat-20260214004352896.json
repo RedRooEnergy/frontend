@@ -1,0 +1,56 @@
+{
+  "runId": "wechat-20260214004352896",
+  "generatedAtUtc": "2026-02-14T00:43:52.920Z",
+  "overall": "PASS",
+  "summary": {
+    "totalChecks": 8,
+    "passCount": 8,
+    "failCount": 0,
+    "trendStatus": "STABLE",
+    "trendReasons": [
+      "No regression signals detected."
+    ]
+  },
+  "checks": [
+    {
+      "id": "CHK-WECHAT-01",
+      "description": "Taxonomy completeness",
+      "passed": true
+    },
+    {
+      "id": "CHK-WECHAT-02",
+      "description": "Forbidden free-form endpoint absent",
+      "passed": true
+    },
+    {
+      "id": "CHK-WECHAT-03",
+      "description": "Renderer determinism",
+      "passed": true
+    },
+    {
+      "id": "CHK-WECHAT-04",
+      "description": "RBAC guards on admin/regulator routes",
+      "passed": true
+    },
+    {
+      "id": "CHK-WECHAT-05",
+      "description": "Dispatch immutability contract",
+      "passed": true
+    },
+    {
+      "id": "CHK-WECHAT-06",
+      "description": "Link allowlist enforcement",
+      "passed": true
+    },
+    {
+      "id": "CHK-WECHAT-07",
+      "description": "Binding verification required before dispatch",
+      "passed": true
+    },
+    {
+      "id": "CHK-WECHAT-08",
+      "description": "Provider response redaction",
+      "passed": true
+    }
+  ]
+}

@@ -1,74 +1,38 @@
-name: Freight & Customs Audit (Non-Blocking v1)
+name: Freight & Customs Audit (Blocking)
 
 on:
   pull_request:
-    paths:
-      - "frontend/tests/freight-customs/**"
-      - "frontend/app/audit/freight-customs/**"
-      - "frontend/app/dashboard/freight/**"
-      - "frontend/app/service-agents/freight-shipping/**"
-      - "frontend/app/(roles)/freight-duty/**"
-      - "frontend/app/(documents)/shipping-delivery-logistics/**"
-      - "frontend/app/api/freight/**"
-      - "frontend/app/api/admin/freight/**"
-      - "frontend/app/api/admin/fee-ledger/**"
-      - "frontend/app/api/fee-ledger/**"
-      - "frontend/app/api/settlements/wise/create-transfer/**"
-      - "frontend/app/api/internal/fee-engine/**"
-      - ".github/workflows/freight-customs-audit.yml"
+  push:
+    branches:
+      - main
 
 jobs:
   freight-customs-audit:
     runs-on: ubuntu-latest
-    env:
-      BASE_URL: http://127.0.0.1:3001
-      FREIGHT_CUSTOMS_AUDIT_ENFORCE: "0"
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
 
-      - name: Install Playwright Chromium
-        working-directory: frontend
-        run: npx playwright install --with-deps chromium
-
-      - name: Start frontend (dev)
+      - name: Run freight customs audit
         working-directory: frontend
         run: |
-          mkdir -p ../artefacts/freight-customs-audit
-          npm run dev:local > ../artefacts/freight-customs-audit/next-dev.log 2>&1 &
-          for i in {1..60}; do
-            curl -sSf "$BASE_URL/" > /dev/null && exit 0
-            sleep 2
-          done
-          echo "Server did not start in time"
-          exit 1
+          test -f tests/freight-customs/runFreightCustomsAudit.ts
+          npx --yes tsx tests/freight-customs/runFreightCustomsAudit.ts
 
-      - name: Run freight & customs audit (non-blocking v1)
-        id: audit
-        continue-on-error: true
-        working-directory: frontend
-        env:
-          BASE_URL: ${{ env.BASE_URL }}
-        run: npx tsx tests/freight-customs/runFreightCustomsAudit.ts
-
-      - name: Enforce audit (future toggle)
-        if: ${{ env.FREIGHT_CUSTOMS_AUDIT_ENFORCE == '1' && steps.audit.outcome == 'failure' }}
-        run: exit 1
-
-      - name: Upload freight & customs audit artifacts
+      - name: Write platform governance URLs to CI summary
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: freight-customs-audit
-          path: |
-            artefacts/freight-customs-audit/**/*
-          if-no-files-found: warn
+        run: |
+          BASE="${BASE_URL:-https://redrooenergy.com.au}"
+          echo "## Platform Governance" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Platform badge: \`${BASE}/api/governance/platform/badge\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Platform status: \`${BASE}/api/governance/platform/status\`" >> "$GITHUB_STEP_SUMMARY"

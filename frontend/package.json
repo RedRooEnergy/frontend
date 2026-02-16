@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "test:admin-dashboard:phaseA": "npx tsx tests/admin-dashboard/runAdminDashboardPhaseATests.ts && npx tsx tests/admin-dashboard/runAdminDashboardPhaseAPassgate.ts",
+    "test:admin-dashboard:security": "npx tsx tests/admin-dashboard/runAdminDashboardPhaseCSecurityTests.ts",
     "test:admin-dashboard:ui": "playwright test",
     "test:chain-integrity-phase1": "tsx tests/chain-integrity/runChainIntegrityPhase1Tests.ts && tsx scripts/proof-chain-integrity-phase1.ts",
     "test:chain-integrity-phase2": "tsx tests/chain-integrity/runChainIntegrityPhase2Tests.ts",
@@ -18,8 +19,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "fs-extra": "^11.3.3",
     "mongodb": "^7.1.0",
     "next": "^14.2.0",
+    "nodemailer": "^8.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -28,6 +31,8 @@
     "@types/node": "^25.0.10",
     "@types/react": "^19.2.10",
     "autoprefixer": "^10.4.24",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.35",
     "typescript": "^5.9.3"
   }
 }

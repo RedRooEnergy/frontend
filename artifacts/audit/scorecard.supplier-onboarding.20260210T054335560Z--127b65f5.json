@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "system": "RedRooEnergy",
+    "auditId": "20260210T054335560Z--127b65f5",
+    "auditVersion": "ui-v1",
+    "environment": "local"
+  },
+  "run": {
+    "timestampUtc": "2026-02-10T05:44:46.155Z",
+    "baseUrl": "http://127.0.0.1:3001",
+    "runner": {
+      "type": "playwright",
+      "actor": "ui-audit"
+    }
+  },
+  "summary": {
+    "overall": "FAIL",
+    "counts": {
+      "total": 11,
+      "pass": 4,
+      "fail": 4,
+      "notBuilt": 2,
+      "notApplicable": 1
+    }
+  },
+  "checks": [
+    {
+      "id": "SUP-01",
+      "title": "Supplier profile shows required field gating",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "SUP-02",
+      "title": "Supplier profile save persists to storage",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "SUP-03",
+      "title": "Supplier profile submission succeeds when complete",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "ADMIN-01",
+      "title": "Admin approval updates supplier KYB status",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "PROD-NEG-draft-images-20260210T054335560Z--127b65f5",
+      "title": "Product submission blocked (missing images)",
+      "status": "FAIL",
+      "details": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for getByText('Submission locked until required fields, images, certifications, partner review, and approval are complete.').first() to be visible\n"
+    },
+    {
+      "id": "PROD-NEG-draft-certs-20260210T054335560Z--127b65f5",
+      "title": "Product submission blocked (missing certifications)",
+      "status": "FAIL",
+      "details": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for getByText('Submission locked until required fields, images, certifications, partner review, and approval are complete.').first() to be visible\n"
+    },
+    {
+      "id": "PROD-NEG-draft-auth-20260210T054335560Z--127b65f5",
+      "title": "Product submission blocked (missing authority)",
+      "status": "FAIL",
+      "details": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for getByText('Submission locked until required fields, images, certifications, partner review, and approval are complete.').first() to be visible\n"
+    },
+    {
+      "id": "PROD-POS-01",
+      "title": "Product submission enabled when all requirements satisfied",
+      "status": "FAIL",
+      "details": "locator.isDisabled: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByRole('button', { name: /Submit to RRE Admin/i })\n"
+    },
+    {
+      "id": "BACKEND-01",
+      "title": "Backend supplier persistence (Mongo/REST)",
+      "status": "NOT_BUILT",
+      "details": "Current platform uses localStorage; no server persistence"
+    },
+    {
+      "id": "BACKEND-02",
+      "title": "Backend product persistence (Mongo/REST)",
+      "status": "NOT_BUILT",
+      "details": "Current platform uses localStorage; no server persistence"
+    },
+    {
+      "id": "BACKEND-03",
+      "title": "TTL cleanup + index verification",
+      "status": "NOT_APPLICABLE",
+      "details": "No backend TTL data layer in current platform build"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "EXT-BUYER-01.01.01": {
+    "title": "Public Browsing Without Authentication",
+    "pdfPage": 1
+  },
+  "EXT-BUYER-01.02.01": {
+    "title": "Buyer Activation Requirement",
+    "pdfPage": 2
+  },
+  "EXT-BUYER-01.04.03": {
+    "title": "Cart Lock Immutability",
+    "pdfPage": 3
+  },
+  "EXT-BUYER-01.05.02": {
+    "title": "Dangerous Goods Freight Restrictions",
+    "pdfPage": 4
+  },
+  "EXT-BUYER-01.07.01": {
+    "title": "Payment Intent Requires Locked Snapshots",
+    "pdfPage": 5
+  }
+}

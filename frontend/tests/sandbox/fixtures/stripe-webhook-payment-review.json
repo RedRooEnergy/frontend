@@ -1,0 +1,16 @@
+{
+  "id": "evt_test_payment_review",
+  "type": "checkout.session.completed",
+  "data": {
+    "object": {
+      "id": "cs_test_999",
+      "payment_intent": "pi_test_999",
+      "amount_total": 10000,
+      "currency": "aud",
+      "metadata": {
+        "orderId": "ORDER_REVIEW",
+        "pricingSnapshotHash": "HASH_BAD"
+      }
+    }
+  }
+}

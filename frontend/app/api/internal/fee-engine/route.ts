@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSessionFromCookieHeader } from "../../../../lib/auth/sessionCookie";
-import { emitFeeLedgerEvent } from "../../../../lib/feeLedgerStore";
 import { emitAuthorityObserveDecision } from "../../../../lib/governance/authority/observe";
-import { evaluateAuthorityEnforcementDecision } from "../../../../lib/governance/authority/enforcementService";
+import {
+  getAuthorityEnforcementEvaluator,
+  getFeeLedgerEmitter,
+} from "../../../../lib/internal/feeEngineTestHooks";
 
 type TriggerBody =
   | {
@@ -62,20 +64,6 @@ function emitFeeEngineAuthorityObservation(input: {
       ...(input.metadata || {}),
     },
   });
-}
-
-type FeeLedgerEmitter = typeof emitFeeLedgerEvent;
-type AuthorityEnforcementEvaluator = typeof evaluateAuthorityEnforcementDecision;
-
-let feeLedgerEmitter: FeeLedgerEmitter = emitFeeLedgerEvent;
-let authorityEnforcementEvaluator: AuthorityEnforcementEvaluator = evaluateAuthorityEnforcementDecision;
-
-export function __setFeeLedgerEmitterForTests(emitter?: FeeLedgerEmitter) {
-  feeLedgerEmitter = emitter || emitFeeLedgerEvent;
-}
-
-export function __setAuthorityEnforcementEvaluatorForTests(evaluator?: AuthorityEnforcementEvaluator) {
-  authorityEnforcementEvaluator = evaluator || evaluateAuthorityEnforcementDecision;
 }
 
 export async function POST(request: Request) {
@@ -143,7 +131,7 @@ export async function POST(request: Request) {
         });
         return NextResponse.json({ error: "Missing workflow payload" }, { status: 400 });
       }
-      const event = await feeLedgerEmitter({
+      const event = await getFeeLedgerEmitter()({
         triggerEvent: "WF_CERTIFIED",
         eventType: "SUPPLIER_CERTIFICATION_FEE",
         actorRole: "supplier",
@@ -208,7 +196,7 @@ export async function POST(request: Request) {
         String(process.env.GOV04_AUTHORITY_OBSERVE_POLICY_VERSION_HASH || "").trim().toLowerCase() ||
         undefined;
 
-      const enforcement = await authorityEnforcementEvaluator({
+      const enforcement = await getAuthorityEnforcementEvaluator()({
         tenantId: null,
         policyId: "gov04.authority.catalog.product_approval.enforce.v1",
         policyVersionHash: enforcementPolicyVersionHash,
@@ -260,7 +248,7 @@ export async function POST(request: Request) {
         );
       }
 
-      const event = await feeLedgerEmitter({
+      const event = await getFeeLedgerEmitter()({
         triggerEvent: "PRODUCT_APPROVED",
         eventType: "PARTNER_LISTING_APPROVAL_FEE",
         actorRole: "service_partner",
@@ -319,7 +307,7 @@ export async function POST(request: Request) {
         });
         return NextResponse.json({ error: "Missing order payload" }, { status: 400 });
       }
-      const event = await feeLedgerEmitter({
+      const event = await getFeeLedgerEmitter()({
         triggerEvent: "ORDER_PAID",
         eventType: "INSTALLER_ORDER_SERVICE_FEE",
         actorRole: "installer",

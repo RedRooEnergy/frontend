@@ -1,15 +1,7 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { isAuthorityObserveEnabled } from "../../../../../../lib/governance/authority/config";
-import { exportAuthorityEvidencePack } from "../../../../../../lib/governance/authority/export";
-
-type AuthorityExportRunner = typeof exportAuthorityEvidencePack;
-
-let exportRunner: AuthorityExportRunner = exportAuthorityEvidencePack;
-
-export function __setAuthorityExportRunnerForTests(runner?: AuthorityExportRunner) {
-  exportRunner = runner || exportAuthorityEvidencePack;
-}
+import { getAuthorityExportRunner } from "../../../../../../lib/internal/authorityExportTestHooks";
 
 function safeEqualHex(left: string, right: string) {
   const leftBuf = Buffer.from(String(left || ""), "utf8");
@@ -91,7 +83,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const report = await exportRunner({
+    const report = await getAuthorityExportRunner()({
       source: parseSource(payload?.source),
       fromUtc: payload?.fromUtc,
       toUtc: payload?.toUtc,

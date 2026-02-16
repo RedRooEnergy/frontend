@@ -1,8 +1,6 @@
 import crypto from "crypto";
-import {
-  POST,
-  __setPaymentsMetricsSnapshotRunnerForTests,
-} from "../../app/api/internal/payments/metrics/snapshot/route";
+import { POST } from "../../app/api/internal/payments/metrics/snapshot/route";
+import { setPaymentsMetricsSnapshotRunnerForTests } from "../../lib/internal/paymentsMetricsSnapshotTestHooks";
 
 function assert(condition: boolean, message: string) {
   if (!condition) throw new Error(message);
@@ -111,7 +109,7 @@ async function testValidSignatureReturnsSnapshot() {
       ENABLE_WISE_HARDENED_FLOW: "false",
     },
     async () => {
-      __setPaymentsMetricsSnapshotRunnerForTests(async () => ({
+      setPaymentsMetricsSnapshotRunnerForTests(async () => ({
         reportVersion: "payments-metrics.v1",
         generatedAtUtc: "2026-02-13T12:00:00.000Z",
         windowStartUtc: "2026-02-13T11:00:00.000Z",
@@ -160,7 +158,7 @@ async function testValidSignatureReturnsSnapshot() {
     }
   );
 
-  __setPaymentsMetricsSnapshotRunnerForTests();
+  setPaymentsMetricsSnapshotRunnerForTests();
 }
 
 async function run() {

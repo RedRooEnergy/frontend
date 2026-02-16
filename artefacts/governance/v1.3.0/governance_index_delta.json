@@ -1,0 +1,35 @@
+{
+  "generatedAtUtc": "2026-02-14T14:27:08.278Z",
+  "overall": "PASS",
+  "badgeState": "REGRESSION",
+  "trendStatus": "REGRESSION",
+  "governanceScore": {
+    "basePercent": 100,
+    "deductions": [],
+    "finalPercent": 100
+  },
+  "deductions": [],
+  "summary": {
+    "totalSubsystems": 3,
+    "passCount": 3,
+    "failCount": 0,
+    "noDataCount": 0
+  },
+  "criticalRules": [
+    {
+      "id": "GOV-WECHAT-07",
+      "status": "PASS",
+      "notes": []
+    },
+    {
+      "id": "GOV-CHAIN-01",
+      "status": "PASS",
+      "notes": []
+    },
+    {
+      "id": "GOV-CHAT-01",
+      "status": "PASS",
+      "notes": []
+    }
+  ]
+}

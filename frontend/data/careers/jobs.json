@@ -1,0 +1,294 @@
+[
+  {
+    "title": "Compliance Lead",
+    "team": "Compliance",
+    "locations": [
+      "NSW, Australia",
+      "VIC, Australia"
+    ],
+    "regionTag": "AU",
+    "workType": "Full-time",
+    "seniority": "Lead",
+    "summary": "Lead compliance assurance for products listed on the marketplace.",
+    "sections": {
+      "aboutRole": "You will shape the compliance framework that ensures listed products meet Australian standards and marketplace governance.",
+      "responsibilities": [
+        "Define compliance review workflows and evidence requirements.",
+        "Partner with suppliers to resolve approval gaps.",
+        "Maintain audit-ready compliance documentation.",
+        "Guide internal teams on regulatory alignment."
+      ],
+      "requiredSkills": [
+        "Regulatory compliance experience",
+        "Risk assessment",
+        "Stakeholder communication"
+      ],
+      "niceToHave": [
+        "Renewable energy product knowledge",
+        "Policy drafting"
+      ],
+      "regionNotes": "Based in Australia with occasional travel to project locations.",
+      "assessment": "We review compliance case studies and decision-making examples."
+    },
+    "currency": "AUD",
+    "status": "published",
+    "featured": true,
+    "id": "8556df91-30fd-442c-8198-97ecb7ed6a81",
+    "slug": "compliance-lead",
+    "refCode": "RRE-COMP-202602-079C",
+    "postedAt": "2026-02-04T08:40:23.526Z",
+    "updatedAt": "2026-02-04T08:40:23.526Z"
+  },
+  {
+    "title": "Supplier Onboarding Specialist",
+    "team": "Operations",
+    "locations": [
+      "China"
+    ],
+    "regionTag": "China",
+    "workType": "Full-time",
+    "seniority": "Mid",
+    "summary": "Support supplier onboarding and documentation reviews for China-based partners.",
+    "sections": {
+      "aboutRole": "You will guide suppliers through onboarding requirements and ensure documentation is complete and accurate.",
+      "responsibilities": [
+        "Coordinate onboarding steps with suppliers.",
+        "Validate compliance documentation and listings.",
+        "Track onboarding progress and issue resolution."
+      ],
+      "requiredSkills": [
+        "Supplier operations",
+        "Documentation review",
+        "Cross-border communication"
+      ],
+      "niceToHave": [
+        "Mandarin language",
+        "Supply chain background"
+      ],
+      "regionNotes": "Role supports China-based suppliers with cross-border coordination."
+    },
+    "currency": "AUD",
+    "status": "published",
+    "featured": false,
+    "id": "6553ae23-38f2-4d51-ae90-0a77d57ceeb1",
+    "slug": "supplier-onboarding-specialist",
+    "refCode": "RRE-OPS-202602-A786",
+    "postedAt": "2026-02-04T08:40:23.526Z",
+    "updatedAt": "2026-02-04T08:40:23.526Z"
+  },
+  {
+    "title": "Logistics Coordinator",
+    "team": "Logistics",
+    "locations": [
+      "NSW, Australia",
+      "New Zealand"
+    ],
+    "regionTag": "NZ",
+    "workType": "Full-time",
+    "seniority": "Mid",
+    "summary": "Coordinate delivery schedules and logistics updates for AU/NZ orders.",
+    "sections": {
+      "aboutRole": "You will ensure delivery timelines and evidence requirements are met for regulated energy projects.",
+      "responsibilities": [
+        "Coordinate shipment timelines with suppliers and service partners.",
+        "Maintain delivery documentation and proof of handover.",
+        "Escalate risks related to customs or delivery delays."
+      ],
+      "requiredSkills": [
+        "Logistics coordination",
+        "Detail accuracy",
+        "Issue escalation"
+      ],
+      "niceToHave": [
+        "DDP knowledge",
+        "Freight forwarding exposure"
+      ]
+    },
+    "currency": "AUD",
+    "status": "published",
+    "featured": false,
+    "id": "ff60843b-9b56-4295-ae6a-1684fe888b04",
+    "slug": "logistics-coordinator",
+    "refCode": "RRE-LOG-202602-7296",
+    "postedAt": "2026-02-04T08:40:23.526Z",
+    "updatedAt": "2026-02-04T08:40:23.526Z"
+  },
+  {
+    "title": "Marketplace Operations",
+    "team": "Operations",
+    "locations": [
+      "NSW, Australia",
+      "VIC, Australia"
+    ],
+    "regionTag": "AU",
+    "workType": "Full-time",
+    "seniority": "Senior",
+    "summary": "Oversee daily marketplace operations and order flow.",
+    "sections": {
+      "aboutRole": "You will keep marketplace workflows reliable and ensure buyers and suppliers follow structured processes.",
+      "responsibilities": [
+        "Monitor order flow and status adherence.",
+        "Coordinate internal teams on workflow improvements.",
+        "Support dispute or incident coordination."
+      ],
+      "requiredSkills": [
+        "Operations management",
+        "Process improvement",
+        "Cross-team coordination"
+      ],
+      "niceToHave": [
+        "Marketplace operations experience"
+      ]
+    },
+    "currency": "AUD",
+    "status": "published",
+    "featured": false,
+    "id": "d8024954-f892-43a8-a516-2eec33088433",
+    "slug": "marketplace-operations",
+    "refCode": "RRE-OPS-202602-73E1",
+    "postedAt": "2026-02-04T08:40:23.526Z",
+    "updatedAt": "2026-02-04T08:40:23.526Z"
+  },
+  {
+    "title": "Partnerships Manager",
+    "team": "Partnerships",
+    "locations": [
+      "Oceania"
+    ],
+    "regionTag": "Oceania",
+    "workType": "Full-time",
+    "seniority": "Senior",
+    "summary": "Develop strategic partnerships across Oceania.",
+    "sections": {
+      "aboutRole": "You will build partnerships that expand supplier and service coverage in Oceania.",
+      "responsibilities": [
+        "Identify and onboard strategic partners.",
+        "Maintain partnership governance and expectations.",
+        "Coordinate cross-functional support for partner success."
+      ],
+      "requiredSkills": [
+        "Partnership management",
+        "Commercial negotiation",
+        "Relationship building"
+      ],
+      "niceToHave": [
+        "Renewable energy sector network"
+      ]
+    },
+    "currency": "AUD",
+    "status": "published",
+    "featured": false,
+    "id": "d07265c5-bfd9-4e58-ad43-a927502dd6e5",
+    "slug": "partnerships-manager",
+    "refCode": "RRE-PART-202602-EBFB",
+    "postedAt": "2026-02-04T08:40:23.526Z",
+    "updatedAt": "2026-02-04T08:40:23.526Z"
+  },
+  {
+    "title": "Frontend Engineer",
+    "team": "Engineering",
+    "locations": [
+      "Remote"
+    ],
+    "regionTag": "Global",
+    "workType": "Full-time",
+    "seniority": "Mid",
+    "summary": "Build intuitive interfaces for a compliance-first marketplace.",
+    "sections": {
+      "aboutRole": "You will deliver user-facing experiences that make governance and workflows easy to follow.",
+      "responsibilities": [
+        "Ship accessible UI components",
+        "Collaborate with product and design",
+        "Maintain UI quality"
+      ],
+      "requiredSkills": [
+        "React/Next.js experience",
+        "UI craftsmanship",
+        "Accessibility awareness"
+      ],
+      "niceToHave": [
+        "Design systems exposure",
+        "Marketplace experience"
+      ]
+    },
+    "currency": "AUD",
+    "status": "published",
+    "featured": false,
+    "id": "1540fc9c-4046-44d4-8b19-dd341050e867",
+    "slug": "frontend-engineer",
+    "refCode": "RRE-ENG-202602-3BE9",
+    "postedAt": "2026-02-04T08:40:23.526Z",
+    "updatedAt": "2026-02-04T08:40:23.526Z"
+  },
+  {
+    "title": "Backend Engineer",
+    "team": "Engineering",
+    "locations": [
+      "Remote"
+    ],
+    "regionTag": "Global",
+    "workType": "Full-time",
+    "seniority": "Senior",
+    "summary": "Build secure services for compliance, orders, and integrations.",
+    "sections": {
+      "aboutRole": "You will design backend services and APIs that keep marketplace workflows reliable and auditable.",
+      "responsibilities": [
+        "Design APIs for workflow integrity",
+        "Maintain data integrity",
+        "Integrate external systems"
+      ],
+      "requiredSkills": [
+        "API design",
+        "Security mindset",
+        "Data modelling"
+      ],
+      "niceToHave": [
+        "Payments or compliance platform experience"
+      ]
+    },
+    "currency": "AUD",
+    "status": "published",
+    "featured": false,
+    "id": "9bc90299-2437-4cf8-a8fa-d73c224b3198",
+    "slug": "backend-engineer",
+    "refCode": "RRE-ENG-202602-2B9E",
+    "postedAt": "2026-02-04T08:40:23.526Z",
+    "updatedAt": "2026-02-04T08:40:23.526Z"
+  },
+  {
+    "title": "Customer Support Specialist",
+    "team": "Customer Support",
+    "locations": [
+      "NSW, Australia",
+      "QLD, Australia"
+    ],
+    "regionTag": "AU",
+    "workType": "Full-time",
+    "seniority": "Junior",
+    "summary": "Support buyers and suppliers with clear, structured assistance.",
+    "sections": {
+      "aboutRole": "You will help marketplace participants resolve issues and navigate structured workflows.",
+      "responsibilities": [
+        "Respond to support requests",
+        "Document issues clearly",
+        "Escalate complex cases"
+      ],
+      "requiredSkills": [
+        "Clear communication",
+        "Customer service experience",
+        "Attention to detail"
+      ],
+      "niceToHave": [
+        "Energy or marketplace experience"
+      ]
+    },
+    "currency": "AUD",
+    "status": "published",
+    "featured": false,
+    "id": "13f58341-86dd-4e3e-ac91-b5cee2a609dc",
+    "slug": "customer-support-specialist",
+    "refCode": "RRE-SUP-202602-DE2A",
+    "postedAt": "2026-02-04T08:40:23.526Z",
+    "updatedAt": "2026-02-04T08:40:23.526Z"
+  }
+]

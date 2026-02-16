@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireRegulator } from "../../../../../lib/auth/roleGuard";
-import { resolveWeChatRuntimeConfig } from "../../../../../lib/wechat/config";
+import { requireRegulator } from "../../../../lib/auth/roleGuard";
+import { resolveWeChatRuntimeConfig } from "../../../../lib/wechat/config";
 import {
   listWeChatDispatchSliceForRegulator,
   listWeChatInboundSliceForRegulator,
   listWeChatLedgerSliceForRegulator,
-} from "../../../../../lib/wechat/store";
+} from "../../../../lib/wechat/store";
 
 export const runtime = "nodejs";
 

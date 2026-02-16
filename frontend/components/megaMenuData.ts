@@ -1,0 +1,17 @@
+export const categories = [
+  { label: "Solar PV Modules", href: "/categories/solar-pv-modules" },
+  { label: "Inverters & Power Electronics", href: "/categories/inverters" },
+  { label: "Energy Storage (Batteries)", href: "/categories/batteries" },
+  { label: "EV Charging", href: "/categories/ev-charging" },
+  { label: "Mounting & Racking", href: "/categories/mounting-racking" },
+  { label: "Electrical BOS (Balance of System)", href: "/categories/electrical-bos" },
+  { label: "Switchgear & Protection", href: "/categories/switchgear-protection" },
+  { label: "Monitoring, Control & IoT", href: "/categories/monitoring-control-iot" },
+  { label: "Off-Grid & Hybrid Accessories", href: "/categories/off-grid-hybrid" },
+  { label: "Solar Thermal & Heat Pumps", href: "/categories/solar-thermal-heat-pumps" },
+  { label: "HVAC & Load-Side Efficiency", href: "/categories/hvac-load-efficiency" },
+  { label: "Tools, Test & PPE", href: "/categories/tools-test-ppe" },
+  { label: "Labels, Compliance & Documentation", href: "/categories/labels-compliance" },
+  { label: "Packaging, Spares & Consumables", href: "/categories/packaging-spares" },
+  { label: "Other Emerging Technologies", href: "/categories/emerging-tech" },
+];

@@ -1,0 +1,64 @@
+{
+  "generatedAtUtc": "2026-02-11T22:41:05Z",
+  "repository": "RedRooEnergy/frontend",
+  "baseline": {
+    "mainCommit": "fbce9042873115ff6e206acc094cfae6c86fc2e8",
+    "baselineTag": "governance-baseline-v1.0-investor",
+    "tagObject": "cc30c9c4d9f4ef6f1c82d9be5440a5a35d453f09",
+    "tagCommit": "fbce9042873115ff6e206acc094cfae6c86fc2e8",
+    "tagPinnedToMain": true
+  },
+  "protection": {
+    "strict": true,
+    "requiredContexts": [
+      "Buyer Onboarding Audit (Blocking) / buyer-onboarding-audit",
+      "Freight & Customs Audit (Blocking) / freight-customs-audit",
+      "Installer Onboarding Audit (Blocking) / installer-onboarding-audit"
+    ],
+    "requiredConversationResolution": true,
+    "allowForcePushes": false,
+    "allowDeletions": false,
+    "enforceAdmins": false,
+    "normalizedHashSha256": "6cf288e49510820537bd7f82f0b3ef770d5285505548036519fe8f5630c79f57"
+  },
+  "runHistoryLast5": {
+    "buyerOnboarding": [
+      {
+        "conclusion": "success",
+        "createdAt": "2026-02-11T22:19:36Z",
+        "databaseId": 21925298406,
+        "displayTitle": "Merge pull request #1 from RedRooEnergy/governance-baseline-declarati…",
+        "headSha": "fbce9042873115ff6e206acc094cfae6c86fc2e8",
+        "status": "completed",
+        "updatedAt": "2026-02-11T22:19:55Z"
+      }
+    ],
+    "freightCustoms": [
+      {
+        "conclusion": "success",
+        "createdAt": "2026-02-11T22:19:36Z",
+        "databaseId": 21925298402,
+        "displayTitle": "Merge pull request #1 from RedRooEnergy/governance-baseline-declarati…",
+        "headSha": "fbce9042873115ff6e206acc094cfae6c86fc2e8",
+        "status": "completed",
+        "updatedAt": "2026-02-11T22:19:53Z"
+      }
+    ],
+    "installerOnboarding": [
+      {
+        "conclusion": "success",
+        "createdAt": "2026-02-11T22:19:36Z",
+        "databaseId": 21925298387,
+        "displayTitle": "Merge pull request #1 from RedRooEnergy/governance-baseline-declarati…",
+        "headSha": "fbce9042873115ff6e206acc094cfae6c86fc2e8",
+        "status": "completed",
+        "updatedAt": "2026-02-11T22:19:52Z"
+      }
+    ]
+  },
+  "checks": {
+    "contextDrift": false,
+    "branchProtectionDrift": false,
+    "breakGlassObserved": false
+  }
+}

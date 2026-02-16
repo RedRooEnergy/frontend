@@ -1,9 +1,9 @@
 import { createSessionToken, SESSION_COOKIE_NAME } from "../../../lib/auth/sessionCookie";
+import { POST as feeEnginePost } from "../../../app/api/internal/fee-engine/route";
 import {
-  POST as feeEnginePost,
-  __setAuthorityEnforcementEvaluatorForTests,
-  __setFeeLedgerEmitterForTests,
-} from "../../../app/api/internal/fee-engine/route";
+  setAuthorityEnforcementEvaluatorForTests,
+  setFeeLedgerEmitterForTests,
+} from "../../../lib/internal/feeEngineTestHooks";
 
 function assert(condition: boolean, message: string) {
   if (!condition) throw new Error(message);
@@ -39,11 +39,11 @@ function buildProductApprovedRequest() {
 async function testEnforcementBlockReturns403AndSkipsFeeEmission() {
   let feeEmitterCalled = 0;
 
-  __setFeeLedgerEmitterForTests(async () => {
+  setFeeLedgerEmitterForTests(async () => {
     feeEmitterCalled += 1;
     return {} as any;
   });
-  __setAuthorityEnforcementEvaluatorForTests(async () => ({
+  setAuthorityEnforcementEvaluatorForTests(async () => ({
     preconditions: {
       enabled: true,
       killSwitch: false,
@@ -84,14 +84,14 @@ async function testEnforcementBlockReturns403AndSkipsFeeEmission() {
 async function testBypassedEnforcementKeepsRouteSuccess() {
   let feeEmitterCalled = 0;
 
-  __setFeeLedgerEmitterForTests(async () => {
+  setFeeLedgerEmitterForTests(async () => {
     feeEmitterCalled += 1;
     return {
       eventId: "fee-event-1",
       eventType: "PARTNER_LISTING_APPROVAL_FEE",
     } as any;
   });
-  __setAuthorityEnforcementEvaluatorForTests(async () => ({
+  setAuthorityEnforcementEvaluatorForTests(async () => ({
     preconditions: {
       enabled: false,
       killSwitch: false,
@@ -130,11 +130,11 @@ async function testBypassedEnforcementKeepsRouteSuccess() {
 async function testStrictModeInternalFailureBlocks() {
   let feeEmitterCalled = 0;
 
-  __setFeeLedgerEmitterForTests(async () => {
+  setFeeLedgerEmitterForTests(async () => {
     feeEmitterCalled += 1;
     return {} as any;
   });
-  __setAuthorityEnforcementEvaluatorForTests(async () => ({
+  setAuthorityEnforcementEvaluatorForTests(async () => ({
     preconditions: {
       enabled: true,
       killSwitch: false,
@@ -176,8 +176,8 @@ async function run() {
     await testBypassedEnforcementKeepsRouteSuccess();
     await testStrictModeInternalFailureBlocks();
   } finally {
-    __setAuthorityEnforcementEvaluatorForTests();
-    __setFeeLedgerEmitterForTests();
+    setAuthorityEnforcementEvaluatorForTests();
+    setFeeLedgerEmitterForTests();
   }
 }
 

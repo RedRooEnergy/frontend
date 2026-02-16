@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "auditId": "buyer-onboarding",
+    "runId": "20260211T110425499Z--18bbf94f",
+    "timestampUtc": "2026-02-11T11:04:48.523Z",
+    "baseUrl": "http://127.0.0.1:3001",
+    "environment": "local"
+  },
+  "summary": {
+    "overall": "FAIL",
+    "totalChecks": 8,
+    "passCount": 4,
+    "failCount": 4,
+    "notBuiltCount": 0,
+    "notApplicableCount": 0
+  },
+  "checks": [
+    {
+      "id": "BUYER-01",
+      "title": "Public entry exposes buyer onboarding start",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "BUYER-02",
+      "title": "Account creation/sign-in yields buyer workspace access",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "BUYER-03",
+      "title": "Buyer terms acknowledgement is explicit and persisted before checkout",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "BUYER-04",
+      "title": "Checkout eligibility gating blocks ineligible buyer progression",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "BUYER-05",
+      "title": "Order creation invariants are captured deterministically",
+      "status": "FAIL",
+      "details": "Order invariants not deterministic (buttonEnabled=true, invariants=false, listed=false, statusOk=false, orderIdOk=false, hashOk=false, timelineOk=false, supplierOk=false, buyerEmailOk=false)",
+      "evidence": {
+        "screenshots": [
+          "artefacts/buyer-onboarding-audit/screenshots/20260211T110425499Z--18bbf94f/BUYER-05.png"
+        ],
+        "notes": ""
+      }
+    },
+    {
+      "id": "BUYER-06",
+      "title": "Payment and escrow transitions are observable across buyer/admin surfaces",
+      "status": "FAIL",
+      "details": "buyerEscrow=true, buyerHeld=true, buyerPaid=false, adminFinance=true, adminHeld=true",
+      "evidence": {
+        "screenshots": [
+          "artefacts/buyer-onboarding-audit/screenshots/20260211T110425499Z--18bbf94f/BUYER-06.png"
+        ],
+        "notes": ""
+      }
+    },
+    {
+      "id": "BUYER-07",
+      "title": "Buyer evidence visibility and role gating are enforced",
+      "status": "FAIL",
+      "details": "ownDoc=false, foreignDocVisible=false, unauthInbox=401, authInbox=200",
+      "evidence": {
+        "screenshots": [
+          "artefacts/buyer-onboarding-audit/screenshots/20260211T110425499Z--18bbf94f/BUYER-07.png"
+        ],
+        "notes": ""
+      }
+    },
+    {
+      "id": "BUYER-08",
+      "title": "Admin oversight and replay evidence are deterministic for buyer order lifecycle",
+      "status": "FAIL",
+      "details": "adminExecutive=true, adminShipmentReplay=false, buyerDelivered=false, buyerSettled=false, unauthRoleGating=true, adminLedger=200",
+      "evidence": {
+        "screenshots": [
+          "artefacts/buyer-onboarding-audit/screenshots/20260211T110425499Z--18bbf94f/BUYER-08.png"
+        ],
+        "notes": ""
+      }
+    }
+  ],
+  "outputs": {
+    "pdfPath": "artefacts/buyer-onboarding-audit/summary.buyer-onboarding.20260211T110425499Z--18bbf94f.pdf",
+    "pdfSha256Path": "artefacts/buyer-onboarding-audit/summary.buyer-onboarding.20260211T110425499Z--18bbf94f.sha256"
+  }
+}

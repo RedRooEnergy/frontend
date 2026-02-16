@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "auditId": "freight-customs",
+    "runId": "20260211T084654200Z--eb237267",
+    "timestampUtc": "2026-02-11T08:46:58.841Z",
+    "baseUrl": "http://127.0.0.1:3001",
+    "environment": "local"
+  },
+  "summary": {
+    "overall": "FAIL",
+    "totalChecks": 8,
+    "passCount": 7,
+    "failCount": 0,
+    "notBuiltCount": 1,
+    "notApplicableCount": 0
+  },
+  "checks": [
+    {
+      "id": "FREIGHT-01",
+      "title": "Public entry exposes freight/DDP governance start",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "FREIGHT-02",
+      "title": "Freight operational surfaces enforce role gating",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "FREIGHT-03",
+      "title": "Customs/DDP control posture is observable and non-editable in UI",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "FREIGHT-04",
+      "title": "Shipment progression controls are deterministic at existing surfaces",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "FREIGHT-05",
+      "title": "Delivery confirmation and settlement gating are enforced on existing endpoints",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "FREIGHT-06",
+      "title": "Freight evidence documents are captured with deterministic metadata",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "FREIGHT-07",
+      "title": "Exception classification exists and escalation traceability is observable",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "FREIGHT-08",
+      "title": "Freight closure evidence is replayable across current ops/finance audit surfaces",
+      "status": "NOT_BUILT",
+      "details": "No deterministic delivered-order replay dataset available in baseline without additional fixture data",
+      "evidence": {
+        "screenshots": [
+          "artefacts/freight-customs-audit/screenshots/20260211T084654200Z--eb237267/FREIGHT-08.png"
+        ],
+        "notes": ""
+      }
+    }
+  ],
+  "outputs": {
+    "pdfPath": "artefacts/freight-customs-audit/summary.freight-customs.20260211T084654200Z--eb237267.pdf",
+    "pdfSha256Path": "artefacts/freight-customs-audit/summary.freight-customs.20260211T084654200Z--eb237267.sha256"
+  }
+}

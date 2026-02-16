@@ -1,0 +1,57 @@
+name: Public Participant Sites E2E (Informational)
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  public-participant-sites-e2e:
+    name: Public Participant Sites E2E (Informational)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        working-directory: frontend
+        run: npx --yes playwright install --with-deps chromium
+
+      - name: Run public participant sites E2E audit
+        working-directory: frontend
+        run: |
+          test -f tests/public-participant-sites/runPublicParticipantSitesE2E.ts
+          npx --yes tsx tests/public-participant-sites/runPublicParticipantSitesE2E.ts
+
+      - name: Write governance URLs to CI summary
+        if: always()
+        run: |
+          BASE="${BASE_URL:-https://redrooenergy.com.au}"
+          echo "## EXT-PUBLIC-PARTICIPANT-SITES-01" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Badge URL: \`${BASE}/api/governance/public-participant-sites/badge\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Status URL: \`${BASE}/api/governance/public-participant-sites/status\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Scorecards: \`artefacts/public-participant-sites/scorecard.<RUN_ID>.json\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- History: \`artefacts/public-participant-sites/history/\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Platform Governance" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Platform badge: \`${BASE}/api/governance/platform/badge\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Platform status: \`${BASE}/api/governance/platform/status\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload audit artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-participant-sites-e2e-artefacts
+          path: artefacts/public-participant-sites/**
+          if-no-files-found: ignore

@@ -1,0 +1,35 @@
+{
+  "runId": "audit-1770626439408",
+  "baseUrl": "http://127.0.0.1:3001",
+  "overall": "PASS",
+  "totalChecks": 11,
+  "passed": 11,
+  "failed": 0,
+  "clauseImpact": {
+    "GOV-CORE-01": {
+      "total": 2,
+      "failed": 0
+    },
+    "GOV-COMP-03": {
+      "total": 3,
+      "failed": 0
+    },
+    "GOV-COMP-02": {
+      "total": 3,
+      "failed": 0
+    },
+    "GOV-COMP-04": {
+      "total": 1,
+      "failed": 0
+    },
+    "GOV-REG-01": {
+      "total": 1,
+      "failed": 0
+    },
+    "GOV-AUD-01": {
+      "total": 1,
+      "failed": 0
+    }
+  },
+  "timestamp": "2026-02-09T08:40:43.786Z"
+}

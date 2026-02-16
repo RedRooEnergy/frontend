@@ -1,0 +1,20 @@
+{
+  "closePackVersion": "v1.0",
+  "timestampUTC": "2026-02-14T14:43:44.383Z",
+  "documents": [
+    {
+      "name": "docs/admin/ADMIN_DASHBOARD_GOVERNANCE_SPEC_v1.0.md",
+      "sha256": "f40fa3f157f506a193c7d6aa32e290aff68248e280f0424c3eee10a8c0074195"
+    },
+    {
+      "name": "docs/admin/PLATFORM_ADMIN_DASHBOARD_UI_WIREFRAME_LAYOUT_v1.0.md",
+      "sha256": "91b4ff9d01906ba4f06064677cf6c06c0432782107beef665ebbafb93c22a9ed"
+    },
+    {
+      "name": "docs/admin/ADMIN_DASHBOARD_CLOSE_PACK_v1.0.md",
+      "sha256": "cc920adc55ef38f098975452600becb8de63d37cc681aedecb61206352405fb2"
+    }
+  ],
+  "signedBy": "BOARD AUTHORITY",
+  "integrityStatement": "All listed documents are immutable governance artefacts."
+}

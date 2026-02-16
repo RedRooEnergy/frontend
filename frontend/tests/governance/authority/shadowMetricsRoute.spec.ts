@@ -1,8 +1,6 @@
 import crypto from "crypto";
-import {
-  POST,
-  __setAuthorityShadowMetricsRunnerForTests,
-} from "../../../app/api/internal/governance/authority/shadow/metrics/route";
+import { POST } from "../../../app/api/internal/governance/authority/shadow/metrics/route";
+import { setAuthorityShadowMetricsRunnerForTests } from "../../../lib/internal/authorityShadowMetricsTestHooks";
 
 function assert(condition: boolean, message: string) {
   if (!condition) throw new Error(message);
@@ -87,7 +85,7 @@ async function testValidSignature() {
       GOV04_AUTHORITY_SHADOW_METRICS_JOB_SECRET: "shadow-secret",
     },
     async () => {
-      __setAuthorityShadowMetricsRunnerForTests(async () => ({
+      setAuthorityShadowMetricsRunnerForTests(async () => ({
         reportVersion: "gov04-authority-shadow-metrics.v1",
         generatedAtUtc: "2026-02-13T12:00:00.000Z",
         windowStartUtc: "2026-02-13T11:00:00.000Z",
@@ -140,7 +138,7 @@ async function testValidSignature() {
     }
   );
 
-  __setAuthorityShadowMetricsRunnerForTests();
+  setAuthorityShadowMetricsRunnerForTests();
 }
 
 async function run() {

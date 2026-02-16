@@ -1,0 +1,25 @@
+{
+  "runId": "wechat-20260214002358672",
+  "generatedAtUtc": "2026-02-14T00:23:58.695Z",
+  "overall": "PASS",
+  "scorecardPath": "/Volumes/External RAM 1TB/REDROO_Projects_mirror/frontend/artefacts/wechat/scorecard.wechat-20260214002358672.json",
+  "signatureSha256": "fc5f0f64c6ec8cd1df7d0e1e2c6a841d28df086c2b5615bb9b799c26e71f56dc",
+  "files": [
+    {
+      "path": "/Volumes/External RAM 1TB/REDROO_Projects_mirror/frontend/artefacts/wechat/scorecard.wechat-20260214002358672.json",
+      "sha256": "549306aa39b8e97aadd038e52317658a51b97436ec5ffdbd78ab367fba05a11e"
+    },
+    {
+      "path": "/Volumes/External RAM 1TB/REDROO_Projects_mirror/frontend/artefacts/wechat/attestation.wechat-20260214002358672.pdf",
+      "sha256": "9ad3a32fe92f8abb815b7b9ba1a221d20057eec8ed9fc551d7002ec3d2a81e03"
+    },
+    {
+      "path": "/Volumes/External RAM 1TB/REDROO_Projects_mirror/frontend/artefacts/wechat/summary.wechat-20260214002358672.pdf",
+      "sha256": "0c83d13f3e882c7574a27d240f515131f5c4c9b4568b66e5a96876f7b9eb7529"
+    },
+    {
+      "path": "/Volumes/External RAM 1TB/REDROO_Projects_mirror/frontend/artefacts/wechat/badge.wechat-governance.svg",
+      "sha256": "00c6d951f6d7e6cdeaebaf615ec428ebbb1392d6ec24fa09e64078e4ad9ba6e6"
+    }
+  ]
+}

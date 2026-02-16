@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "system": "RedRooEnergy",
+    "auditId": "20260210T054711111Z--2e158171",
+    "auditVersion": "ui-v1",
+    "environment": "local"
+  },
+  "run": {
+    "timestampUtc": "2026-02-10T05:47:31.264Z",
+    "baseUrl": "http://127.0.0.1:3001",
+    "runner": {
+      "type": "playwright",
+      "actor": "ui-audit"
+    }
+  },
+  "summary": {
+    "overall": "FAIL",
+    "counts": {
+      "total": 11,
+      "pass": 7,
+      "fail": 1,
+      "notBuilt": 2,
+      "notApplicable": 1
+    }
+  },
+  "checks": [
+    {
+      "id": "SUP-01",
+      "title": "Supplier profile shows required field gating",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "SUP-02",
+      "title": "Supplier profile save persists to storage",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "SUP-03",
+      "title": "Supplier profile submission succeeds when complete",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "ADMIN-01",
+      "title": "Admin approval updates supplier KYB status",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "PROD-NEG-draft-images-20260210T054711111Z--2e158171",
+      "title": "Product submission blocked (missing images)",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "PROD-NEG-draft-certs-20260210T054711111Z--2e158171",
+      "title": "Product submission blocked (missing certifications)",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "PROD-NEG-draft-auth-20260210T054711111Z--2e158171",
+      "title": "Product submission blocked (missing authority)",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "PROD-POS-01",
+      "title": "Product submission enabled when all requirements satisfied",
+      "status": "FAIL",
+      "details": "page.waitForURL: Timeout 10000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/dashboard/supplier/products\" until \"load\"\n============================================================"
+    },
+    {
+      "id": "BACKEND-01",
+      "title": "Backend supplier persistence (Mongo/REST)",
+      "status": "NOT_BUILT",
+      "details": "Current platform uses localStorage; no server persistence"
+    },
+    {
+      "id": "BACKEND-02",
+      "title": "Backend product persistence (Mongo/REST)",
+      "status": "NOT_BUILT",
+      "details": "Current platform uses localStorage; no server persistence"
+    },
+    {
+      "id": "BACKEND-03",
+      "title": "TTL cleanup + index verification",
+      "status": "NOT_APPLICABLE",
+      "details": "No backend TTL data layer in current platform build"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "evt_test_refund_success",
+  "type": "charge.refunded",
+  "data": {
+    "object": {
+      "id": "re_test_123",
+      "payment_intent": "pi_test_123"
+    }
+  }
+}

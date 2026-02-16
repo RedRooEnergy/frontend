@@ -3,16 +3,8 @@ import "../../../../../../lib/payments/bootstrap";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { resolvePaymentsRuntimeConfig } from "../../../../../../lib/payments/config";
-import { runPaymentsMetricsSnapshot } from "../../../../../../lib/payments/metrics/engine";
+import { getPaymentsMetricsSnapshotRunner } from "../../../../../../lib/internal/paymentsMetricsSnapshotTestHooks";
 import type { MetricsSource } from "../../../../../../lib/payments/metrics/types";
-
-type PaymentsMetricsSnapshotRunner = typeof runPaymentsMetricsSnapshot;
-
-let snapshotRunner: PaymentsMetricsSnapshotRunner = runPaymentsMetricsSnapshot;
-
-export function __setPaymentsMetricsSnapshotRunnerForTests(runner?: PaymentsMetricsSnapshotRunner) {
-  snapshotRunner = runner || runPaymentsMetricsSnapshot;
-}
 
 function safeEqualHex(left: string, right: string) {
   const leftBuf = Buffer.from(String(left || ""), "utf8");
@@ -103,7 +95,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const report = await snapshotRunner({
+    const report = await getPaymentsMetricsSnapshotRunner()({
       source: parseSource(payload?.source),
       fromUtc: payload?.fromUtc,
       toUtc: payload?.toUtc,

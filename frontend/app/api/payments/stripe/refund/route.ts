@@ -7,6 +7,7 @@ import { recordAudit } from "../../../../../lib/audit";
 import { getTestSessionFromHeaders } from "../../../../../lib/testSession";
 import { sendEmail } from "../../../../../lib/email/dispatchService";
 import { resolvePaymentsRuntimeConfig } from "../../../../../lib/payments/config";
+import { createQueueItem } from "../../../../../lib/adminDashboard/adminQueueStore";
 import {
   acquirePaymentIdempotencyLock,
   buildScopedPaymentIdempotencyKey,
@@ -92,6 +93,20 @@ export async function POST(request: Request) {
       if (refund.id) {
         orders[index].refundId = refund.id;
         writeStore("orders" as any, orders as any);
+        try {
+          await createQueueItem({
+            queueType: "REFUND_REQUEST",
+            entityType: "Refund",
+            entityId: refund.id,
+            priority: "MEDIUM",
+            riskScore: 50,
+            summary: `Refund requested for order ${orderId}`,
+            governanceRefs: {},
+          });
+        } catch (err) {
+          console.error("QUEUE_INSERT_FAILURE", err);
+          throw err;
+        }
         recordAudit("STRIPE_REFUND_INITIATED", { orderId, refundId: refund.id });
 
         try {
@@ -231,6 +246,20 @@ export async function POST(request: Request) {
       refundId: refund.id || order.refundId,
     };
     writeStore("orders" as any, orders as any);
+    try {
+      await createQueueItem({
+        queueType: "REFUND_REQUEST",
+        entityType: "Refund",
+        entityId: refund.id || orderId,
+        priority: "MEDIUM",
+        riskScore: 50,
+        summary: `Refund requested for order ${orderId}`,
+        governanceRefs: {},
+      });
+    } catch (err) {
+      console.error("QUEUE_INSERT_FAILURE", err);
+      throw err;
+    }
 
     await markPaymentIdempotencyResult({
       provider: "stripe",

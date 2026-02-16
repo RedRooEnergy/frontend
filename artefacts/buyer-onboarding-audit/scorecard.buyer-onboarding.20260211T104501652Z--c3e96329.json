@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "auditId": "buyer-onboarding",
+    "runId": "20260211T104501652Z--c3e96329",
+    "timestampUtc": "2026-02-11T10:45:44.106Z",
+    "baseUrl": "http://127.0.0.1:3001",
+    "environment": "local"
+  },
+  "summary": {
+    "overall": "FAIL",
+    "totalChecks": 8,
+    "passCount": 3,
+    "failCount": 4,
+    "notBuiltCount": 1,
+    "notApplicableCount": 0
+  },
+  "checks": [
+    {
+      "id": "BUYER-01",
+      "title": "Public entry exposes buyer onboarding start",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "BUYER-02",
+      "title": "Account creation/sign-in yields buyer workspace access",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "BUYER-03",
+      "title": "Buyer terms acknowledgement is explicit and persisted before checkout",
+      "status": "NOT_BUILT",
+      "details": "Explicit persisted buyer-terms acknowledgement not found (checkbox=true, link=true, persisted=false)",
+      "evidence": {
+        "screenshots": [
+          "artefacts/buyer-onboarding-audit/screenshots/20260211T104501652Z--c3e96329/BUYER-03.png"
+        ],
+        "notes": ""
+      }
+    },
+    {
+      "id": "BUYER-04",
+      "title": "Checkout eligibility gating blocks ineligible buyer progression",
+      "status": "PASS",
+      "details": "",
+      "evidence": {
+        "screenshots": [],
+        "notes": ""
+      }
+    },
+    {
+      "id": "BUYER-05",
+      "title": "Order creation invariants are captured deterministically",
+      "status": "FAIL",
+      "details": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Place Order' })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"submit\" class=\"px-4 py-2 bg-brand-700 text-brand-100 rounded-md font-semibold disabled:opacity-50 disabled:cursor-not-allowed\">Place Order</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is not enabled\u001b[22m\n\u001b[2m  - retrying click action\u001b[22m\n\u001b[2m    - waiting 100ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  - element was detached from the DOM, retrying\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"submit\" class=\"px-4 py-2 bg-brand-700 text-brand-100 rounded-md font-semibold disabled:opacity-50 disabled:cursor-not-allowed\">Place Order</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+      "evidence": {
+        "screenshots": [
+          "artefacts/buyer-onboarding-audit/screenshots/20260211T104501652Z--c3e96329/BUYER-05.png"
+        ],
+        "notes": ""
+      }
+    },
+    {
+      "id": "BUYER-06",
+      "title": "Payment and escrow transitions are observable across buyer/admin surfaces",
+      "status": "FAIL",
+      "details": "buyerEscrow=true, buyerHeld=true, buyerPaid=false, adminFinance=true, adminHeld=true",
+      "evidence": {
+        "screenshots": [
+          "artefacts/buyer-onboarding-audit/screenshots/20260211T104501652Z--c3e96329/BUYER-06.png"
+        ],
+        "notes": ""
+      }
+    },
+    {
+      "id": "BUYER-07",
+      "title": "Buyer evidence visibility and role gating are enforced",
+      "status": "FAIL",
+      "details": "ownDoc=false, foreignDocVisible=false, unauthInbox=401, authInbox=200",
+      "evidence": {
+        "screenshots": [
+          "artefacts/buyer-onboarding-audit/screenshots/20260211T104501652Z--c3e96329/BUYER-07.png"
+        ],
+        "notes": ""
+      }
+    },
+    {
+      "id": "BUYER-08",
+      "title": "Admin oversight and replay evidence are deterministic for buyer order lifecycle",
+      "status": "FAIL",
+      "details": "adminExecutive=true, adminShipmentReplay=false, buyerDelivered=false, buyerSettled=false, unauthRoleGating=true, adminLedger=200",
+      "evidence": {
+        "screenshots": [
+          "artefacts/buyer-onboarding-audit/screenshots/20260211T104501652Z--c3e96329/BUYER-08.png"
+        ],
+        "notes": ""
+      }
+    }
+  ],
+  "outputs": {
+    "pdfPath": "artefacts/buyer-onboarding-audit/summary.buyer-onboarding.20260211T104501652Z--c3e96329.pdf",
+    "pdfSha256Path": "artefacts/buyer-onboarding-audit/summary.buyer-onboarding.20260211T104501652Z--c3e96329.sha256"
+  }
+}

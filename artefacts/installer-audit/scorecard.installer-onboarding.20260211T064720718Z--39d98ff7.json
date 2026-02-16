@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "system": "RedRooEnergy",
+    "auditId": "20260211T064720718Z--39d98ff7",
+    "auditVersion": "ui-v1",
+    "environment": "local"
+  },
+  "run": {
+    "timestampUtc": "2026-02-11T06:47:25.159Z",
+    "baseUrl": "http://127.0.0.1:3001",
+    "runner": {
+      "type": "playwright",
+      "actor": "ui-audit"
+    }
+  },
+  "summary": {
+    "overall": "FAIL",
+    "counts": {
+      "total": 8,
+      "pass": 7,
+      "fail": 1,
+      "notBuilt": 0,
+      "notApplicable": 0
+    }
+  },
+  "checks": [
+    {
+      "id": "INSTALLER-01",
+      "title": "Public entry exposes installer onboarding start",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "INSTALLER-02",
+      "title": "Account creation/sign-in yields onboarding workspace access",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "INSTALLER-03",
+      "title": "Terms gating is enforced before submission",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "INSTALLER-04",
+      "title": "Licence/accreditation verification response is deterministic",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "INSTALLER-05",
+      "title": "Required-field gating blocks incomplete onboarding",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "INSTALLER-06",
+      "title": "Evidence upload rules are enforced (PDF-only, required artefacts)",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "INSTALLER-07",
+      "title": "Final submission transitions state and locks editing",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "id": "INSTALLER-08",
+      "title": "Admin review produces Reviewed outcome and (if approved) activation gates access",
+      "status": "FAIL",
+      "details": "APPROVED profile incorrectly gained ACTIVE access",
+      "evidence": {
+        "screenshots": [
+          "artefacts/installer-audit/screenshots/20260211T064720718Z--39d98ff7/INSTALLER-08.png"
+        ],
+        "htmlSnapshots": []
+      }
+    }
+  ],
+  "notes": [
+    "Non-blocking v1 audit; FAIL indicates gaps; NOT_BUILT indicates missing surfaces."
+  ],
+  "outputs": {
+    "scorecardPath": "artefacts/installer-audit/scorecard.installer-onboarding.20260211T064720718Z--39d98ff7.json",
+    "pdfPath": "artefacts/installer-audit/summary.installer-onboarding.20260211T064720718Z--39d98ff7.pdf",
+    "pdfSha256Path": "artefacts/installer-audit/summary.installer-onboarding.20260211T064720718Z--39d98ff7.sha256"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "badgeId": "installer-onboarding-audit-v1",
+  "label": "Installer Onboarding Audit v1",
+  "message": "PASS",
+  "status": "PASS",
+  "color": "green",
+  "nonBlocking": true,
+  "source": {
+    "auditId": "installer-onboarding",
+    "runId": "20260211T065556201Z--4fb65e59",
+    "scorecardPath": "artefacts/installer-audit/scorecard.installer-onboarding.20260211T065556201Z--4fb65e59.json",
+    "pdfPath": "artefacts/installer-audit/summary.installer-onboarding.20260211T065556201Z--4fb65e59.pdf",
+    "pdfSha256Path": "artefacts/installer-audit/summary.installer-onboarding.20260211T065556201Z--4fb65e59.sha256"
+  },
+  "updatedAtUtc": "2026-02-11T06:59:23Z"
+}

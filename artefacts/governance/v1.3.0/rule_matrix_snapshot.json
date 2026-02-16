@@ -1,0 +1,55 @@
+{
+  "generatedAtUtc": "2026-02-14T14:27:08.279Z",
+  "governanceChecks": [
+    {
+      "id": "GOV-WECHAT-07",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "evidence": [
+        "frontend/app/api/wechat/regulator-public-key/route.ts",
+        "frontend/lib/wechat/signaturePublicKey.ts",
+        "frontend/tests/wechat-ui/runWeChatUiTests.ts",
+        "docs/communications/EXT-WECHAT-07_CLOSE_PACK.md"
+      ],
+      "impactSurface": "Communications/Cryptographic",
+      "notes": []
+    },
+    {
+      "id": "GOV-CHAIN-01",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "evidence": [
+        "docs/communications/EXT-CHAIN-INTEGRITY-01_ASSERTION.md",
+        "docs/communications/EXT-CHAIN-INTEGRITY-01_SCHEMA_DESIGN_PACK.md",
+        "docs/communications/EXT-CHAIN-INTEGRITY-01_INVARIANT_TEST_SCAFFOLDING_SPEC.md",
+        "docs/communications/EXT-CHAIN-INTEGRITY-01_CLOSE_PACK.md",
+        "docs/communications/EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_AUTHORIZATION_PACKET.md",
+        "docs/governance/BOARD_RESOLUTION_EXT-CHAIN-INTEGRITY-01_IMPLEMENTATION_AUTHORIZATION_v1.0.md",
+        "frontend/lib/chainIntegrity/canonicalSettlement.ts",
+        "frontend/lib/chainIntegrity/chainComputation.ts",
+        "frontend/lib/chainIntegrity/verifyIntegrityChain.ts",
+        "frontend/lib/chainIntegrity/writeOnceGuards.ts",
+        "frontend/lib/chainIntegrity/exportManifestStore.ts",
+        "frontend/lib/chainIntegrity/freightSettlementStore.ts",
+        "frontend/tests/chain-integrity/runChainIntegrityPhase1Tests.ts",
+        "frontend/tests/chain-integrity/runChainIntegrityPhase2Tests.ts"
+      ],
+      "impactSurface": "Platform/IntegrityChain",
+      "notes": []
+    },
+    {
+      "id": "GOV-CHAT-01",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "evidence": [
+        "docs/governance/GOV-CHAT-01_PGA_RULE_CONTRACT.md",
+        "frontend/app/api/governance/chatbot/status/route.ts",
+        "frontend/app/api/governance/chatbot/badge/route.ts",
+        ".github/workflows/chatbot-audit.yml",
+        "scorecards/chatbot.scorecard.json"
+      ],
+      "impactSurface": "Platform/CommunicationIntegrity",
+      "notes": []
+    }
+  ]
+}

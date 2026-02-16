@@ -21,7 +21,7 @@ function getRateLimitKey(input: { supplierId: string; nowMs: number }) {
 }
 
 function pruneStaleRateLimitBuckets(activeBucket: number) {
-  for (const key of bindingStartAttempts.keys()) {
+  for (const key of Array.from(bindingStartAttempts.keys())) {
     const bucketValue = Number.parseInt(key.split(":").pop() || "", 10);
     if (Number.isNaN(bucketValue) || bucketValue < activeBucket - 2) {
       bindingStartAttempts.delete(key);

@@ -1,0 +1,25 @@
+name: Email System Governance CI
+
+on:
+  pull_request:
+    paths:
+      - "frontend/lib/email/**"
+      - "frontend/app/api/admin/email/**"
+      - "frontend/app/dashboard/admin/email/**"
+      - "frontend/tests/email/**"
+      - "docs/email/**"
+
+jobs:
+  email-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+      - name: Run email governance tests
+        run: npm run test:email
+        working-directory: frontend

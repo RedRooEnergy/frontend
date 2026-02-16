@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "system": "RedRooEnergy",
+    "auditId": "20260210T220056441Z--0490d3fa",
+    "auditVersion": "ui-v1",
+    "environment": "local"
+  },
+  "run": {
+    "timestampUtc": "2026-02-10T22:04:35.541Z",
+    "baseUrl": "http://127.0.0.1:3001",
+    "runner": {
+      "type": "playwright",
+      "actor": "ui-audit"
+    }
+  },
+  "summary": {
+    "overall": "FAIL",
+    "counts": {
+      "total": 8,
+      "pass": 0,
+      "fail": 7,
+      "notBuilt": 1,
+      "notApplicable": 0
+    }
+  },
+  "checks": [
+    {
+      "id": "INSTALLER-01",
+      "title": "Public entry exposes installer onboarding start",
+      "status": "NOT_BUILT",
+      "details": "Onboarding CTA to /signin?role=service-partner not found",
+      "evidence": {
+        "screenshots": [
+          "artefacts/installer-audit/screenshots/20260210T220056441Z--0490d3fa/INSTALLER-01.png"
+        ],
+        "htmlSnapshots": []
+      }
+    },
+    {
+      "id": "INSTALLER-02",
+      "title": "Account creation/sign-in yields onboarding workspace access",
+      "status": "FAIL",
+      "details": "page.reload: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for navigation until \"networkidle\"\u001b[22m\n\u001b[2m    - navigated to \"http://127.0.0.1:3001/\"\u001b[22m\n",
+      "evidence": {
+        "screenshots": [
+          "artefacts/installer-audit/screenshots/20260210T220056441Z--0490d3fa/INSTALLER-02.png"
+        ],
+        "htmlSnapshots": []
+      }
+    },
+    {
+      "id": "INSTALLER-03",
+      "title": "Terms gating is enforced before submission",
+      "status": "FAIL",
+      "details": "page.reload: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for navigation until \"networkidle\"\u001b[22m\n\u001b[2m    - navigated to \"http://127.0.0.1:3001/\"\u001b[22m\n",
+      "evidence": {
+        "screenshots": [
+          "artefacts/installer-audit/screenshots/20260210T220056441Z--0490d3fa/INSTALLER-03.png"
+        ],
+        "htmlSnapshots": []
+      }
+    },
+    {
+      "id": "INSTALLER-04",
+      "title": "Licence/accreditation verification response is deterministic",
+      "status": "FAIL",
+      "details": "page.reload: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for navigation until \"networkidle\"\u001b[22m\n\u001b[2m    - navigated to \"http://127.0.0.1:3001/\"\u001b[22m\n",
+      "evidence": {
+        "screenshots": [
+          "artefacts/installer-audit/screenshots/20260210T220056441Z--0490d3fa/INSTALLER-04.png"
+        ],
+        "htmlSnapshots": []
+      }
+    },
+    {
+      "id": "INSTALLER-05",
+      "title": "Required-field gating blocks incomplete onboarding",
+      "status": "FAIL",
+      "details": "page.reload: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for navigation until \"networkidle\"\u001b[22m\n\u001b[2m    - navigated to \"http://127.0.0.1:3001/\"\u001b[22m\n",
+      "evidence": {
+        "screenshots": [
+          "artefacts/installer-audit/screenshots/20260210T220056441Z--0490d3fa/INSTALLER-05.png"
+        ],
+        "htmlSnapshots": []
+      }
+    },
+    {
+      "id": "INSTALLER-06",
+      "title": "Evidence upload rules are enforced (PDF-only, required artefacts)",
+      "status": "FAIL",
+      "details": "page.reload: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for navigation until \"networkidle\"\u001b[22m\n\u001b[2m    - navigated to \"http://127.0.0.1:3001/\"\u001b[22m\n",
+      "evidence": {
+        "screenshots": [
+          "artefacts/installer-audit/screenshots/20260210T220056441Z--0490d3fa/INSTALLER-06.png"
+        ],
+        "htmlSnapshots": []
+      }
+    },
+    {
+      "id": "INSTALLER-07",
+      "title": "Final submission transitions state and locks editing",
+      "status": "FAIL",
+      "details": "page.reload: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for navigation until \"networkidle\"\u001b[22m\n\u001b[2m    - navigated to \"http://127.0.0.1:3001/\"\u001b[22m\n",
+      "evidence": {
+        "screenshots": [
+          "artefacts/installer-audit/screenshots/20260210T220056441Z--0490d3fa/INSTALLER-07.png"
+        ],
+        "htmlSnapshots": []
+      }
+    },
+    {
+      "id": "INSTALLER-08",
+      "title": "Admin review produces Reviewed outcome and (if approved) activation gates access",
+      "status": "FAIL",
+      "details": "page.reload: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for navigation until \"networkidle\"\u001b[22m\n\u001b[2m    - navigated to \"http://127.0.0.1:3001/\"\u001b[22m\n",
+      "evidence": {
+        "screenshots": [
+          "artefacts/installer-audit/screenshots/20260210T220056441Z--0490d3fa/INSTALLER-08.png"
+        ],
+        "htmlSnapshots": []
+      }
+    }
+  ],
+  "notes": [
+    "Non-blocking v1 audit; FAIL indicates gaps; NOT_BUILT indicates missing surfaces."
+  ],
+  "outputs": {
+    "scorecardPath": "artefacts/installer-audit/scorecard.installer-onboarding.20260210T220056441Z--0490d3fa.json",
+    "pdfPath": "artefacts/installer-audit/summary.installer-onboarding.20260210T220056441Z--0490d3fa.pdf",
+    "pdfSha256Path": "artefacts/installer-audit/summary.installer-onboarding.20260210T220056441Z--0490d3fa.sha256"
+  }
+}

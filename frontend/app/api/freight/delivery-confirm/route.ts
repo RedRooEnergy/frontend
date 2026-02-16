@@ -3,6 +3,7 @@ import { requireFreight } from "../../../../lib/auth/roleGuard";
 import { getOrders, writeStore, getShipmentUpdates, setShipmentUpdates, type OrderRecord } from "../../../../lib/store";
 import { sendEmail } from "../../../../lib/email/dispatchService";
 import { resolveSupplierRecipient } from "../../../../lib/email/recipientResolvers";
+import { dispatchFreightAuditLifecycleHook } from "../../../../lib/freightAudit/FreightAuditLifecycleHooks";
 
 export const runtime = "nodejs";
 
@@ -96,6 +97,29 @@ export async function POST(request: Request) {
     });
   });
   setShipmentUpdates(nextUpdates);
+
+  const primarySupplierId = orders[idx].items.find((item) => !!item.supplierId)?.supplierId || null;
+  dispatchFreightAuditLifecycleHook({
+    source: "api.freight.delivery-confirm",
+    triggerEvent: "DELIVERED",
+    orderId,
+    shipmentId: payload.trackingId || null,
+    supplierId: primarySupplierId,
+    createdByRole: "freight",
+    createdById: freight.actorId,
+    closedByRole: "freight",
+    closedById: freight.actorId,
+    context: {
+      source: "api.freight.delivery-confirm",
+      orderId,
+      trackingId: payload.trackingId || null,
+      evidenceNote: payload.evidenceNote || null,
+      auditFixture,
+      availableEvidenceCodes: payload.trackingId
+        ? ["PROOF_OF_DELIVERY_REFERENCE", "DELIVERY_ATTEMPT_LOG"]
+        : ["DELIVERY_ATTEMPT_LOG"],
+    },
+  });
 
   if (!auditFixture) {
     try {

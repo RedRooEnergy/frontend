@@ -1,0 +1,38 @@
+name: Installer Onboarding Audit (Blocking)
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  installer-onboarding-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run installer onboarding audit
+        working-directory: frontend
+        run: |
+          test -f tests/installer-onboarding/runInstallerOnboardingAudit.ts
+          npx --yes tsx tests/installer-onboarding/runInstallerOnboardingAudit.ts
+
+      - name: Write platform governance URLs to CI summary
+        if: always()
+        run: |
+          BASE="${BASE_URL:-https://redrooenergy.com.au}"
+          echo "## Platform Governance" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Platform badge: \`${BASE}/api/governance/platform/badge\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Platform status: \`${BASE}/api/governance/platform/status\`" >> "$GITHUB_STEP_SUMMARY"

@@ -21,14 +21,14 @@ test("checkout banner shows for NON_BUYER on /cart and /checkout", async ({ page
   await expect(page.getByTestId("checkout-eligibility-banner")).toBeVisible();
   await expect(page.getByTestId("checkout-eligibility-cta")).toHaveAttribute(
     "href",
-    "/account/upgrade-to-buyer"
+    "/register"
   );
 
   await page.goto("/checkout");
   await expect(page.getByTestId("checkout-eligibility-banner")).toBeVisible();
   await expect(page.getByTestId("checkout-eligibility-cta")).toHaveAttribute(
     "href",
-    "/account/upgrade-to-buyer"
+    "/register"
   );
 });
 
@@ -50,13 +50,13 @@ test("checkout banner shows for BUYER_PENDING on /cart and /checkout", async ({ 
   await expect(page.getByTestId("checkout-eligibility-banner")).toBeVisible();
   await expect(page.getByTestId("checkout-eligibility-cta")).toHaveAttribute(
     "href",
-    "/buyer/profile"
+    "/dashboard/buyer/profile"
   );
 
   await page.goto("/checkout");
   await expect(page.getByTestId("checkout-eligibility-banner")).toBeVisible();
   await expect(page.getByTestId("checkout-eligibility-cta")).toHaveAttribute(
     "href",
-    "/buyer/profile"
+    "/dashboard/buyer/profile"
   );
 });
