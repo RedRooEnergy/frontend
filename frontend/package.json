@@ -15,6 +15,7 @@
     "test:wechat-ui": "tsx tests/wechat-ui/runWeChatUiTests.ts",
     "test:chatbot": "tsx tests/chatbot/runChatbotTests.ts",
     "verify:chat-models": "tsx scripts/verify-chat-models.ts",
+    "orch:e2e": "node tools/integration/run-orchestrated-e2e.mjs",
     "lint": "next lint"
   },
   "dependencies": {
