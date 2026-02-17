@@ -5,6 +5,7 @@ import { paymentsCheckoutRouter } from "./routes/paymentsCheckout.js";
 import { refundsRouter } from "./routes/refunds.js";
 import { adminQueuesRouter } from "./routes/adminQueues.js";
 import { settlementHoldsRouter } from "./routes/settlementHolds.js";
+import { shippingRouter } from "./routes/shipping.js";
 
 export function createApp() {
   const app = express();
@@ -21,9 +22,14 @@ export function createApp() {
     });
   });
 
-  // Mount existing route families exactly (no path changes)
+  // Payments
   app.use("/api/payments", paymentsCheckoutRouter);
   app.use("/api/payments/refunds", refundsRouter);
+
+  // Shipping
+  app.use("/api/shipping", shippingRouter);
+
+  // Admin/Settlement (existing)
   app.use("/api/admin/queues", adminQueuesRouter);
   app.use("/api/settlement/holds", settlementHoldsRouter);
 

@@ -1,6 +1,6 @@
 Version: v1.0
 Phase: 10.5.11 — Runtime Inventory (Authoritative)
-Status: UPDATED (Post Tranche 1 Payments)
+Status: UPDATED (Post Tranche 2 Shipping)
 Date: 2026-02-16
 Baseline SHA: aab75b0874a69dc93d5b3c0c4431e7fef5087f78
 
@@ -8,7 +8,7 @@ Baseline SHA: aab75b0874a69dc93d5b3c0c4431e7fef5087f78
 
 The RedRooEnergy runtime is consolidated into a single executable backend for currently implemented control surfaces.
 
-The full Phase 11 required contract surface is still incomplete due to missing Shipping, CRM, and Email subsystem routes.
+The full Phase 11 required contract surface is still incomplete due to missing CRM and Email subsystem routes.
 
 Runtime consolidation is complete; subsystem expansion is now the active constraint.
 
@@ -19,9 +19,9 @@ Runtime consolidation is complete; subsystem expansion is now the active constra
 | Core | GET | /healthz | PRESENT | Verified via curl -> 200 OK |
 | Payments | POST | /api/payments/checkout | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 1 (`paymentsCheckout` router) |
 | Payments | GET | /api/payments/status/:id | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 1 (`paymentsCheckout` router) |
-| Shipping | POST | /api/shipping/quote | MISSING | No route present |
-| Shipping | POST | /api/shipping/select | MISSING | No route present |
-| Shipping | GET | /api/shipping/shipments/:id | MISSING | No route present |
+| Shipping | POST | /api/shipping/quote | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 2 (shipping router) |
+| Shipping | POST | /api/shipping/select | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 2 (shipping router) |
+| Shipping | GET | /api/shipping/shipments/:id | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 2 (shipping router) |
 | Settlement | POST | /api/settlement/holds | PRESENT (Partial Service) | Located in REDROO_Projects_backend |
 | Settlement | GET | /api/settlement/holds/:id | PRESENT (Partial Service) | Located in REDROO_Projects_backend |
 | Settlement | POST | /api/settlement/holds/:id/override | PRESENT | Located in REDROO_Projects_backend |
@@ -52,8 +52,8 @@ Conclusion: Not full marketplace backend.
 B) Feb-17-26-RedRooEnergy-Platform (Next-based)
 
 Purpose: Frontend + consolidated runtime package (`runtime-unified-backend`)  
-Surface: Unified runtime for health, payments checkout/status, refunds, admin queues, settlement holds  
-Shipping/CRM/Email contracts remain unimplemented
+Surface: Unified runtime for health, payments checkout/status, shipping quote/select/read, refunds, admin queues, settlement holds  
+CRM/Email contracts remain unimplemented
 
 Conclusion: Consolidated runtime exists with partial subsystem coverage.
 
@@ -67,7 +67,7 @@ No runtime services
 | Contract Group | Gap Type | Blocking for Phase 11 |
 |---|---|---|
 | Payments checkout | RESOLVED_IN_UNIFIED_RUNTIME | NO |
-| Shipping routes | MISSING_ROUTE | YES |
+| Shipping routes | RESOLVED_IN_UNIFIED_RUNTIME | NO |
 | CRM routes | MISSING_ROUTE | YES |
 | Email routes | MISSING_ROUTE | YES |
 | Unified DB layer | RESOLVED_IN_UNIFIED_RUNTIME | NO |
@@ -80,7 +80,7 @@ The RedRooEnergy system currently consists of:
 - Governance-complete artefacts
 - Unified runtime service with deterministic boot/CI validation
 - Implemented financial control surfaces (payments checkout/status, refunds, queue, settlement holds)
-- Remaining subsystem gaps (shipping, CRM, email)
+- Remaining subsystem gaps (CRM, email)
 
 Phase 11 orchestration progression is blocked by missing subsystem routes, not by runtime fragmentation.
 

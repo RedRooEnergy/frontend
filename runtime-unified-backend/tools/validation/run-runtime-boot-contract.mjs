@@ -210,6 +210,8 @@ async function main() {
     checks: [],
     entities: {
       paymentId: null,
+      shipmentId: null,
+      selectedQuoteId: null,
       refundRequestId: null,
       queueItemId: null,
       holdId: null,
@@ -223,6 +225,9 @@ async function main() {
     makeCheck("healthz", "200"),
     makeCheck("payments checkout create", "201 + paymentId + status"),
     makeCheck("payments status read", "200 + same paymentId"),
+    makeCheck("shipping quote create", "201 + shipmentId + quotes std/exp"),
+    makeCheck("shipping select", "200 + selectedQuoteId"),
+    makeCheck("shipping shipment read", "200 + SELECTED state"),
     makeCheck("admin queues unauthenticated", "401"),
     makeCheck("admin queues forbidden role", "403"),
     makeCheck("refund create", "201 + ids"),
@@ -308,6 +313,78 @@ async function main() {
 
     {
       const check = checks[3];
+      const quoteRes = await http("POST", "/api/shipping/quote", {
+        json: {
+          orderId: `order_10560_ship_${Date.now()}`,
+          snapshotId: `snap_10560_ship_${Date.now()}`,
+          destination: { country: "AU", state: "QLD", postcode: "4000" },
+          items: [
+            { sku: "TEST-SKU-001", quantity: 2, weightKg: 1.2 },
+            { sku: "TEST-SKU-002", quantity: 1 },
+          ],
+        },
+      });
+
+      const shipmentId = quoteRes.body?.shipmentId || null;
+      const quotes = Array.isArray(quoteRes.body?.quotes) ? quoteRes.body.quotes : [];
+      const quoteIds = new Set(quotes.map((q) => q.quoteId));
+
+      report.entities.shipmentId = shipmentId;
+
+      const hasStd = quoteIds.has("std");
+      const hasExp = quoteIds.has("exp");
+
+      if (quoteRes.status === 201 && shipmentId && hasStd && hasExp) {
+        markPass(check, `${quoteRes.status}`, { shipmentId, quoteCount: quotes.length });
+      } else {
+        markFail(check, `${quoteRes.status}`, quoteRes.body);
+      }
+    }
+
+    {
+      const check = checks[4];
+      const selRes = await http("POST", "/api/shipping/select", {
+        json: {
+          shipmentId: report.entities.shipmentId,
+          quoteId: "std",
+        },
+      });
+
+      const selectedQuoteId = selRes.body?.selectedQuoteId || null;
+      report.entities.selectedQuoteId = selectedQuoteId;
+
+      if (selRes.status === 200 && selectedQuoteId === "std") {
+        markPass(check, `${selRes.status}`, {
+          shipmentId: report.entities.shipmentId,
+          selectedQuoteId,
+        });
+      } else {
+        markFail(check, `${selRes.status}`, selRes.body);
+      }
+    }
+
+    {
+      const check = checks[5];
+      const res = await http("GET", `/api/shipping/shipments/${report.entities.shipmentId || "missing"}`);
+
+      if (
+        res.status === 200 &&
+        res.body?.shipmentId === report.entities.shipmentId &&
+        res.body?.status === "SELECTED" &&
+        res.body?.selectedQuoteId === "std"
+      ) {
+        markPass(check, `${res.status}`, {
+          shipmentId: res.body.shipmentId,
+          status: res.body.status,
+          selectedQuoteId: res.body.selectedQuoteId,
+        });
+      } else {
+        markFail(check, `${res.status}`, res.body);
+      }
+    }
+
+    {
+      const check = checks[6];
       const res = await http("GET", "/api/admin/queues");
       if (res.status === 401) {
         markPass(check, `${res.status}`, res.body);
@@ -317,7 +394,7 @@ async function main() {
     }
 
     {
-      const check = checks[4];
+      const check = checks[7];
       const res = await http("GET", "/api/admin/queues", {
         headers: {
           "x-test-role": "buyer",
@@ -332,7 +409,7 @@ async function main() {
     }
 
     {
-      const check = checks[5];
+      const check = checks[8];
       const refundRes = await http("POST", "/api/payments/refunds/request", {
         json: {
           orderId: `order_10560_ci_${Date.now()}`,
@@ -357,7 +434,7 @@ async function main() {
     }
 
     {
-      const check = checks[6];
+      const check = checks[9];
       const res = await http("GET", "/api/admin/queues", {
         headers: {
           "x-test-role": "admin",
@@ -372,7 +449,7 @@ async function main() {
     }
 
     {
-      const check = checks[7];
+      const check = checks[10];
       const holdRes = await http("POST", "/api/settlement/holds", {
         json: {
           entityType: "Refund",
@@ -392,7 +469,7 @@ async function main() {
     }
 
     {
-      const check = checks[8];
+      const check = checks[11];
       const res = await http("PATCH", "/api/admin/queues", {
         headers: {
           "x-test-role": "admin",
@@ -411,7 +488,7 @@ async function main() {
     }
 
     {
-      const check = checks[9];
+      const check = checks[12];
       const res = await http("GET", "/api/not-a-real-route");
       if (res.status === 404) {
         markPass(check, `${res.status}`, res.body);
@@ -430,7 +507,7 @@ async function main() {
   }
 
   {
-    const check = checks[10];
+    const check = checks[13];
     const watchdog = await runWatchdogProbe();
     report.watchdog = {
       exitCode: watchdog.exitCode,
