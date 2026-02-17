@@ -4,7 +4,7 @@ Version: v1.4
 Phase: 11.50 Tranche 4 — Post-Implementation Smoke  
 Status: PASS (Expected Failing Surface Detection)  
 Date: 2026-02-17  
-Tranche 4 Implementation SHA: (fill after commit)
+Tranche 4 Implementation SHA: 2d8404b6103a6b3c70be6c4a3653cc1760b58ce1
 
 ## 1) Objective
 Re-run Phase 11 harness after adding settlement hold read-by-id to confirm the prior first failure is resolved.
