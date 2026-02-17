@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "validate:runtime-boot-contract": "node tools/validation/run-runtime-boot-contract.mjs"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

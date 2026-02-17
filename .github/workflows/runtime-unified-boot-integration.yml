@@ -1,0 +1,142 @@
+name: Runtime Unified Boot Integration CI
+
+on:
+  pull_request:
+    paths:
+      - "runtime-unified-backend/**"
+      - "frontend/tools/integration/run-orchestrated-e2e.mjs"
+      - "frontend/package.json"
+      - "frontend/package-lock.json"
+      - ".github/workflows/runtime-unified-boot-integration.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "runtime-unified-backend/**"
+      - "frontend/tools/integration/run-orchestrated-e2e.mjs"
+      - "frontend/package.json"
+      - "frontend/package-lock.json"
+      - ".github/workflows/runtime-unified-boot-integration.yml"
+  workflow_dispatch:
+    inputs:
+      run_orchestration_gate:
+        description: "Run manual orchestration PASS gate (fails if orchestration-report.json status !== PASS)"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+jobs:
+  runtime-boot-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mongo:
+        image: mongo:6
+        ports:
+          - 27017:27017
+    env:
+      MONGODB_URI: mongodb://127.0.0.1:27017
+      MONGODB_DB_NAME: rre_runtime_ci_${{ github.run_id }}_${{ github.run_attempt }}
+      RUNTIME_BASE_URL: http://127.0.0.1:4010
+      RUNTIME_PORT: "4010"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install runtime-unified-backend dependencies
+        working-directory: runtime-unified-backend
+        run: npm install
+
+      - name: Build runtime-unified-backend
+        working-directory: runtime-unified-backend
+        run: npm run build
+
+      - name: Run runtime boot contract validation
+        working-directory: runtime-unified-backend
+        run: npm run validate:runtime-boot-contract
+
+      - name: Upload runtime boot report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runtime-boot-contract-report
+          path: runtime-unified-backend/runtime-boot-contract-report.json
+          if-no-files-found: warn
+
+  orchestration-pass-gate:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_orchestration_gate == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mongo:
+        image: mongo:6
+        ports:
+          - 27017:27017
+    env:
+      MONGODB_URI: mongodb://127.0.0.1:27017
+      MONGODB_DB_NAME: rre_runtime_ci_${{ github.run_id }}_${{ github.run_attempt }}
+      BACKEND_URL: http://127.0.0.1:4010
+      RUNTIME_PORT: "4010"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install runtime-unified-backend dependencies
+        working-directory: runtime-unified-backend
+        run: npm install
+
+      - name: Build runtime-unified-backend
+        working-directory: runtime-unified-backend
+        run: npm run build
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run orchestration harness and enforce PASS report status
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artefacts/orchestration-gate
+
+          cd runtime-unified-backend
+          PORT="${RUNTIME_PORT}" MONGODB_URI="${MONGODB_URI}" MONGODB_DB_NAME="${MONGODB_DB_NAME}" \
+            node dist/server.js > ../artefacts/orchestration-gate/runtime.log 2>&1 &
+          runtime_pid=$!
+
+          cleanup() {
+            kill "${runtime_pid}" >/dev/null 2>&1 || true
+            wait "${runtime_pid}" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          for i in {1..60}; do
+            if curl -sSf "http://127.0.0.1:${RUNTIME_PORT}/healthz" >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+
+          cd ../frontend
+          BACKEND_URL="${BACKEND_URL}" npm run orch:e2e || true
+
+          node -e "const fs=require('fs'); const p='orchestration-report.json'; if(!fs.existsSync(p)){console.error('Missing orchestration-report.json'); process.exit(1);} const report=JSON.parse(fs.readFileSync(p,'utf8')); console.log('orchestration status:', report.status); if(report.status!=='PASS'){console.error('orchestration-report.json status must be PASS'); process.exit(1);}"
+
+      - name: Upload orchestration gate artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: orchestration-pass-gate
+          path: |
+            frontend/orchestration-report.json
+            artefacts/orchestration-gate/runtime.log
+          if-no-files-found: warn

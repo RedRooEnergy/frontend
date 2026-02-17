@@ -30,6 +30,11 @@ out/
 # Logs
 logs/
 *.log
+artefacts/
 
 # Package caches
 .npm-cache/
+
+# Local validation artifacts
+frontend/orchestration-report.json
+runtime-unified-backend/runtime-boot-contract-report.json
