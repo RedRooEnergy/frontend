@@ -1,6 +1,6 @@
 Version: v1.0
 Phase: 10.5.11 — Runtime Inventory (Authoritative)
-Status: UPDATED (Post Tranche 5 CRM Read Alignment)
+Status: UPDATED (Post Tranche 6 orderId Linkage Alignment)
 Date: 2026-02-16
 Baseline SHA: aab75b0874a69dc93d5b3c0c4431e7fef5087f78
 
@@ -8,7 +8,7 @@ Baseline SHA: aab75b0874a69dc93d5b3c0c4431e7fef5087f78
 
 The RedRooEnergy runtime is consolidated into a single executable backend for currently implemented control surfaces.
 
-The full Phase 11 required contract surface is still incomplete due to missing CRM and Email subsystem routes.
+The full Phase 11 required contract surface is still incomplete due to missing Email subsystem routes.
 
 Runtime consolidation is complete; subsystem expansion is now the active constraint.
 
@@ -54,8 +54,8 @@ Conclusion: Not full marketplace backend.
 B) Feb-17-26-RedRooEnergy-Platform (Next-based)
 
 Purpose: Frontend + consolidated runtime package (`runtime-unified-backend`)  
-Surface: Unified runtime for health, payments checkout/status, shipping quote/select/read, refunds, admin queues, settlement holds  
-CRM/Email contracts remain unimplemented
+Surface: Unified runtime for health, pricing checkout/snapshot, payments checkout/status, shipping quote/select/read, refunds, admin queues, settlement holds, and CRM read contracts  
+Email contracts remain unimplemented
 
 Conclusion: Consolidated runtime exists with partial subsystem coverage.
 
@@ -73,6 +73,7 @@ No runtime services
 | Shipping routes | RESOLVED_IN_UNIFIED_RUNTIME | NO |
 | Settlement hold read-by-id | RESOLVED_IN_UNIFIED_RUNTIME | NO |
 | CRM read contracts | RESOLVED_IN_UNIFIED_RUNTIME | NO |
+| Chain linkage precondition (orderId propagation) | RESOLVED_IN_UNIFIED_RUNTIME | NO |
 | Email routes | MISSING_ROUTE | YES |
 | Unified DB layer | RESOLVED_IN_UNIFIED_RUNTIME | NO |
 | Unified service entrypoint | RESOLVED_IN_UNIFIED_RUNTIME | NO |
@@ -84,9 +85,9 @@ The RedRooEnergy system currently consists of:
 - Governance-complete artefacts
 - Unified runtime service with deterministic boot/CI validation
 - Implemented financial control surfaces (payments checkout/status, refunds, queue, settlement holds)
-- Remaining subsystem gaps (CRM, email)
+- Remaining subsystem gaps (email)
 
-Phase 11 orchestration progression is blocked by missing subsystem routes, not by runtime fragmentation.
+Phase 11 orchestration progression is no longer blocked by CRM route absence and has progressed to remaining email/linkage-finalization work.
 
 6) Authorization to Proceed
 

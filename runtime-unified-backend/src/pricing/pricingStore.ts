@@ -20,6 +20,7 @@ type PricingItem = {
 type PricingSnapshotDoc = {
   _id?: ObjectId;
   createdAt: string;
+  orderId: string;
   currency: string;
   items: PricingItem[];
   subtotalAUD: number;
@@ -31,6 +32,7 @@ type PricingSnapshotDoc = {
 export type PricingSnapshotView = {
   snapshotId: string;
   createdAt: string;
+  orderId: string;
   currency: string;
   items: PricingItem[];
   subtotalAUD: number;
@@ -142,6 +144,7 @@ function toView(doc: PricingSnapshotDoc): PricingSnapshotView {
   return {
     snapshotId: doc._id.toString(),
     createdAt: doc.createdAt,
+    orderId: doc.orderId,
     currency: doc.currency,
     items: doc.items,
     subtotalAUD: doc.subtotalAUD,
@@ -175,6 +178,7 @@ export async function createCheckoutSession(input: {
   }
 
   const createdAt = nowIso();
+  const orderId = new ObjectId().toString();
   const canonical = canonicalStringify({ createdAt, currency, items, subtotalAUD, totalAUD, metadata });
   const snapshotHash = sha256Hex(canonical);
 
@@ -183,6 +187,7 @@ export async function createCheckoutSession(input: {
 
   const doc: PricingSnapshotDoc = {
     createdAt,
+    orderId,
     currency,
     items,
     subtotalAUD,

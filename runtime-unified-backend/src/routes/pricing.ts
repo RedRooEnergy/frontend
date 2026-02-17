@@ -27,6 +27,7 @@ router.post("/checkout/session", async (req, res, next) => {
       entityType: "PricingSnapshot",
       entityId: created.snapshotId,
       metadata: {
+        orderId: created.orderId,
         snapshotHash: created.snapshotHash,
         currency: created.currency,
         totalAUD: created.totalAUD,
@@ -37,6 +38,7 @@ router.post("/checkout/session", async (req, res, next) => {
     res.status(201).json({
       ok: true,
       snapshotId: created.snapshotId,
+      orderId: created.orderId,
       snapshotHash: created.snapshotHash,
       currency: created.currency,
       subtotalAUD: created.subtotalAUD,
@@ -58,6 +60,7 @@ router.get("/pricing/snapshots/:id", async (req, res, next) => {
 
     res.status(200).json({
       snapshotId: snap.snapshotId,
+      orderId: snap.orderId,
       snapshotHash: snap.snapshotHash,
       currency: snap.currency,
       subtotalAUD: snap.subtotalAUD,

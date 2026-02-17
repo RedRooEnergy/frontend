@@ -248,6 +248,7 @@ async function main() {
     entities: {
       snapshotId: null,
       snapshotHash: null,
+      orderId: null,
       paymentId: null,
       shipmentId: null,
       selectedQuoteId: null,
@@ -327,13 +328,16 @@ async function main() {
 
       const snapshotId = checkoutRes.body?.snapshotId || null;
       const snapshotHash = checkoutRes.body?.snapshotHash || null;
+      const orderId = checkoutRes.body?.orderId || null;
       report.entities.snapshotId = snapshotId;
       report.entities.snapshotHash = snapshotHash;
+      report.entities.orderId = orderId;
 
-      if (checkoutRes.status === 201 && snapshotId && snapshotHash) {
+      if (checkoutRes.status === 201 && snapshotId && snapshotHash && orderId) {
         markPass(check, `${checkoutRes.status}`, {
           snapshotId,
           snapshotHash,
+          orderId,
           totalAUD: checkoutRes.body?.totalAUD,
         });
       } else {
@@ -351,11 +355,13 @@ async function main() {
       if (
         res.status === 200 &&
         res.body?.snapshotId === report.entities.snapshotId &&
-        res.body?.snapshotHash === report.entities.snapshotHash
+        res.body?.snapshotHash === report.entities.snapshotHash &&
+        res.body?.orderId === report.entities.orderId
       ) {
         markPass(check, `${res.status}`, {
           snapshotId: res.body.snapshotId,
           snapshotHash: res.body.snapshotHash,
+          orderId: res.body.orderId,
           totalAUD: res.body.totalAUD,
         });
       } else {
