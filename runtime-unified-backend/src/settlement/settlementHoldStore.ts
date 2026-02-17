@@ -61,6 +61,31 @@ export async function listSettlementHolds() {
   }));
 }
 
+export async function getSettlementHoldById(id: string) {
+  let _id: ObjectId;
+  try {
+    _id = new ObjectId(id);
+  } catch {
+    return null;
+  }
+
+  const db = await getDb();
+  const col = db.collection(COLLECTION);
+  const found = await col.findOne({ _id });
+  if (!found) return null;
+
+  return {
+    holdId: found._id.toString(),
+    entityType: found.entityType,
+    entityId: found.entityId,
+    reason: found.reason,
+    status: found.status,
+    createdBy: found.createdBy,
+    createdAt: found.createdAt,
+    updatedAt: found.updatedAt,
+  };
+}
+
 export async function requestOverride(id: string, approverId: string) {
   const db = await getDb();
   const col = db.collection(COLLECTION);

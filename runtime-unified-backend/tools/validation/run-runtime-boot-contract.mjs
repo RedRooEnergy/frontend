@@ -245,6 +245,7 @@ async function main() {
     makeCheck("refund create", "201 + ids"),
     makeCheck("admin queues authorized list", "200"),
     makeCheck("settlement hold create", "201 + holdId"),
+    makeCheck("settlement hold read", "200 + same holdId"),
     makeCheck("queue resolve blocked by active hold", "409 HOLD_ACTIVE"),
     makeCheck("unknown route", "404"),
     makeCheck("watchdog startup fail-fast", "exit non-zero + DB_STARTUP_TIMEOUT"),
@@ -534,6 +535,19 @@ async function main() {
         markPass(check, `${holdRes.status}`, { holdId });
       } else {
         markFail(check, `${holdRes.status}`, holdRes.body);
+      }
+    }
+
+    {
+      const check = getCheck(checks, "settlement hold read");
+      const res = await http("GET", `/api/settlement/holds/${report.entities.holdId || "missing"}`);
+      if (res.status === 200 && res.body?.holdId === report.entities.holdId) {
+        markPass(check, `${res.status}`, {
+          holdId: res.body.holdId,
+          status: res.body.status,
+        });
+      } else {
+        markFail(check, `${res.status}`, res.body);
       }
     }
 

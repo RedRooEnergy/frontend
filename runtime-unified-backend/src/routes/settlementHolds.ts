@@ -6,6 +6,7 @@
 import { Router } from "express";
 import {
   createSettlementHold,
+  getSettlementHoldById,
   listSettlementHolds,
   requestOverride,
 } from "../settlement/settlementHoldStore";
@@ -17,6 +18,23 @@ router.get("/", async (_req, res, next) => {
   try {
     const holds = await listSettlementHolds();
     res.status(200).json(holds);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const hold = await getSettlementHoldById(String(id));
+
+    if (!hold) {
+      const error = new Error("HOLD_NOT_FOUND");
+      (error as any).status = 404;
+      throw error;
+    }
+
+    res.status(200).json(hold);
   } catch (err) {
     next(err);
   }
