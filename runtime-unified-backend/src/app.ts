@@ -6,6 +6,7 @@ import { paymentsCheckoutRouter } from "./routes/paymentsCheckout.js";
 import { refundsRouter } from "./routes/refunds.js";
 import { shippingRouter } from "./routes/shipping.js";
 import { crmRouter } from "./routes/crm.js";
+import { emailRouter } from "./routes/email.js";
 import { adminQueuesRouter } from "./routes/adminQueues.js";
 import { settlementHoldsRouter } from "./routes/settlementHolds.js";
 
@@ -36,6 +37,9 @@ export function createApp() {
 
   // CRM (authorized Tranche 5 read-only surfaces)
   app.use("/api/crm", crmRouter);
+
+  // Email (authorized Tranche 7 minimal queue/log surfaces)
+  app.use("/api/admin/email", emailRouter);
 
   // Admin/Settlement
   app.use("/api/admin/queues", adminQueuesRouter);
