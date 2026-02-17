@@ -4,7 +4,7 @@ Version: v1.5
 Phase: 11.60 Tranche 5 — Post-Implementation Smoke  
 Status: PASS (Expected Failing Surface Detection)  
 Date: 2026-02-17  
-Tranche 5 Implementation SHA: (fill after commit)
+Tranche 5 Implementation SHA: d749529a8af4bdeeaf0aa80d837aa977fbfa4151
 
 ## 1) Objective
 Re-run Phase 11 harness after adding CRM read surfaces to confirm CRM missing-contract failure is removed.
