@@ -4,7 +4,7 @@ Version: v1.2
 Phase: 11.30 Tranche 2 — Post-Implementation Smoke  
 Status: PASS (Expected Failing Surface Detection)  
 Date: 2026-02-17  
-Tranche 2 Implementation SHA: (fill after commit)
+Tranche 2 Implementation SHA: 9c9bc414750c2fcb06032a59dbe23f59f5218a9e
 
 ## 1) Objective
 Re-run the Phase 11 orchestration harness after Shipping Tranche 2 implementation to confirm contract-surface alignment and failure progression.
