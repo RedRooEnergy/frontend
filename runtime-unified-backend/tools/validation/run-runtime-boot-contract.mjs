@@ -209,6 +209,7 @@ async function main() {
     runtimePort: RUNTIME_PORT,
     checks: [],
     entities: {
+      paymentId: null,
       refundRequestId: null,
       queueItemId: null,
       holdId: null,
@@ -220,6 +221,8 @@ async function main() {
 
   const checks = [
     makeCheck("healthz", "200"),
+    makeCheck("payments checkout create", "201 + paymentId + status"),
+    makeCheck("payments status read", "200 + same paymentId"),
     makeCheck("admin queues unauthenticated", "401"),
     makeCheck("admin queues forbidden role", "403"),
     makeCheck("refund create", "201 + ids"),
@@ -254,6 +257,57 @@ async function main() {
 
     {
       const check = checks[1];
+      const checkoutRes = await http("POST", "/api/payments/checkout", {
+        headers: {
+          "x-correlation-id": `runtime-boot-contract-${Date.now()}`,
+        },
+        json: {
+          snapshotId: `snap_10560_ci_${Date.now()}`,
+          orderId: `order_10560_payment_${Date.now()}`,
+          amountAUD: 2500,
+          currency: "AUD",
+          provider: "TEST",
+          metadata: {
+            source: "runtime-boot-contract",
+          },
+        },
+      });
+      const paymentId = checkoutRes.body?.paymentId || null;
+      report.entities.paymentId = paymentId;
+
+      if (
+        checkoutRes.status === 201 &&
+        paymentId &&
+        (checkoutRes.body?.status === "SUCCEEDED" || checkoutRes.body?.status === "PENDING")
+      ) {
+        markPass(check, `${checkoutRes.status}`, {
+          paymentId,
+          status: checkoutRes.body.status,
+        });
+      } else {
+        markFail(check, `${checkoutRes.status}`, checkoutRes.body);
+      }
+    }
+
+    {
+      const check = checks[2];
+      const res = await http("GET", `/api/payments/status/${report.entities.paymentId || "missing"}`);
+      if (
+        res.status === 200 &&
+        res.body?.paymentId === report.entities.paymentId &&
+        (res.body?.status === "SUCCEEDED" || res.body?.status === "PENDING")
+      ) {
+        markPass(check, `${res.status}`, {
+          paymentId: res.body.paymentId,
+          status: res.body.status,
+        });
+      } else {
+        markFail(check, `${res.status}`, res.body);
+      }
+    }
+
+    {
+      const check = checks[3];
       const res = await http("GET", "/api/admin/queues");
       if (res.status === 401) {
         markPass(check, `${res.status}`, res.body);
@@ -263,7 +317,7 @@ async function main() {
     }
 
     {
-      const check = checks[2];
+      const check = checks[4];
       const res = await http("GET", "/api/admin/queues", {
         headers: {
           "x-test-role": "buyer",
@@ -278,7 +332,7 @@ async function main() {
     }
 
     {
-      const check = checks[3];
+      const check = checks[5];
       const refundRes = await http("POST", "/api/payments/refunds/request", {
         json: {
           orderId: `order_10560_ci_${Date.now()}`,
@@ -303,7 +357,7 @@ async function main() {
     }
 
     {
-      const check = checks[4];
+      const check = checks[6];
       const res = await http("GET", "/api/admin/queues", {
         headers: {
           "x-test-role": "admin",
@@ -318,7 +372,7 @@ async function main() {
     }
 
     {
-      const check = checks[5];
+      const check = checks[7];
       const holdRes = await http("POST", "/api/settlement/holds", {
         json: {
           entityType: "Refund",
@@ -338,7 +392,7 @@ async function main() {
     }
 
     {
-      const check = checks[6];
+      const check = checks[8];
       const res = await http("PATCH", "/api/admin/queues", {
         headers: {
           "x-test-role": "admin",
@@ -357,7 +411,7 @@ async function main() {
     }
 
     {
-      const check = checks[7];
+      const check = checks[9];
       const res = await http("GET", "/api/not-a-real-route");
       if (res.status === 404) {
         markPass(check, `${res.status}`, res.body);
@@ -376,7 +430,7 @@ async function main() {
   }
 
   {
-    const check = checks[8];
+    const check = checks[10];
     const watchdog = await runWatchdogProbe();
     report.watchdog = {
       exitCode: watchdog.exitCode,

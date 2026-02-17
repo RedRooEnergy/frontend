@@ -1,24 +1,24 @@
 Version: v1.0
 Phase: 10.5.11 — Runtime Inventory (Authoritative)
-Status: EVIDENCE-CAPTURED
+Status: UPDATED (Post Tranche 1 Payments)
 Date: 2026-02-16
 Baseline SHA: aab75b0874a69dc93d5b3c0c4431e7fef5087f78
 
 1) Executive Summary
 
-The current RedRooEnergy runtime is fragmented across multiple repositories and partial services.
+The RedRooEnergy runtime is consolidated into a single executable backend for currently implemented control surfaces.
 
-There is no single executable backend exposing the full Phase 11 required contract surface.
+The full Phase 11 required contract surface is still incomplete due to missing Shipping, CRM, and Email subsystem routes.
 
-Runtime consolidation is required before orchestration validation can succeed.
+Runtime consolidation is complete; subsystem expansion is now the active constraint.
 
 2) Required Runtime Contract Matrix (Evidence-Based)
 
 | Subsystem | Method | Required Contract | Status | Evidence |
 |---|---|---|---|---|
 | Core | GET | /healthz | PRESENT | Verified via curl -> 200 OK |
-| Payments | POST | /api/payments/checkout | MISSING | No router.post found in any repo |
-| Payments | GET | /api/payments/status/:id | MISSING | No route present |
+| Payments | POST | /api/payments/checkout | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 1 (`paymentsCheckout` router) |
+| Payments | GET | /api/payments/status/:id | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 1 (`paymentsCheckout` router) |
 | Shipping | POST | /api/shipping/quote | MISSING | No route present |
 | Shipping | POST | /api/shipping/select | MISSING | No route present |
 | Shipping | GET | /api/shipping/shipments/:id | MISSING | No route present |
@@ -51,13 +51,11 @@ Conclusion: Not full marketplace backend.
 
 B) Feb-17-26-RedRooEnergy-Platform (Next-based)
 
-Purpose: Frontend + scattered Next API routes  
-Surface: Limited  
-No unified Express backend  
-No payments checkout  
-No shipping contracts
+Purpose: Frontend + consolidated runtime package (`runtime-unified-backend`)  
+Surface: Unified runtime for health, payments checkout/status, refunds, admin queues, settlement holds  
+Shipping/CRM/Email contracts remain unimplemented
 
-Conclusion: Not a consolidated runtime.
+Conclusion: Consolidated runtime exists with partial subsystem coverage.
 
 C) Governance Worktree
 
@@ -68,30 +66,30 @@ No runtime services
 
 | Contract Group | Gap Type | Blocking for Phase 11 |
 |---|---|---|
-| Payments checkout | MISSING_ROUTE | YES |
+| Payments checkout | RESOLVED_IN_UNIFIED_RUNTIME | NO |
 | Shipping routes | MISSING_ROUTE | YES |
 | CRM routes | MISSING_ROUTE | YES |
 | Email routes | MISSING_ROUTE | YES |
-| Unified DB layer | ARCHITECTURE_GAP | YES |
-| Unified service entrypoint | ARCHITECTURE_GAP | YES |
+| Unified DB layer | RESOLVED_IN_UNIFIED_RUNTIME | NO |
+| Unified service entrypoint | RESOLVED_IN_UNIFIED_RUNTIME | NO |
 
 5) Architectural Conclusion
 
 The RedRooEnergy system currently consists of:
 
 - Governance-complete artefacts
-- Subsystem logic fragments
-- Partial financial control backend
-- No unified runtime service
+- Unified runtime service with deterministic boot/CI validation
+- Implemented financial control surfaces (payments checkout/status, refunds, queue, settlement holds)
+- Remaining subsystem gaps (shipping, CRM, email)
 
-Phase 11 orchestration is blocked by runtime fragmentation.
+Phase 11 orchestration progression is blocked by missing subsystem routes, not by runtime fragmentation.
 
 6) Authorization to Proceed
 
-This document authorizes Phase 10.5.20 — Route Extraction & Runtime Consolidation.
+This document authorizes continued Phase 11 subsystem implementation against the consolidated runtime.
 
-No new business logic is permitted.
+Subsystem additions require explicit tranche authorization.
 
-Only assembly of existing subsystems into one executable service.
+The runtime foundation itself is already closed and frozen.
 
 END OF DOCUMENT
