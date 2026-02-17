@@ -5,6 +5,7 @@ import { pricingRouter } from "./routes/pricing.js";
 import { paymentsCheckoutRouter } from "./routes/paymentsCheckout.js";
 import { refundsRouter } from "./routes/refunds.js";
 import { shippingRouter } from "./routes/shipping.js";
+import { crmRouter } from "./routes/crm.js";
 import { adminQueuesRouter } from "./routes/adminQueues.js";
 import { settlementHoldsRouter } from "./routes/settlementHolds.js";
 
@@ -32,6 +33,9 @@ export function createApp() {
 
   // Shipping
   app.use("/api/shipping", shippingRouter);
+
+  // CRM (authorized Tranche 5 read-only surfaces)
+  app.use("/api/crm", crmRouter);
 
   // Admin/Settlement
   app.use("/api/admin/queues", adminQueuesRouter);

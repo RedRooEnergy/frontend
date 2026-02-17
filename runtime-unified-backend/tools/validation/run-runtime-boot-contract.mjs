@@ -3,6 +3,7 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { MongoClient } from "mongodb";
 
 const BASE_URL = (process.env.RUNTIME_BASE_URL || "http://127.0.0.1:4010").replace(/\/+$/, "");
 const RUNTIME_PORT = Number(process.env.RUNTIME_PORT || "4010");
@@ -11,6 +12,8 @@ const STARTUP_TIMEOUT_MS = Number(process.env.RUNTIME_STARTUP_TIMEOUT_MS || "300
 const REQUEST_TIMEOUT_MS = Number(process.env.RUNTIME_REQUEST_TIMEOUT_MS || "8000");
 const WATCHDOG_TIMEOUT_MS = Number(process.env.RUNTIME_WATCHDOG_TIMEOUT_MS || "1000");
 const WATCHDOG_MAX_WAIT_MS = Number(process.env.RUNTIME_WATCHDOG_MAX_WAIT_MS || "12000");
+const MONGO_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017";
+const MONGO_DB_NAME = process.env.MONGODB_DB_NAME || "redroo_backend";
 
 function nowIso() {
   return new Date().toISOString();
@@ -207,6 +210,32 @@ async function runWatchdogProbe() {
   };
 }
 
+async function seedCrmCaseFixture() {
+  const client = new MongoClient(MONGO_URI);
+  await client.connect();
+  try {
+    const db = client.db(MONGO_DB_NAME);
+    const collection = db.collection("crm_cases");
+    const now = nowIso();
+    const entityType = "order";
+    const entityId = `order_crm_case_${Date.now()}`;
+    const insert = await collection.insertOne({
+      entityType,
+      entityId,
+      status: "OPEN",
+      createdAt: now,
+      updatedAt: now,
+    });
+    return {
+      caseId: insert.insertedId.toString(),
+      entityType,
+      entityId,
+    };
+  } finally {
+    await client.close();
+  }
+}
+
 async function main() {
   const report = {
     phase: "10.5.60-runtime-boot-contract",
@@ -225,6 +254,9 @@ async function main() {
       refundRequestId: null,
       queueItemId: null,
       holdId: null,
+      crmCaseId: null,
+      crmEntityType: null,
+      crmEntityId: null,
     },
     watchdog: null,
     logs: {},
@@ -246,6 +278,8 @@ async function main() {
     makeCheck("admin queues authorized list", "200"),
     makeCheck("settlement hold create", "201 + holdId"),
     makeCheck("settlement hold read", "200 + same holdId"),
+    makeCheck("crm list cases", "200 + cases array"),
+    makeCheck("crm read case", "200 + same caseId"),
     makeCheck("queue resolve blocked by active hold", "409 HOLD_ACTIVE"),
     makeCheck("unknown route", "404"),
     makeCheck("watchdog startup fail-fast", "exit non-zero + DB_STARTUP_TIMEOUT"),
@@ -545,6 +579,54 @@ async function main() {
         markPass(check, `${res.status}`, {
           holdId: res.body.holdId,
           status: res.body.status,
+        });
+      } else {
+        markFail(check, `${res.status}`, res.body);
+      }
+    }
+
+    {
+      const seeded = await seedCrmCaseFixture();
+      report.entities.crmCaseId = seeded.caseId;
+      report.entities.crmEntityType = seeded.entityType;
+      report.entities.crmEntityId = seeded.entityId;
+    }
+
+    {
+      const check = getCheck(checks, "crm list cases");
+      const entityType = encodeURIComponent(report.entities.crmEntityType || "order");
+      const entityId = encodeURIComponent(report.entities.crmEntityId || "missing");
+      const res = await http("GET", `/api/crm/cases?entityType=${entityType}&entityId=${entityId}`);
+
+      const cases = Array.isArray(res.body)
+        ? res.body
+        : Array.isArray(res.body?.cases)
+          ? res.body.cases
+          : [];
+
+      const found = cases.some((row) => {
+        const id = row?.caseId || row?.id || null;
+        return id === report.entities.crmCaseId;
+      });
+
+      if (res.status === 200 && found) {
+        markPass(check, `${res.status}`, {
+          caseId: report.entities.crmCaseId,
+          count: cases.length,
+        });
+      } else {
+        markFail(check, `${res.status}`, res.body);
+      }
+    }
+
+    {
+      const check = getCheck(checks, "crm read case");
+      const res = await http("GET", `/api/crm/cases/${report.entities.crmCaseId || "missing"}`);
+      if (res.status === 200 && res.body?.caseId === report.entities.crmCaseId) {
+        markPass(check, `${res.status}`, {
+          caseId: res.body.caseId,
+          entityType: res.body.entityType,
+          entityId: res.body.entityId,
         });
       } else {
         markFail(check, `${res.status}`, res.body);

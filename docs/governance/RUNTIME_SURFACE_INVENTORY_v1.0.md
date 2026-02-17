@@ -1,6 +1,6 @@
 Version: v1.0
 Phase: 10.5.11 — Runtime Inventory (Authoritative)
-Status: UPDATED (Post Tranche 4 Settlement Read Alignment)
+Status: UPDATED (Post Tranche 5 CRM Read Alignment)
 Date: 2026-02-16
 Baseline SHA: aab75b0874a69dc93d5b3c0c4431e7fef5087f78
 
@@ -27,8 +27,8 @@ Runtime consolidation is complete; subsystem expansion is now the active constra
 | Settlement | POST | /api/settlement/holds | PRESENT (Partial Service) | Located in REDROO_Projects_backend |
 | Settlement | GET | /api/settlement/holds/:id | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 4 (settlement holds router) |
 | Settlement | POST | /api/settlement/holds/:id/override | PRESENT | Located in REDROO_Projects_backend |
-| CRM | GET | /api/crm/cases | MISSING | No route present |
-| CRM | GET | /api/crm/cases/:id | MISSING | No route present |
+| CRM | GET | /api/crm/cases | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 5 (crm router) |
+| CRM | GET | /api/crm/cases/:id | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 5 (crm router) |
 | Email | POST | /api/admin/email/preview-or-send | MISSING | No route present |
 | Email | GET | /api/admin/email/logs | MISSING | No route present |
 | Compliance | POST | /api/compliance/check | DOC_ONLY | Present in governance docs only |
@@ -72,7 +72,7 @@ No runtime services
 | Payments checkout | RESOLVED_IN_UNIFIED_RUNTIME | NO |
 | Shipping routes | RESOLVED_IN_UNIFIED_RUNTIME | NO |
 | Settlement hold read-by-id | RESOLVED_IN_UNIFIED_RUNTIME | NO |
-| CRM routes | MISSING_ROUTE | YES |
+| CRM read contracts | RESOLVED_IN_UNIFIED_RUNTIME | NO |
 | Email routes | MISSING_ROUTE | YES |
 | Unified DB layer | RESOLVED_IN_UNIFIED_RUNTIME | NO |
 | Unified service entrypoint | RESOLVED_IN_UNIFIED_RUNTIME | NO |
