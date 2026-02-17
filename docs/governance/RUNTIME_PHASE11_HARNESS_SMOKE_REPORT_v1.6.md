@@ -4,7 +4,7 @@ Version: v1.6
 Phase: 11.70 Tranche 6 — Post-Implementation Smoke  
 Status: PASS (Expected Failing Surface Detection)  
 Date: 2026-02-17  
-Tranche 6 Implementation SHA: (fill after commit)
+Tranche 6 Implementation SHA: dbc06010a4217a01ee9b5d26c0006bb6941132af
 
 ## 1) Objective
 Re-run Phase 11 harness after deterministic `orderId` propagation alignment to confirm the CRM linkage precondition failure is resolved.
