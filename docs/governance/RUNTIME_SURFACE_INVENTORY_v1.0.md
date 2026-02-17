@@ -1,6 +1,6 @@
 Version: v1.0
 Phase: 10.5.11 — Runtime Inventory (Authoritative)
-Status: UPDATED (Post Tranche 2 Shipping)
+Status: UPDATED (Post Tranche 3 Pricing)
 Date: 2026-02-16
 Baseline SHA: aab75b0874a69dc93d5b3c0c4431e7fef5087f78
 
@@ -17,6 +17,8 @@ Runtime consolidation is complete; subsystem expansion is now the active constra
 | Subsystem | Method | Required Contract | Status | Evidence |
 |---|---|---|---|---|
 | Core | GET | /healthz | PRESENT | Verified via curl -> 200 OK |
+| Pricing | POST | /api/checkout/session | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 3 (pricing router) |
+| Pricing | GET | /api/pricing/snapshots/:id | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 3 (pricing router) |
 | Payments | POST | /api/payments/checkout | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 1 (`paymentsCheckout` router) |
 | Payments | GET | /api/payments/status/:id | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 1 (`paymentsCheckout` router) |
 | Shipping | POST | /api/shipping/quote | PRESENT (Unified Runtime) | Implemented in runtime-unified-backend tranche 2 (shipping router) |
@@ -66,6 +68,7 @@ No runtime services
 
 | Contract Group | Gap Type | Blocking for Phase 11 |
 |---|---|---|
+| Pricing checkout/snapshot | RESOLVED_IN_UNIFIED_RUNTIME | NO |
 | Payments checkout | RESOLVED_IN_UNIFIED_RUNTIME | NO |
 | Shipping routes | RESOLVED_IN_UNIFIED_RUNTIME | NO |
 | CRM routes | MISSING_ROUTE | YES |

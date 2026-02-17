@@ -79,6 +79,14 @@ function makeCheck(name, expected) {
   };
 }
 
+function getCheck(checks, name) {
+  const check = checks.find((entry) => entry.name === name);
+  if (!check) {
+    throw new Error(`CHECK_NOT_FOUND:${name}`);
+  }
+  return check;
+}
+
 function markPass(check, actual, details) {
   check.status = "PASS";
   check.actual = actual;
@@ -209,6 +217,8 @@ async function main() {
     runtimePort: RUNTIME_PORT,
     checks: [],
     entities: {
+      snapshotId: null,
+      snapshotHash: null,
       paymentId: null,
       shipmentId: null,
       selectedQuoteId: null,
@@ -223,6 +233,8 @@ async function main() {
 
   const checks = [
     makeCheck("healthz", "200"),
+    makeCheck("pricing checkout create", "201 + snapshotId + snapshotHash"),
+    makeCheck("pricing snapshot read", "200 + same snapshotId + same snapshotHash"),
     makeCheck("payments checkout create", "201 + paymentId + status"),
     makeCheck("payments status read", "200 + same paymentId"),
     makeCheck("shipping quote create", "201 + shipmentId + quotes std/exp"),
@@ -245,13 +257,13 @@ async function main() {
   try {
     runtimeReady = await waitForHealth(STARTUP_TIMEOUT_MS);
     if (!runtimeReady) {
-      const check = checks[0];
+      const check = getCheck(checks, "healthz");
       markFail(check, "timeout", { timeoutMs: STARTUP_TIMEOUT_MS });
       throw new Error("RUNTIME_STARTUP_TIMEOUT");
     }
 
     {
-      const check = checks[0];
+      const check = getCheck(checks, "healthz");
       const res = await http("GET", "/healthz");
       if (res.status === 200 && res.body?.status === "ok") {
         markPass(check, `${res.status}`, res.body);
@@ -261,13 +273,69 @@ async function main() {
     }
 
     {
-      const check = checks[1];
-      const checkoutRes = await http("POST", "/api/payments/checkout", {
+      const check = getCheck(checks, "pricing checkout create");
+      const checkoutRes = await http("POST", "/api/checkout/session", {
         headers: {
-          "x-correlation-id": `runtime-boot-contract-${Date.now()}`,
+          "x-correlation-id": `runtime-boot-contract-pricing-${Date.now()}`,
         },
         json: {
-          snapshotId: `snap_10560_ci_${Date.now()}`,
+          items: [
+            { sku: "TEST-SKU-001", quantity: 2, unitPriceAUD: 1200 },
+            { sku: "TEST-SKU-002", quantity: 1, unitPriceAUD: 800 },
+          ],
+          currency: "AUD",
+          metadata: {
+            source: "runtime-boot-contract",
+          },
+        },
+      });
+
+      const snapshotId = checkoutRes.body?.snapshotId || null;
+      const snapshotHash = checkoutRes.body?.snapshotHash || null;
+      report.entities.snapshotId = snapshotId;
+      report.entities.snapshotHash = snapshotHash;
+
+      if (checkoutRes.status === 201 && snapshotId && snapshotHash) {
+        markPass(check, `${checkoutRes.status}`, {
+          snapshotId,
+          snapshotHash,
+          totalAUD: checkoutRes.body?.totalAUD,
+        });
+      } else {
+        markFail(check, `${checkoutRes.status}`, checkoutRes.body);
+      }
+    }
+
+    {
+      const check = getCheck(checks, "pricing snapshot read");
+      const res = await http(
+        "GET",
+        `/api/pricing/snapshots/${report.entities.snapshotId || "missing"}`,
+      );
+
+      if (
+        res.status === 200 &&
+        res.body?.snapshotId === report.entities.snapshotId &&
+        res.body?.snapshotHash === report.entities.snapshotHash
+      ) {
+        markPass(check, `${res.status}`, {
+          snapshotId: res.body.snapshotId,
+          snapshotHash: res.body.snapshotHash,
+          totalAUD: res.body.totalAUD,
+        });
+      } else {
+        markFail(check, `${res.status}`, res.body);
+      }
+    }
+
+    {
+      const check = getCheck(checks, "payments checkout create");
+      const checkoutRes = await http("POST", "/api/payments/checkout", {
+        headers: {
+          "x-correlation-id": `runtime-boot-contract-payment-${Date.now()}`,
+        },
+        json: {
+          snapshotId: report.entities.snapshotId,
           orderId: `order_10560_payment_${Date.now()}`,
           amountAUD: 2500,
           currency: "AUD",
@@ -277,6 +345,7 @@ async function main() {
           },
         },
       });
+
       const paymentId = checkoutRes.body?.paymentId || null;
       report.entities.paymentId = paymentId;
 
@@ -295,7 +364,7 @@ async function main() {
     }
 
     {
-      const check = checks[2];
+      const check = getCheck(checks, "payments status read");
       const res = await http("GET", `/api/payments/status/${report.entities.paymentId || "missing"}`);
       if (
         res.status === 200 &&
@@ -312,11 +381,11 @@ async function main() {
     }
 
     {
-      const check = checks[3];
+      const check = getCheck(checks, "shipping quote create");
       const quoteRes = await http("POST", "/api/shipping/quote", {
         json: {
           orderId: `order_10560_ship_${Date.now()}`,
-          snapshotId: `snap_10560_ship_${Date.now()}`,
+          snapshotId: report.entities.snapshotId,
           destination: { country: "AU", state: "QLD", postcode: "4000" },
           items: [
             { sku: "TEST-SKU-001", quantity: 2, weightKg: 1.2 },
@@ -342,7 +411,7 @@ async function main() {
     }
 
     {
-      const check = checks[4];
+      const check = getCheck(checks, "shipping select");
       const selRes = await http("POST", "/api/shipping/select", {
         json: {
           shipmentId: report.entities.shipmentId,
@@ -364,7 +433,7 @@ async function main() {
     }
 
     {
-      const check = checks[5];
+      const check = getCheck(checks, "shipping shipment read");
       const res = await http("GET", `/api/shipping/shipments/${report.entities.shipmentId || "missing"}`);
 
       if (
@@ -384,7 +453,7 @@ async function main() {
     }
 
     {
-      const check = checks[6];
+      const check = getCheck(checks, "admin queues unauthenticated");
       const res = await http("GET", "/api/admin/queues");
       if (res.status === 401) {
         markPass(check, `${res.status}`, res.body);
@@ -394,7 +463,7 @@ async function main() {
     }
 
     {
-      const check = checks[7];
+      const check = getCheck(checks, "admin queues forbidden role");
       const res = await http("GET", "/api/admin/queues", {
         headers: {
           "x-test-role": "buyer",
@@ -409,7 +478,7 @@ async function main() {
     }
 
     {
-      const check = checks[8];
+      const check = getCheck(checks, "refund create");
       const refundRes = await http("POST", "/api/payments/refunds/request", {
         json: {
           orderId: `order_10560_ci_${Date.now()}`,
@@ -434,7 +503,7 @@ async function main() {
     }
 
     {
-      const check = checks[9];
+      const check = getCheck(checks, "admin queues authorized list");
       const res = await http("GET", "/api/admin/queues", {
         headers: {
           "x-test-role": "admin",
@@ -449,7 +518,7 @@ async function main() {
     }
 
     {
-      const check = checks[10];
+      const check = getCheck(checks, "settlement hold create");
       const holdRes = await http("POST", "/api/settlement/holds", {
         json: {
           entityType: "Refund",
@@ -469,7 +538,7 @@ async function main() {
     }
 
     {
-      const check = checks[11];
+      const check = getCheck(checks, "queue resolve blocked by active hold");
       const res = await http("PATCH", "/api/admin/queues", {
         headers: {
           "x-test-role": "admin",
@@ -488,7 +557,7 @@ async function main() {
     }
 
     {
-      const check = checks[12];
+      const check = getCheck(checks, "unknown route");
       const res = await http("GET", "/api/not-a-real-route");
       if (res.status === 404) {
         markPass(check, `${res.status}`, res.body);
@@ -507,7 +576,7 @@ async function main() {
   }
 
   {
-    const check = checks[13];
+    const check = getCheck(checks, "watchdog startup fail-fast");
     const watchdog = await runWatchdogProbe();
     report.watchdog = {
       exitCode: watchdog.exitCode,

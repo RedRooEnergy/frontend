@@ -1,11 +1,12 @@
 import express, { NextFunction, Request, Response } from "express";
 
 // NOTE: routes in src/routes/* must be router-only modules (no listen(), no DB connect).
+import { pricingRouter } from "./routes/pricing.js";
 import { paymentsCheckoutRouter } from "./routes/paymentsCheckout.js";
 import { refundsRouter } from "./routes/refunds.js";
+import { shippingRouter } from "./routes/shipping.js";
 import { adminQueuesRouter } from "./routes/adminQueues.js";
 import { settlementHoldsRouter } from "./routes/settlementHolds.js";
-import { shippingRouter } from "./routes/shipping.js";
 
 export function createApp() {
   const app = express();
@@ -13,7 +14,7 @@ export function createApp() {
   // Core middleware (no authority expansion)
   app.use(express.json({ limit: "2mb" }));
 
-  // Health (required for consolidation)
+  // Health
   app.get("/healthz", (_req, res) => {
     res.status(200).json({
       status: "ok",
@@ -22,6 +23,9 @@ export function createApp() {
     });
   });
 
+  // Pricing (authorized Tranche 3)
+  app.use("/api", pricingRouter);
+
   // Payments
   app.use("/api/payments", paymentsCheckoutRouter);
   app.use("/api/payments/refunds", refundsRouter);
@@ -29,7 +33,7 @@ export function createApp() {
   // Shipping
   app.use("/api/shipping", shippingRouter);
 
-  // Admin/Settlement (existing)
+  // Admin/Settlement
   app.use("/api/admin/queues", adminQueuesRouter);
   app.use("/api/settlement/holds", settlementHoldsRouter);
 
